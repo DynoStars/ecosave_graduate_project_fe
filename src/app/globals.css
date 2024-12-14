@@ -1,27 +1,160 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
 }
-
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
   }
 }
-
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
 }
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+/* globals.css */
+/* Default (light) theme styles */
+.light {
+  background-color: #ffffff !important;
+  color: #0b0a0a !important;
+}
+.dark {
+  background-color: #151515 !important;
+  color: #ffffff !important;
+}
+.box-shadow {
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+}
+.box-shadow-1 {
+  box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+}
+.box-shadow-2 {
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 30px 90px;
+}
+.custom-popconfirm {
+  z-index: 1500 !important;
+}
+.h-max-height {
+  height: 38rem;
+}
+.cart-container {
+  right: -100%; /* Bắt đầu ẩn bên phải */
+  transition: right 0.3s ease; /* Hiệu ứng slide qua từ phải sang trái trong 0.3 giây */
+}
+.cart-container.visible {
+  right: 0; /* Khi hiển thị, slide vào từ bên phải */
+  transition: right 0.3s ease; /* Hiệu ứng slide qua từ phải sang trái trong 0.3 giây */
+}
+.message-item {
+  width: 75vw;
+  padding-right: 50px;
+}
+.editMode {
+  background-color: lightgreen;
+}
+
+/* .scrollbar-container {
+  width: 5px;
+}
+.scrollbar-container:hover {
+  overflow-y: auto;
+} */
+/* Tùy chỉnh thanh cuộn */
+.scrollbar-container::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollbar-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.scrollbar-container::-webkit-scrollbar-thumb {
+  background-color: white;
+  border-radius: 10px;
+}
+.bg-icon {
+  background-image: url("../../src/assets/images/icons/Orange.png");
+}
+/* global.css */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.truncate-description,
+.truncate-description-1-line,
+.truncate-description-2-line {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.truncate-description-1-line {
+  -webkit-line-clamp: 1;
+}
+.truncate-description-2-line {
+  -webkit-line-clamp: 2;
+}
+.scroll-container {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+.scroll-container::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+.custom-button{
+   background-color: orangered;
+}
+.cart-hover {
+  transition: all 0.3s ease;
+  /* Other base styles for the cart item */
+}
+.cart-hover:hover {
+  box-shadow: rgba(149, 157, 165, 0.3) 0px 12px 32px;
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+}
+.hidden-line {
+   display: hidden;
+}
+.rounded-20{
+   border-radius: 15px;
+}
+.box-flex-center{
+    display: flex;
+    justify-items: center;
+    align-items: center;
+}
+
+.custom-upload {
+  width: 500px;  /* Increase width here */
+  height: 500px; /* Increase height here */
+}
+
+.custom-upload .ant-upload-list {
+  height: 100%; /* Ensure the list takes up full height */
+}
+
+.custom-upload .ant-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
