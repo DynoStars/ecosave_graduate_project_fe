@@ -1,0 +1,33 @@
+/* Kiểu dáng chung cho input */
+.search-input {
+    position: absolute;
+    height: 100%;
+    right: 100%;
+    top: 0px;
+    width: 0; /* Bắt đầu với chiều rộng bằng 0 */
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 2px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0; /* Ẩn input ban đầu */
+    pointer-events: none; /* Vô hiệu hóa tương tác khi chưa mở */
+    transition: all 0.3s ease; /* Hiệu ứng mượt mà khi mở và đóng */
+  }
+  /* Khi input được mở (toggled state) */
+  .search-input.open {
+    width: 57em; /* Chiều rộng khi mở */
+    opacity: 1; /* Hiển thị input */
+    pointer-events: auto; /* Cho phép tương tác khi input hiển thị */
+    /* z-index : 99999; */
+  }
+  /* Hiệu ứng focus cho input */
+  .search-input:focus {
+    outline: none;
+    border-color: #0b9d96; /* Màu viền khi focus */
+  }
+
+  /* Hiệu ứng khi hover vào icon tìm kiếm */
+  .search-input:hover {
+    border-color: #0b9d96;
+  }

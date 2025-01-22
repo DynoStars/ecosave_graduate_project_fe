@@ -1,5 +1,9 @@
 import React from "react";
 // import Home from "./home/Home";
+
+// import Map from "../components/Map";
+import SearchComponent from "../components/Search";
+
 import { generateMetadata } from "@/utils";
 // import { fetchFoods } from "./home/page";
 // import { Product } from "@/types";
@@ -23,6 +27,8 @@ export default async function HomePage() {
     <>
       {/* <Home listFoods={foods} /> */}
       <h1>EcoSave Homepage welcome!</h1>
+      {/* <Map /> */}
+
     </>
   );
 }

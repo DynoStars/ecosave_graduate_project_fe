@@ -1,0 +1,15 @@
+{
+  "menuItems1": {
+    "Home": "Trang chủ",
+    "Products": "Sản phẩm",
+    "Map": "Bản đồ",
+    "Scan": "Quét mã",
+    "About": "Về chúng tôi"
+  },
+  "menuItems2" : {
+    "Profile" : "Tài khoản",
+    "Cart" : "Giỏ hàng",
+    "Notification" : "Thông báo",
+    "Wishlist" : "Yêu thích"  
+  }
+}

@@ -68,7 +68,6 @@ body {
 .editMode {
   background-color: lightgreen;
 }
-
 /* .scrollbar-container {
   width: 5px;
 }
@@ -87,13 +86,17 @@ body {
   background-color: white;
   border-radius: 10px;
 }
-.bg-icon {
+/* .bg-icon {
   background-image: url("../../src/assets/images/icons/Orange.png");
-}
+} */
 /* global.css */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+.shadown{
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
@@ -143,16 +146,13 @@ body {
     justify-items: center;
     align-items: center;
 }
-
 .custom-upload {
   width: 500px;  /* Increase width here */
   height: 500px; /* Increase height here */
 }
-
 .custom-upload .ant-upload-list {
   height: 100%; /* Ensure the list takes up full height */
 }
-
 .custom-upload .ant-upload {
   display: flex;
   align-items: center;
