@@ -2,13 +2,15 @@ import React from "react";
 // import Home from "./home/Home";
 
 // import Map from "../components/Map";
-import SearchComponent from "../components/Search";
-
 import { generateMetadata } from "@/utils";
+import Image from "next/image";
 // import { fetchFoods } from "./home/page";
 // import { Product } from "@/types";
-export const metadata = generateMetadata("", "Welcome to LayRestaurant, the best platform for booking food and rooms");
-
+export const metadata = generateMetadata(
+  "",
+  "Welcome to LayRestaurant, the best platform for booking food and rooms"
+);
+import Banner from "../assets/images/banner/mainBanner1.png";
 export default async function HomePage() {
   // let foods: Product[] | null = null;
 
@@ -26,9 +28,10 @@ export default async function HomePage() {
   return (
     <>
       {/* <Home listFoods={foods} /> */}
-      <h1>EcoSave Homepage welcome!</h1>
+      <div className="w-screen">
+        <Image src={Banner.src} width={2000} height={1000} alt="banner" />
+      </div>
       {/* <Map /> */}
-
     </>
   );
 }

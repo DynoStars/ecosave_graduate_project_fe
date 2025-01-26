@@ -1,0 +1,12 @@
+.bg-image {
+  position: absolute;
+}
+.bg-image:first-child {
+    left: -100px;
+  top: 0px;
+}
+
+.bg-image:last-child {
+  bottom: 0;
+}
+

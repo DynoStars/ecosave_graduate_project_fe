@@ -1,7 +1,10 @@
-"use client"
+"use client";
+
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { usePathname } from "next/navigation";
+import { Provider } from "react-redux"; // Import Provider
+import { store } from "@/redux/store"; // Import store
 import "./globals.css";
 
 export default function RootLayout({
@@ -12,6 +15,8 @@ export default function RootLayout({
   const pathname = usePathname();
   const shouldHideHeader =
     pathname && (pathname.includes("/login") || pathname.includes("/register"));
+    
+
   return (
     <html lang="en">
       <head>
@@ -21,11 +26,13 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-white text-gray-900">
-        {!shouldHideHeader && <Header />}
-        <main className="bg-white overflow-x-hidden relative min-h-[200px]">
-          {children}
-        </main>
-        {!shouldHideHeader && <Footer />}
+        <Provider store={store}>
+          {!shouldHideHeader && <Header />}
+          <main className="bg-white overflow-x-hidden relative min-h-[200px]">
+            {children}
+          </main>
+          {!shouldHideHeader && <Footer />}
+        </Provider>
       </body>
     </html>
   );

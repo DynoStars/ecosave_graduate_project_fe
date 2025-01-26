@@ -1,12 +1,19 @@
+"use clientclient";
 import { useState, useRef } from "react";
 import { FaSearch, FaHeart, FaBell } from "react-icons/fa";
-import { IoPersonCircle } from "react-icons/io5";
 import { MdShoppingCart } from "react-icons/md";
 import "./NavBar.css";
 import Link from "next/link";
 import menuItemsData from "../../../assets/json/menuItems.json";
+import { UserProfile } from "@/types";
+import Image from "next/image";
+import defaultAvatar from "../../../assets/images/users/userAvata1.png";
 
-const Navbar: React.FC = () => {
+export interface NavbarProps {
+  user: UserProfile | null; // Allow user to be null
+}
+
+const Navbar: React.FC<NavbarProps> = ({ user }) => {
   // Lấy dữ liệu từ JSON
   const [menuItems] = useState<{ [key: string]: string }>(
     menuItemsData.menuItems1
@@ -24,7 +31,6 @@ const Navbar: React.FC = () => {
     Notification: <FaBell />,
     Wishlist: <FaHeart />,
     Cart: <MdShoppingCart />,
-    // Profile: <IoPersonCircle />,
   };
 
   // Map các đường dẫn tương ứng
@@ -37,7 +43,7 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className={`shadown hidden lg:flex items-center justify-between w-full px-6 py-4 bg-white shadow-md ${
+      className={`shadown hidden lg:flex items-center justify-between w-full px-6 py-2 bg-white shadow-md ${
         searchActive ? "higher" : ""
       }`}
     >
@@ -59,7 +65,6 @@ const Navbar: React.FC = () => {
               }}
               onClick={() => setActive(index)}
               className={`cursor-pointer transition-colors duration-300 text-lg ${
-                // Increased font size
                 active === index ? "text-primary" : "hover:text-primary-light"
               }`}
             >
@@ -77,7 +82,7 @@ const Navbar: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setSearchActive(!searchActive)}
-            className="bg-orange-500 p-4 rounded"
+            className="bg-orange-500 px-4 py-[10px]  rounded"
           >
             {/* Increased button padding */}
             <FaSearch className="text-white cursor-pointer hover:text-primary-light transition-colors duration-300 text-xl" />
@@ -91,27 +96,50 @@ const Navbar: React.FC = () => {
           />
         </div>
 
-        {/* Menu Icons từ menuItems2 */}
-        {Object.keys(menuIcons).map((key) => (
-          <Link href={links[key]} key={key}>
-            <div className="text-gray-600 cursor-pointer hover:text-primary-light transition-colors duration-300 text-xl">
-              {icons[key]}
+        {user &&
+          Object.keys(menuIcons).map((key) => (
+            <Link href={links[key]} key={key}>
+              <div className="text-gray-600 cursor-pointer hover:text-primary-light transition-colors duration-300 text-xl">
+                {icons[key]}
+              </div>
+            </Link>
+          ))}
+
+        {/* Tài khoản hoặc Buttons nếu không có user */}
+        {user ? (
+          <Link href={links.Profile}>
+            <div className="flex items-center space-x-2 cursor-pointer hover:text-primary-light transition-colors duration-300">
+              <div className="w-10 h-10 rounded-full overflow-hidden">
+                <Image
+                  src={user?.avatar || defaultAvatar} // Fallback to default if avatar is null
+                  width={40} // Set the width to 40px
+                  height={40} // Set the height to 40px
+                  alt="avatar user"
+                  className="object-cover" // Ensures the image covers the circle without distortion
+                />
+              </div>
+              <div>
+                <p className="text-gray-600 text-sm">Hello</p>
+                <p className="text-gray-800 font-semibold text-lg">
+                  {user?.username || "Guest"} {/* Fallback username */}
+                </p>
+              </div>
             </div>
           </Link>
-        ))}
-
-        {/* Tài khoản */}
-        <Link href={links.Profile}>
-          <div className="flex items-center space-x-2 cursor-pointer hover:text-primary-light transition-colors duration-300">
-            <IoPersonCircle className="text-gray-600 text-3xl" />
-            <div>
-              <p className="text-gray-600 text-sm">Hello,</p>
-              <p className="text-gray-800 font-semibold text-lg">
-                {menuIcons.Profile}
-              </p>
-            </div>
+        ) : (
+          <div className="flex space-x-4">
+            <Link href="/login">
+              <button className="bg-orange-500 text-white px-4 py-2 rounded transition-colors duration-300 hover:bg-orange-600">
+                Login
+              </button>
+            </Link>
+            <Link href="/register">
+              <button className="bg-primary text-white px-4 py-2 rounded transition-colors duration-300 hover:bg-primary-dark">
+                Sign Up
+              </button>
+            </Link>
           </div>
-        </Link>
+        )}
       </div>
     </nav>
   );

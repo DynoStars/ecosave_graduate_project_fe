@@ -16,7 +16,7 @@ const config: Config = {
         // Primary Colors
         primary: {
           DEFAULT: "#009883", // Màu chính
-          dark: "#1E3A8A",   // Biến thể tối hơn
+          dark: "#06887",   // Biến thể tối hơn
           light: "#058170",  // Biến thể sáng hơn
         },
 
