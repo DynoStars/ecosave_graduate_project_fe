@@ -1,51 +1,80 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  content: [
+    darkMode: ["class"],
+    content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        // Basic Colors
-        black: "#000000",
-        white: "#FFFFFF",
-
-        // Primary Colors
-        primary: {
-          DEFAULT: "#009883", // Màu chính
-          dark: "#1E3A8A",   // Biến thể tối hơn
-          light: "#058170",  // Biến thể sáng hơn
-        },
-
-        // Secondary Colors
-        secondary: {
-          DEFAULT: "#EDF4F6", // Màu phụ
-          dark: "#D8E1E4",   // Biến thể tối hơn
-          light: "#F1FCFF",  // Biến thể sáng hơn
-        },
-
-        // Status Colors
-        error: {
-          DEFAULT: "#DC2626",  // Lỗi
-          dark: "#B91C1C",
-          light: "#F87171",
-        },
-        success: {
-          DEFAULT: "#16A34A",  // Thành công
-          dark: "#15803D",
-          light: "#4ADE80",
-        },
-
-        // Custom Colors
-        background: "var(--background)",  // Biến động CSS
-        foreground: "var(--foreground)",  // Biến động CSS
-      },
-    },
+  	extend: {
+  		colors: {
+  			black: '#000000',
+  			white: '#FFFFFF',
+  			primary: {
+  				DEFAULT: 'hsl(var(--primary))',
+  				dark: '#1E3A8A',
+  				light: '#058170',
+  				foreground: 'hsl(var(--primary-foreground))'
+  			},
+  			secondary: {
+  				DEFAULT: 'hsl(var(--secondary))',
+  				dark: '#D8E1E4',
+  				light: '#F1FCFF',
+  				foreground: 'hsl(var(--secondary-foreground))'
+  			},
+  			error: {
+  				DEFAULT: '#DC2626',
+  				dark: '#B91C1C',
+  				light: '#F87171'
+  			},
+  			success: {
+  				DEFAULT: '#16A34A',
+  				dark: '#15803D',
+  				light: '#4ADE80'
+  			},
+  			background: 'hsl(var(--background))',
+  			foreground: 'hsl(var(--foreground))',
+  			card: {
+  				DEFAULT: 'hsl(var(--card))',
+  				foreground: 'hsl(var(--card-foreground))'
+  			},
+  			popover: {
+  				DEFAULT: 'hsl(var(--popover))',
+  				foreground: 'hsl(var(--popover-foreground))'
+  			},
+  			muted: {
+  				DEFAULT: 'hsl(var(--muted))',
+  				foreground: 'hsl(var(--muted-foreground))'
+  			},
+  			accent: {
+  				DEFAULT: 'hsl(var(--accent))',
+  				foreground: 'hsl(var(--accent-foreground))'
+  			},
+  			destructive: {
+  				DEFAULT: 'hsl(var(--destructive))',
+  				foreground: 'hsl(var(--destructive-foreground))'
+  			},
+  			border: 'hsl(var(--border))',
+  			input: 'hsl(var(--input))',
+  			ring: 'hsl(var(--ring))',
+  			chart: {
+  				'1': 'hsl(var(--chart-1))',
+  				'2': 'hsl(var(--chart-2))',
+  				'3': 'hsl(var(--chart-3))',
+  				'4': 'hsl(var(--chart-4))',
+  				'5': 'hsl(var(--chart-5))'
+  			}
+  		},
+  		borderRadius: {
+  			lg: 'var(--radius)',
+  			md: 'calc(var(--radius) - 2px)',
+  			sm: 'calc(var(--radius) - 4px)'
+  		}
+  	}
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 };
 
 export default config;
