@@ -1,33 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'www.lottemart.vn',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn4.iconfinder.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'static.vecteezy.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn3.iconfinder.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn-icons-png.flaticon.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'hcm.fstorage.vn',
-      },
-    ],
-  },
-};
+    images: {
+      domains: ['127.0.0.1', 'localhost', 'svgrepo.com','www.google.com', 'www.lottemart.vn', 'cdn4.iconfinder.com','static.vecteezy.com','cdn3.iconfinder.com', 'cdn-icons-png.flaticon.com', 'hcm.fstorage.vn'], // Correct domains for direct image URLs
+    },
+  };
 
-export default nextConfig;
+  export default nextConfig;

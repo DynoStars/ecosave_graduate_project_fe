@@ -1,19 +1,53 @@
+// Header.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "./navbar/NavBar";
 import { FaSearch, FaHeart, FaBell, FaBars, FaTimes } from "react-icons/fa";
-import SelectInputProps from "../select/SelectInputProps"; // Import SelectInputProps component
-import { SelectChangeEvent } from "@mui/material";
 import Link from "next/link";
-import menuItemsData from '../../assets/json/menuItems.json'; // Adjust the path based on your project structure
+import menuItemsData from "../../assets/json/menuItems.json"; // Adjust the path based on your project structure
+import defaultAvatar from "../../assets/images/users/userAvata1.png";
 
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux/store"; // Assuming you have a root state type
+import Image from "next/image";
+import { MdShoppingCart } from "react-icons/md";
+import { fetchUserInfo } from "@/api";
+import { setUser } from "@/redux/userSlice";
 const Header: React.FC = () => {
+  const dispatch = useDispatch();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [language, setLanguage] = useState("English");
+  // const [language, setLanguage] = useState("English");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  // Use useSelector to get the user data from the Redux state
+  const { user } = useSelector((state: RootState) => state.user);
+
   // Define menuItems as an object
-  const [menuItems] = useState<{ [key: string]: string }>(menuItemsData.menuItems1);
+  const [menuItems] = useState<{ [key: string]: string }>(
+    menuItemsData.menuItems1
+  );
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      // Kiểm tra nếu thông tin người dùng chưa có trong Redux
+      if (!user) {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+          try {
+            const userInfo = await fetchUserInfo(token);  // Gọi API để lấy thông tin người dùng
+            console.log(userInfo)
+            dispatch(setUser(userInfo));  // Cập nhật Redux store với thông tin người dùng
+          } catch (error) {
+            console.error("Error fetching user info:", error);
+          }
+        }
+      }
+    };
+
+    fetchUser();  // Gọi hàm bất đồng bộ bên trong useEffect
+  }, [dispatch, user]);
+
+
 
   // Toggle sidebar
   const toggleSidebar = () => {
@@ -26,30 +60,25 @@ const Header: React.FC = () => {
   };
 
   // Handle language change
-  const handleLanguageChange = (event: SelectChangeEvent) => {
-    setLanguage(event.target.value);
-  };
+  // const handleLanguageChange = (event: SelectChangeEvent) => {
+  //   setLanguage(event.target.value);
+  // };
 
   return (
     <header className="shadown">
       {/* Top Header */}
-      <div className="hidden lg:flex items-center justify-between bg-primary text-white px-6 py-2 text-sm">
+      <div className="hidden lg:flex items-center justify-between bg-primary text-white px-6 text-xsm">
         <p>1418 Riverwood Drive, CA 96052, US</p>
         <div className="flex items-center space-x-4">
-          <SelectInputProps
-            label="Language"
-            options={["English", "Vietnamese"]}
-            value={language}
-            onChange={handleLanguageChange}
-          />
+           Tiếng Việt
         </div>
       </div>
 
       {/* Desktop Navbar */}
-      <Navbar />
+      <Navbar user={user} />
 
       {/* Mobile Navbar */}
-      <div className="lg:hidden flex items-center justify-between px-4 py-4 bg-white shadow-md">
+      <div className="lg:hidden flex items-center justify-between px-2 py-4 bg-white shadow-md">
         {/* Menu Icon */}
         <FaBars
           className="text-gray-600 text-xl cursor-pointer"
@@ -58,14 +87,31 @@ const Header: React.FC = () => {
         <h1 className="text-2xl font-bold text-primary">
           Fast<span className="text-gray-800">kart.</span>
         </h1>
+
         <div className="flex items-center space-x-4">
-          <FaSearch className="text-gray-600" onClick={toggleSearch} />
-          <FaBell className="text-gray-600 relative">
-            <span className="absolute top-0 right-0 bg-error text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-              2
-            </span>
-          </FaBell>
-          <FaHeart className="text-gray-600" />
+          <FaSearch
+            className="text-gray-600 cursor-pointer hover:text-primary"
+            onClick={toggleSearch}
+          />
+          <Link href="/notifications">
+            <p>
+              <FaBell className="text-gray-600 relative cursor-pointer hover:text-primary">
+                <span className="absolute top-0 right-0 bg-error text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  2
+                </span>
+              </FaBell>
+            </p>
+          </Link>
+          <Link href="/favorites">
+            <p>
+              <FaHeart className="text-gray-600 cursor-pointer hover:text-primary" />
+            </p>
+          </Link>
+          <Link href="/cart">
+            <p>
+              <MdShoppingCart className="text-gray-600 cursor-pointer hover:text-primary" />
+            </p>
+          </Link>
         </div>
       </div>
 
@@ -82,7 +128,7 @@ const Header: React.FC = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-0  bg-opacity-50 z-40 transition-opacity ${
+        className={`fixed inset-0 bg-opacity-50 z-40 transition-opacity ${
           isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={toggleSidebar}
@@ -104,6 +150,24 @@ const Header: React.FC = () => {
               <p className="hover:text-primary-light">{label}</p>
             </Link>
           ))}
+          <Link href="/account">
+            <div className="flex items-center space-x-2 cursor-pointer hover:text-primary-light transition-colors duration-300">
+              <div className="w-10 h-10 rounded-full overflow-hidden">
+                <Image
+                  src={user?.avatar || defaultAvatar} // Fallback to default if avatar is null
+                  width={40} // Set the width to 40px
+                  height={40} // Set the height to 40px
+                  alt="avatar user"
+                  className="object-cover" // Ensures the image covers the circle without distortion
+                />
+              </div>
+              <div>
+                <p className="text-gray-800 font-semibold text-lg">
+                  {user?.username || "Customer"} {/* Display the user's name */}
+                </p>
+              </div>
+            </div>
+          </Link>
         </nav>
       </aside>
     </header>
