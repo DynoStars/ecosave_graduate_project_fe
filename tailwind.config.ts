@@ -39,7 +39,7 @@ const config: Config = {
           dark: "#15803D",
           light: "#4ADE80",
         },
-
+        border: "#e5e7eb",
         // Custom Colors
         background: "var(--background)",  // Biến động CSS
         foreground: "var(--foreground)",  // Biến động CSS
