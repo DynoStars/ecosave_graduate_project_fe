@@ -68,7 +68,7 @@ const Header: React.FC = () => {
     <header className="shadown">
       {/* Top Header */}
       <div className="hidden lg:flex items-center justify-between bg-primary text-white px-6 text-xsm">
-        <p>1418 Riverwood Drive, CA 96052, US</p>
+        <p>99 Tô Hiến Thành - DN</p>
         <div className="flex items-center space-x-4">
            Tiếng Việt
         </div>
@@ -85,7 +85,7 @@ const Header: React.FC = () => {
           onClick={toggleSidebar}
         />
         <h1 className="text-2xl font-bold text-primary">
-          Fast<span className="text-gray-800">kart.</span>
+          Eco<span className="text-gray-800">Save</span>
         </h1>
 
         <div className="flex items-center space-x-4">

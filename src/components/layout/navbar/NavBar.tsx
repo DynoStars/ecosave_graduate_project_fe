@@ -50,7 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
       {/* Logo */}
       <div className="flex items-center space-x-4">
         <h1 className="text-3xl font-bold text-primary">
-          Fast<span className="text-gray-800">kart.</span>
+          Eco<span className="text-gray-800">Save</span>
         </h1>
       </div>
 

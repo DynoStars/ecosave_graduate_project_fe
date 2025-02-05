@@ -12,6 +12,7 @@ import { logIn } from "@/api";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/userSlice";
+import { signIn } from "next-auth/react";
 const Login = ({ csrf }: LoginProps) => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
@@ -24,6 +25,7 @@ const Login = ({ csrf }: LoginProps) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
   const isFormValid = !emailError && !passwordError && email && password;
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError(!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email));
@@ -48,6 +50,20 @@ const Login = ({ csrf }: LoginProps) => {
       }
     }
   };
+
+  const handleSignInWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const result = await signIn("google", { redirect: true });
+      console.log("Sign in result:", result); // In ra toàn bộ đối tượng
+      if (result) {
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error during sign in:", error);
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col lg:flex-row items-center justify-center overflow-hidden relative">
       <Image src={bgIcon.src} width={300} height={300} alt="background login image" className="bg-image hidden lg:block" />
@@ -65,7 +81,7 @@ const Login = ({ csrf }: LoginProps) => {
             <h2 className="mt-4 text-2xl font-medium">Chào mừng bạn</h2>
             <p className="text-gray-600">Đăng nhập vào tài khoản</p>
           </div>
-          <button className="mt-6 w-full flex items-center justify-center gap-2 py-3 border bg-white border-primary-light rounded-md hover:bg-gray-100">
+          <button onClick={handleSignInWithGoogle} className="mt-6 w-full flex items-center justify-center gap-2 py-3 border bg-white border-primary-light rounded-md hover:bg-gray-100">
             <FaGoogle /> Tiếp tục với Google
           </button>
           <div className="mt-4 text-center text-gray-500">Hoặc tiếp tục với</div>
