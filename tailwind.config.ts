@@ -1,7 +1,8 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  content: [
+    darkMode: ["class"],
+    content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
@@ -38,14 +39,14 @@ const config: Config = {
           dark: "#15803D",
           light: "#4ADE80",
         },
-
+        border: "#e5e7eb",
         // Custom Colors
         background: "var(--background)",  // Biến động CSS
         foreground: "var(--foreground)",  // Biến động CSS
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 };
 
 export default config;
