@@ -1,54 +1,166 @@
 "use client";
 
-import React from 'react'
-
-
-
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import Image2 from "../../assets/images/auth/registerImage.png";
+import Image1 from "../../assets/images/auth/loginImage.png";
+import IconComputer from "../../assets/icons/computerIcon.png";
+import IconProgess from "../../assets/icons/Progress circle.png";
+import IconStore from "../../assets/icons/IconStore.png";
+import bgIcon from "../../assets/images/auth/bg-circle.png";
+import IconSafe from "../../assets/icons/IconSafe.png";
+import IconSaveMoney from "../../assets/icons/Briefcase.png";
+import IconIdea from "../../assets/icons/idea.png";
+import ProductCategories from "@/components/category/ProductCategories";
 
 export default function Home() {
+  const images = [Image1.src, Image1.src, Image2.src, Image2.src]; // Danh sách ảnh
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prevIndex) => (prevIndex + 2) % images.length);
+    }, 3000); // Chuyển đổi ảnh mỗi 3 giây
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div>
+    <div className="lg:px-20 px-10 h-full w-full overflow-hidden">
+      <section className="relative flex flex-col md:flex-row items-center justify-between h-[600px]">
+        {/* Background Icons */}
+        <Image
+          src={bgIcon.src}
+          width={300}
+          height={300}
+          alt="background login image"
+          className="bg-image hidden absolute -left-40 lg:block"
+        />
+        <Image
+          src={bgIcon.src}
+          width={300}
+          height={300}
+          alt="background login image"
+          className="bg-image hidden absolute -right-40 bottom-4 lg:block"
+        />
 
-
-<section className="relative flex flex-col md:flex-row items-center justify-between px-8 py-16 bg-white">
-      {/* Nội dung bên trái */}
-      <div className="max-w-xl">
-        <h1 className="text-4xl font-bold leading-tight text-gray-900">
-          Thu Thập <span className="text-green-500">Giảm Giá Tốt</span> Gần Địa Điểm Của Bạn
-        </h1>
-        <p className="mt-4 text-gray-600">
-          Khám phá và thu thập những ưu đãi tuyệt vời ngay gần bạn để tiết kiệm hơn mỗi ngày!
-        </p>
-        <div className="mt-6 flex space-x-4">
-          <button className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600">
-            Đến sản phẩm
-          </button>
-          <button className="px-6 py-3 bg-teal-400 text-white font-semibold rounded-lg shadow-md hover:bg-teal-500">
-            Khám phá các cửa hàng gần bạn
-          </button>
+        {/* Nội dung bên trái */}
+        <div className="max-w-xl">
+          <h1 className="text-6xl font-bold leading-tight text-gray-900">
+            Thu Thập <span className="text-primary">Giảm Giá Tốt</span> Gần Địa
+            Điểm Của Bạn
+          </h1>
+          <p className="mt-4 text-gray-600">
+            Khám phá và thu thập những ưu đãi tuyệt vời ngay gần bạn để tiết
+            kiệm hơn mỗi ngày!
+          </p>
+          <div className="mt-6 flex space-x-4">
+            <button className="px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-light">
+              Đến sản phẩm
+            </button>
+            <button className="px-6 py-3 bg-teal-50 font-semibold rounded-lg hover:bg-teal-100">
+              Khám phá các cửa hàng gần bạn
+            </button>
+          </div>
+          <div className="flex p-3 my-4 space-x-6">
+            <div className="flex justify-center items-center gap-2">
+              <Image
+                src={IconSafe.src}
+                width={30}
+                height={30}
+                alt="icon safe"
+              />
+              <p>An Toàn</p>
+            </div>
+            <div className="flex justify-center items-center gap-2">
+              <Image
+                src={IconSaveMoney.src}
+                width={30}
+                height={30}
+                alt="icon save money"
+              />
+              <p>An Toàn</p>
+            </div>
+            <div className="flex justify-center items-center gap-2">
+              <Image
+                src={IconIdea.src}
+                width={30}
+                height={30}
+                alt="icon idea"
+              />
+              <p>An Toàn</p>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Ảnh bên phải */}
-      <div className="relative mt-8 md:mt-0 flex space-x-4">
-        <img src="/images/grocery1.jpg" alt="Shopping" className="w-40 h-64 object-cover rounded-lg shadow-md" />
-        <img src="/images/grocery2.jpg" alt="Cart" className="w-40 h-64 object-cover rounded-lg shadow-md" />
-      </div>
+        {/* Ảnh Slider */}
+        <div className="relative w-1/2 h-full overflow-hidden">
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="flex h-full items-center justify-center w-full space-x-4"
+          >
+            <Image
+              src={images[index]}
+              alt="Slider image 1"
+              width={500}
+              height={1000}
+              className="w-72 h-[80%] object-cover rounded-lg shadow-md"
+            />
+            <Image
+              src={images[(index + 1) % images.length]}
+              alt="Slider image 2"
+              width={500}
+              height={1000}
+              className="w-72 h-[80%] object-cover rounded-lg shadow-md"
+            />
+          </motion.div>
 
-      {/* Thông tin thống kê */}
-      <div className="absolute top-10 left-2/3 bg-white shadow-lg p-4 rounded-lg">
-        <p className="text-lg font-bold">2K+</p>
-        <span className="text-gray-500 text-sm">Khách hàng hài lòng</span>
-      </div>
-      <div className="absolute bottom-10 left-2/3 bg-white shadow-lg p-4 rounded-lg">
-        <p className="text-lg font-bold">5K+</p>
-        <span className="text-gray-500 text-sm">Sản phẩm</span>
-      </div>
-      <div className="absolute bottom-0 right-1/3 bg-white shadow-lg p-4 rounded-lg">
-        <p className="text-lg font-bold">250+</p>
-        <span className="text-gray-500 text-sm">Cửa hàng</span>
-      </div>
-    </section>
+          {/* Box số liệu */}
+          <div className="absolute top-20 left-0 space-x-3 bg-white flex items-center shadow-lg p-4 rounded-lg border border-primary">
+            <Image
+              src={IconComputer.src}
+              alt="icon computer for top banner"
+              width={50}
+              height={50}
+            />
+            <div>
+              <p className="text-lg font-bold">2K+</p>
+              <span className="text-gray-500 text-sm">Khách hàng hài lòng</span>
+            </div>
+          </div>
+          <div className="absolute top-20 right-10 flex flex-col items-center space-y-2 border border-primary bg-white shadow-lg p-4 rounded-lg">
+            <Image
+              src={IconProgess.src}
+              alt="icon computer for top banner"
+              width={50}
+              height={50}
+            />
+            <p className="text-lg font-bold">5K+</p>
+            <span className="text-gray-500 text-sm">Sản phẩm</span>
+          </div>
+          <div className="absolute bottom-20 right-32 space-x-3 bg-white flex items-center shadow-lg p-4 rounded-lg border border-primary">
+            <Image
+              src={IconStore.src}
+              alt="icon computer for top banner"
+              width={50}
+              height={50}
+            />
+            <div>
+              <span className="text-gray-500 text-sm">Cửa hàng</span>
+              <p className="text-lg font-bold">250+</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="relative flex flex-col md:flex-row items-center justify-between h-auto">
+        <ProductCategories />
+      </section>
+
     </div>
-  )
+  );
 }

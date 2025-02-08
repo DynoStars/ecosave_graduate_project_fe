@@ -43,7 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
   return (
     <nav
-      className={`shadown hidden lg:flex items-center justify-between w-full px-6 py-2 bg-white shadow-md ${
+      className={` hidden lg:flex items-center justify-between w-full px-6 py-2 shadow-md ${
         searchActive ? "higher" : ""
       }`}
     >
@@ -130,12 +130,12 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
           <div className="flex space-x-4">
             <Link href="/login">
               <button className="bg-orange-500 text-white px-4 py-2 rounded transition-colors duration-300 hover:bg-orange-600">
-                Login
+                Đăng nhập
               </button>
             </Link>
             <Link href="/register">
               <button className="bg-primary text-white px-4 py-2 rounded transition-colors duration-300 hover:bg-primary-dark">
-                Sign Up
+                Đăng ký
               </button>
             </Link>
           </div>

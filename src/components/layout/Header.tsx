@@ -65,7 +65,7 @@ const Header: React.FC = () => {
   // };
 
   return (
-    <header className="shadown">
+    <header className="sticky top-0 z-50 bg-white">
       {/* Top Header */}
       <div className="hidden lg:flex items-center justify-between bg-primary text-white px-6 text-xsm">
         <p>99 Tô Hiến Thành - DN</p>
@@ -78,7 +78,7 @@ const Header: React.FC = () => {
       <Navbar user={user} />
 
       {/* Mobile Navbar */}
-      <div className="lg:hidden flex items-center justify-between px-2 py-4 bg-white shadow-md">
+      <div className="lg:hidden flex items-center justify-between px-2 py-4 shadow-md">
         {/* Menu Icon */}
         <FaBars
           className="text-gray-600 text-xl cursor-pointer"
