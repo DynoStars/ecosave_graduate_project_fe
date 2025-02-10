@@ -1,10 +1,10 @@
 import React from 'react'
-import MapPage from './MapPage'
+import GoongMap from './MapPage'
 
 export default function page() {
   return (
     <div>
-        <MapPage />
+        <GoongMap />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { motion } from "framer-motion";
 import LoginWithGoogleButton from "@/components/button/LoginWithGoogleButton";
 import Link from "next/link";
@@ -7,7 +7,6 @@ import "./register.css";
 import bgIcon from "../../../assets/images/auth/bg-circle.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { getLatLng, register } from "@/api";
 import ToastNotification from "@/components/toast/ToastNotification";
 import AddressInput from "@/components/input/AddressInput";

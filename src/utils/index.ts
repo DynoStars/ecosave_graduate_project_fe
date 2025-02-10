@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 
-export const API_URL: string = "https://lay-restaurant.zeabur.app/api";
+export const API_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 /**
  * Formats a number with commas as thousand separators.
