@@ -12,9 +12,73 @@ import bgIcon from "../../assets/images/auth/bg-circle.png";
 import IconSafe from "../../assets/icons/IconSafe.png";
 import IconSaveMoney from "../../assets/icons/Briefcase.png";
 import IconIdea from "../../assets/icons/idea.png";
-import ProductCategories from "@/components/category/ProductCategories";
+import ProductCategories from "@/components/homeSection/ProductCategories";
+
+import Product1 from '../../assets/images/products/product1.png';
+import Product2 from '../../assets/images/products/product2.png';
+import Product3 from '../../assets/images/products/product3.png';
+import Product4 from '../../assets/images/products/product4.png';
+import Product5 from '../../assets/images/products/product5.png';
+import {
+  FaCarrot,
+  FaCoffee,
+  FaDrumstickBite,
+  FaBreadSlice,
+  FaSnowflake,
+  FaList,
+} from "react-icons/fa";
+import Products from "@/components/homeSection/Products";
+import PromoBanner from "@/components/banner/PromoBanner";
+import ValuesSection from "@/components/homeSection/ValuesSection";
+import FoundersSection from "@/components/homeSection/FoundersSection";
+import BenefitsSection from "@/components/homeSection/BenefitsSection";
+import GoongMap from "../map/MapPage";
+
+export type Category = {
+  name: string;
+  icon: JSX.Element;
+};
+
+export interface Product {
+  id: number;
+  name: string;
+  original_price: string;
+  image: string;
+  category: string;
+  rating: number;
+  discount: number;
+}
 
 export default function Home() {
+
+  const [categories, setCategories] = useState<Category[]>([
+    { name: "Tất cả", icon: <FaList /> }, // Biểu tượng có thể thay đổi tùy thích
+    { name: "Rau & Trái cây", icon: <FaCarrot /> },
+    { name: "Đồ uống", icon: <FaCoffee /> },
+    { name: "Thịt & Hải sản", icon: <FaDrumstickBite /> },
+    { name: "Bữa sáng", icon: <FaBreadSlice /> },
+    { name: "Đồ đông lạnh", icon: <FaSnowflake /> },
+    { name: "Rau & Trái cây", icon: <FaCarrot /> },
+    { name: "Đồ uống", icon: <FaCoffee /> },
+    { name: "Thịt & Hải sản", icon: <FaDrumstickBite /> },
+    { name: "Bữa sáng", icon: <FaBreadSlice /> },
+]);
+
+
+  const [products, setProducts] = useState<Product[]>([
+    { id: 1, name: 'Buscopan Forte Tab 20mg X 10', original_price: '40.000 vnd', image: Product1.src, category: 'Vitamins', rating: 4.5, discount: 60 },
+    { id: 2, name: 'Panadol Extra', original_price: '35.000 vnd', image: Product2.src, category: 'Pain Relief', rating: 4.7, discount: 50 },
+    { id: 3, name: 'Cough Syrup', original_price: '30.000 vnd', image: Product3.src, category: 'Cold & Flu', rating: 4.3, discount: 40 },
+    { id: 4, name: 'Vitamin C 500mg', original_price: '50.000 vnd', image: Product4.src, category: 'Vitamins', rating: 4.8, discount: 20 },
+    { id: 5, name: 'Zinc Supplement', original_price: '45.000 vnd', image: Product5.src, category: 'Supplements', rating: 4.6, discount: 30 },
+    { id: 6, name: 'Buscopan Forte Tab 20mg X 10', original_price: '40.000 vnd', image: Product1.src, category: 'Vitamins', rating: 4.5, discount: 60 },
+    { id: 7, name: 'Panadol Extra', original_price: '35.000 vnd', image: Product2.src, category: 'Pain Relief', rating: 4.7, discount: 50 },
+    { id: 8, name: 'Cough Syrup', original_price: '30.000 vnd', image: Product3.src, category: 'Cold & Flu', rating: 4.3, discount: 40 },
+    { id: 9, name: 'Vitamin C 500mg', original_price: '50.000 vnd', image: Product4.src, category: 'Vitamins', rating: 4.8, discount: 20 },
+    { id: 10, name: 'Zinc Supplement', original_price: '45.000 vnd', image: Product5.src, category: 'Supplements', rating: 4.6, discount: 30 },
+
+  ]);
+
   const images = [Image1.src, Image1.src, Image2.src, Image2.src]; // Danh sách ảnh
   const [index, setIndex] = useState(0);
 
@@ -28,7 +92,8 @@ export default function Home() {
 
   return (
     <div className="lg:px-20 px-10 h-full w-full overflow-hidden">
-      <section className="relative flex flex-col md:flex-row items-center justify-between h-[600px]">
+
+      <section className="relative px-4 flex flex-col md:flex-row items-center justify-between h-[600px]">
         {/* Background Icons */}
         <Image
           src={bgIcon.src}
@@ -157,10 +222,28 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <section className="relative flex-col md:flex-row items-center justify-between h-auto px-4 hidden lg:block">
+        <PromoBanner />
+      </section>
       <section className="relative flex flex-col md:flex-row items-center justify-between h-auto">
-        <ProductCategories />
+        <ProductCategories categories={categories} setProducts={setProducts} />
+      </section>
+      <section className="relative flex flex-col md:flex-row items-center justify-between h-auto">
+        <Products products={products} setProducts={setProducts} />
       </section>
 
+      <section className="relative flex flex-col md:flex-row items-center justify-between h-auto">
+        <ValuesSection />
+      </section>
+      <section className="relative flex flex-col md:flex-row items-center justify-between h-auto bg-red-300">
+        <GoongMap />
+      </section>
+      <section >
+        <FoundersSection />
+      </section>
+      <section className="relative flex flex-col md:flex-row items-center gap-5 h-auto justify-center">
+        <BenefitsSection />
+      </section>
     </div>
   );
 }
