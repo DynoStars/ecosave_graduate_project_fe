@@ -12,7 +12,8 @@ const nextConfig = {
       "cdn3.iconfinder.com",
       "cdn-icons-png.flaticon.com",
       "hcm.fstorage.vn",
-      'via.placeholder.com'
+      'via.placeholder.com',
+      'img.tripi.vn'
     ], // Correct domains for direct image URLs
   },
 };

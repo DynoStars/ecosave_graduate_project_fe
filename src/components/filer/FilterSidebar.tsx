@@ -1,114 +1,97 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Product } from "@/app/home/Home";
-import BenefitsSection from "../homeSection/BenefitsSection";
+// import BenefitsSection from "../homeSection/BenefitsSection";
+import { Category, Product, ProductFilters } from "@/types";
+import { getProducts } from "@/api";
 
 interface FilterSidebarProps {
   setProducts: (products: Product[]) => void;
   allProducts: Product[];
+  categories: Category[];
+  setLoading: (loading: boolean) => void;
 }
 
 export default function FilterSidebar({
   setProducts,
   allProducts,
+  categories,
+  setLoading
 }: FilterSidebarProps) {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
-  const [priceRange, setPriceRange] = useState<[number, number]>([10, 100]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    10000, 1000000,
+  ]); // Giá trị phù hợp hơn
   const [expiryDate, setExpiryDate] = useState<string>("");
   const [distance, setDistance] = useState<number>(10);
 
-  // ⚡ Tối ưu hóa hàm lọc bằng useCallback để tránh re-render không cần thiết
-  const applyFilters = useCallback(() => {
-    let filteredProducts = allProducts;
+  async function handleFilterProduct() {
+    setLoading(true)
+    const filters: ProductFilters = {
+      category_id:
+        selectedCategories.length > 0 ? selectedCategories : undefined,
+      rating: selectedRating ?? undefined,
+      min_price: priceRange[0],
+      max_price: priceRange[1],
+      expiration_date: expiryDate || undefined,
+      // distance: distance ?? undefined,
+    };
+    console.log(expiryDate)
+    const filteredProducts = await getProducts(filters);
+    setProducts(filteredProducts);
+    setLoading(false)
+  }
 
-    if (selectedCategories.length > 0) {
-      filteredProducts = filteredProducts.filter((p) =>
-        selectedCategories.includes(p.category)
-      );
-    }
-
-    if (selectedRating !== null) {
-      filteredProducts = filteredProducts.filter(
-        (p) => Math.round(p.rating) === selectedRating
-      );
-    }
-
-    filteredProducts = filteredProducts.filter(
-      (p) =>
-        parseFloat(p.original_price.replace(" vnd", "").replace(",", "")) >=
-          priceRange[0] &&
-        parseFloat(p.original_price.replace(" vnd", "").replace(",", "")) <=
-          priceRange[1]
-    );
-
-    if (expiryDate) {
-      filteredProducts = filteredProducts.filter(
-        (p) => new Date(p.expiry_date) <= new Date(expiryDate)
-      );
-    }
-
-    if (distance) {
-      filteredProducts = filteredProducts.filter((p) => p.distance <= distance);
-    }
-
-    setProducts((prevProducts) => {
-      const isEqual =
-        JSON.stringify(prevProducts) === JSON.stringify(filteredProducts);
-      return isEqual ? prevProducts : filteredProducts;
-    });
-  }, [selectedCategories, selectedRating, priceRange, expiryDate, distance, allProducts, setProducts]);
-
-  // 🚀 Chỉ chạy khi state thay đổi thực sự
+  async function handleResetFilter() {
+    setSelectedCategories([]);
+    setSelectedRating(null);
+    setPriceRange([10000, 1000000]);
+    setExpiryDate("");
+    setDistance(10);
+    setProducts(allProducts); // Reset về danh sách ban đầu
+    const page = 1;
+    const filteredProducts = await getProducts({page});
+    setProducts(filteredProducts);
+  }
   useEffect(() => {
-    if (
-      selectedCategories.length === 0 &&
-      selectedRating === null &&
-      priceRange[0] === 10 &&
-      priceRange[1] === 100 &&
-      expiryDate === "" &&
-      distance === 10
-    ) {
-      // Không có bộ lọc nào được chọn => Hiển thị tất cả sản phẩm
-      setProducts(allProducts);
-      return;
-    }
-
-    applyFilters();
-  }, [applyFilters, allProducts]);
-
+    handleFilterProduct();
+  }, [selectedCategories, selectedRating, priceRange, expiryDate, distance]);
 
   return (
     <aside className="w-full lg:w-[250px] space-y-6 border-r pr-4">
+      {/* Lọc theo loại sản phẩm */}
       <div>
         <h3 className="font-semibold mb-4">Loại sản phẩm</h3>
-        <div className="space-y-2">
-          {["Vitamins", "Pain Relief", "Cold & Flu", "Supplements"].map(
-            (type) => (
-              <div key={type} className="flex items-center space-x-2">
+        <div className="space-y-2 max-h-96 overflow-auto">
+          {categories && categories.length > 0 ? (
+            categories.map((type) => (
+              <div key={type.id} className="flex items-center space-x-2 cursor-pointer hover:bg-primary">
                 <Checkbox
-                  id={type.toLowerCase()}
-                  checked={selectedCategories.includes(type)}
+                  id={type.name.toLowerCase()}
+                  checked={selectedCategories.includes(type.id)}
                   onCheckedChange={() =>
                     setSelectedCategories((prev) =>
-                      prev.includes(type)
-                        ? prev.filter((c) => c !== type)
-                        : [...prev, type]
+                      prev.includes(type.id)
+                        ? prev.filter((c) => c !== type.id)
+                        : [...prev, type.id]
                     )
                   }
                 />
-                <label htmlFor={type.toLowerCase()} className="text-sm">
-                  {type}
+                <label htmlFor={type.name.toLowerCase()} className="text-sm cursor-pointer">
+                  {type.name}
                 </label>
               </div>
-            )
+            ))
+          ) : (
+            <p className="text-gray-500">Không có loại sản phẩm nào</p>
           )}
         </div>
       </div>
 
+      {/* Lọc theo đánh giá */}
       <div>
         <h3 className="mb-4">Đánh giá</h3>
         <div className="space-y-2">
@@ -132,6 +115,7 @@ export default function FilterSidebar({
         </div>
       </div>
 
+      {/* Lọc theo khoảng giá */}
       <div>
         <h3 className="font-semibold mb-4">Khoảng giá</h3>
         <Slider
@@ -147,6 +131,7 @@ export default function FilterSidebar({
         </div>
       </div>
 
+      {/* Lọc theo ngày hết hạn */}
       <div>
         <h3 className="font-semibold mb-4">Ngày hết hạn</h3>
         <input
@@ -157,6 +142,7 @@ export default function FilterSidebar({
         />
       </div>
 
+      {/* Lọc theo khoảng cách */}
       <div>
         <h3 className="font-semibold mb-4">Khoảng cách (km)</h3>
         <Slider
@@ -169,20 +155,16 @@ export default function FilterSidebar({
         <div className="text-sm mt-2">{distance} km</div>
       </div>
 
+      {/* Nút đặt lại bộ lọc */}
       <button
         onClick={() => {
-          setSelectedCategories([]);
-          setSelectedRating(null);
-          setPriceRange([10, 100]);
-          setExpiryDate("");
-          setDistance(10);
-          setProducts(allProducts); // Reset về danh sách ban đầu
+          handleResetFilter();
         }}
         className="w-full bg-gray-300 text-black py-2 rounded-lg font-semibold mt-2"
       >
         Đặt lại bộ lọc
       </button>
-      <BenefitsSection />
+      {/* <BenefitsSection /> */}
     </aside>
   );
 }

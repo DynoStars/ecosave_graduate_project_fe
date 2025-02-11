@@ -1,43 +1,45 @@
-// Danh sách sản phẩm
-import React from "react";
+import React, { Suspense } from "react";
 import Home from "./Home";
-// import { Metadata } from "next";
-// import { API_URL } from "@/utils";
-// import { Product } from "@/types";
-// import Home from "./Home";
-// Hàm fetch danh sách sản phẩm
-// export async function fetchFoods(): Promise<Product[]> {
-//   try {
-//     const response = await fetch(`${API_URL}/foods?page=1`, { cache: "no-store" });
-//     if (!response.ok) {
-//       const errorMessage = await response.text(); // Đọc thông báo lỗi từ response
-//       console.error("Failed to fetch data:", response.status, response.statusText, errorMessage);
-//       throw new Error(`HTTP error! Status: ${response.status}`);
-//     }
-//     const data = await response.json();
-//     return data.data as Product[];
-//   } catch (error) {
-//     console.error("Error fetching data:", error);
-//     return []; // Trả về mảng rỗng nếu có lỗi
-//   }
-// }
+import { getCategories, getProducts } from "@/api";
+import { Category, Product } from "@/types";
+import Loading from "../loading";
+
 // Server component để hiển thị danh sách sản phẩm
-export const ListProducts: React.FC = async () => {
-  // let foods: Product[] | null = null;
-  // try {
-  //   foods = await fetchFoods();
-  // } catch (error) {
-  //   console.error("Failed to fetch data:", error);
-  //   return <div>Error fetching data. Please try again later.</div>;
-  // }
-  // if (!foods || foods.length === 0) {
-  //   return <div>No foods available to display.</div>;
-  // }
+const ListProducts = async () => {
+  const page = 1; // Có thể lấy từ URL hoặc props nếu cần
+  let products: Product[] | null = null;
+  let categories: Category[] | null = null;
+  let loading = true;
+
+  try {
+    products = await getProducts({page});
+    categories = await getCategories();
+    loading = false;
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+    return (
+      <div className="text-center text-orange-500">
+        Lỗi khi lấy dữ liệu. Vui lòng thử lại sau
+      </div>
+    );
+  }
+
+  if (!products || products.length === 0) {
+    return (
+      <div className="text-center text-primary">
+        Không có sản phẩm nào để hiển thị.
+      </div>
+    );
+  }
   return (
-    <>
-      {/* <Home listFoods={foods} /> */}
-      <Home />
-    </>
+    <Suspense fallback={<Loading />}>
+      <Home
+        listCategories={categories}
+        listProducts={products}
+        loadingProps={loading}
+      />
+    </Suspense>
   );
 };
+
 export default ListProducts;

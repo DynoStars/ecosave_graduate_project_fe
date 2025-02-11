@@ -1,4 +1,5 @@
 import { FormData } from '@/app/(auth)/register/Register';
+import { Category, Product, ProductFilters } from '@/types';
 import axios from 'axios';
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 const MAP_KEY = process.env.NEXT_PUBLIC_MAP_KEY;
@@ -94,4 +95,73 @@ const register = async (formData: FormData) => {
     console.error("Lỗi khi đăng ký:", error);
   }
 };
-export { getCSRF, logIn, fetchUserInfo, register, getLatLng ,getLocationSuggestions};
+
+ async function getProducts(filters: ProductFilters): Promise<Product[]> {
+  try {
+    // Tạo object mới để gửi request
+    const params : any = { ...filters };
+
+    // 🔹 Chuyển đổi category_id (mảng số) thành chuỗi trước khi gửi API
+    if (filters.category_id && filters.category_id.length > 0) {
+      params.category_id = filters.category_id.join(","); // Chuyển thành "1,2,3"
+    }
+
+    const response = await axios.get(`${serverUrl}/products`, {
+      params,
+      headers: { "Cache-Control": "no-store" },
+    });
+
+    return response.data.data as Product[];
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return [];
+  }
+}
+
+// getProducts({ category_id: [1, 3, 5], page: 1 }).then((products) =>
+//   console.log(products)
+// );
+
+
+// // 🔹 Lấy danh sách sản phẩm với phân trang và lọc theo danh mục
+// getProducts({ page: 1, category_id: 3 }).then((products) =>
+//   console.log(products)
+// );
+
+// // 🔹 Tìm kiếm sản phẩm theo tên và khoảng giá
+// getProducts({ name: "Bánh", min_price: 50000, max_price: 200000 }).then(
+//   (products) => console.log(products)
+// );
+
+// // 🔹 Lọc theo đánh giá
+// getProducts({ rating: 4 }).then((products) => console.log(products));
+
+
+
+async function getCategories(): Promise<Category[]> {
+  try {
+    const response = await axios.get(`${serverUrl}/categories`, {
+      headers: { "Cache-Control": "no-store" },
+    });
+
+    return response.data.data as Category[];
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return [];
+  }
+}
+
+async function getProductsByCategoryId(categoryId : number | string): Promise<Product[]> {
+  try {
+    const response = await axios.get(`${serverUrl}/products?category_id=${categoryId}`, {
+      headers: { "Cache-Control": "no-store" },
+    });
+    return response.data.data as Product[];
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return [];
+  }
+}
+
+
+export { getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
