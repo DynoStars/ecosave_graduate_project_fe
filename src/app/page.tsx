@@ -1,40 +1,49 @@
-import React from "react";
-// import Home from "./home/Home";
-
-// import Map from "../components/Map";
 import { generateMetadata } from "@/utils";
-// import Image from "next/image";
-// import { fetchFoods } from "./home/page";
-// import { Product } from "@/types";
+import React, { Suspense } from "react";
+import { getCategories, getProducts } from "@/api";
+import { Category, Product } from "@/types";
 export const metadata = generateMetadata(
   "",
   "Welcome to LayRestaurant, the best platform for booking food and rooms"
 );
-// import Banner from "../assets/images/banner/mainBanner1.png";
 import Home from "./home/Home";
+import Loading from "./loading";
 export default async function HomePage() {
-  // let foods: Product[] | null = null;
+  const page = 1; // Có thể lấy từ URL hoặc props nếu cần
+  let products: Product[] | null = null;
+  let categories: Category[] | null = null;
+  let loading = true;
 
-  // try {
-  //   foods = await fetchFoods();
-  // } catch (error) {
-  //   console.error("Failed to fetch data:", error);
-  //   return <div>Error fetching data. Please try again later.</div>;
-  // }
+  try {
+    products = await getProducts({page});
+    categories = await getCategories();
+    loading = false;
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+    return (
+      <div className="text-center text-orange-500">
+        Lỗi khi lấy dữ liệu. Vui lòng thử lại sau
+      </div>
+    );
+  }
 
-  // if (!foods || foods.length === 0) {
-  //   return <div>No foods available to display.</div>;
-  // }
+  if (!products || products.length === 0) {
+    return (
+      <div className="text-center text-primary">
+        Không có sản phẩm nào để hiển thị.
+      </div>
+    );
+  }
 
   return (
-    <>
-      {/* <Home listFoods={foods} /> */}
+    <Suspense fallback={<Loading />}>
       <div className="w-screen">
-        {/* <Image src={Banner.src} width={2000} height={1000} alt="banner" />
-         */}
-         <Home />
+        <Home
+          listCategories={categories}
+          listProducts={products}
+          loadingProps={loading}
+        />
       </div>
-      {/* <Map /> */}
-    </>
+    </Suspense>
   );
 }

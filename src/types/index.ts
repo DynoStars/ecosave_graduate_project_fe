@@ -24,3 +24,71 @@ export interface UserProfile {
   created_at: string; // Thời gian tạo tài khoản
   updated_at: string; // Thời gian cập nhật tài khoản
 }
+
+export interface Store {
+  id: number;
+  store_name: string;
+  avatar: string;
+  store_type: string;
+  opening_hours: string | null;
+  status: string;
+  contact_email: string | null;
+  contact_phone: string | null;
+  latitude: string;
+  longitude: string;
+  description: string | null;
+  user_id: number;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductImage {
+  id: number;
+  product_id: number;
+  image_url: string;
+  image_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Product {
+  id: number;
+  name: string;
+  description: string;
+  original_price: string;
+  discount_percent: number;
+  product_type: string;
+  discounted_price: string;
+  expiration_date: string;
+  stock_quantity: number;
+  store_id: number;
+  category_id: number;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+  store: Store;
+  rating: number;
+  category: Category;
+  images: ProductImage[];
+}
+
+export interface ProductFilters {
+  page?: number;
+  name?: string;
+  store_name?: string;
+  category_id?: number[]; // Mảng số
+  category_name?: string;
+  expiration_date?: string;
+  min_price?: number;
+  max_price?: number;
+  rating?: number;
+}
