@@ -18,8 +18,8 @@ import PromoBanner from "@/components/banner/PromoBanner";
 import ValuesSection from "@/components/homeSection/ValuesSection";
 import FoundersSection from "@/components/homeSection/FoundersSection";
 import BenefitsSection from "@/components/homeSection/BenefitsSection";
-import GoongMap from "../map/MapPage";
 import { Category, Product } from "@/types";
+import HomeMapSecsion from "@/components/Map";
 
 type HomeType = {
   listCategories: Category[];
@@ -192,7 +192,7 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
         <ValuesSection />
       </section>
       <section className="relative flex flex-col md:flex-row items-center justify-between h-auto bg-red-300">
-        <GoongMap />
+        <HomeMapSecsion />
       </section>
       <section >
         <FoundersSection />

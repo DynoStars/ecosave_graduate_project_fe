@@ -1,5 +1,5 @@
 import { FormData } from '@/app/(auth)/register/Register';
-import { Category, Product, ProductFilters } from '@/types';
+import { Category, Product, ProductFilters, Store } from '@/types';
 import axios from 'axios';
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 const MAP_KEY = process.env.NEXT_PUBLIC_MAP_KEY;
@@ -163,5 +163,17 @@ async function getProductsByCategoryId(categoryId : number | string): Promise<Pr
   }
 }
 
+async function getNearingStores (latitude : number, longitude : number) : Promise<Store[]> {
+  try {
+    const response = await axios.get(`${serverUrl}/stores?latitude=${latitude}&longitude=${longitude}`, {
+      headers: { "Cache-Control": "no-store" },
+    });
+    return response.data.data as Store[];
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return [];
+  }
+}
 
-export { getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
+
+export { getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };

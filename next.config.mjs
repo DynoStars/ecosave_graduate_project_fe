@@ -13,7 +13,8 @@ const nextConfig = {
       "cdn-icons-png.flaticon.com",
       "hcm.fstorage.vn",
       'via.placeholder.com',
-      'img.tripi.vn'
+      'img.tripi.vn',
+      'cdnphoto.dantri.com.vn'
     ], // Correct domains for direct image URLs
   },
 };

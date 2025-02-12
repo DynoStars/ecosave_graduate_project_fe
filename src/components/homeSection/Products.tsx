@@ -14,9 +14,9 @@ import { Product } from "@/types";
 
 interface ProductsProps {
   products: Product[];
-  setProducts: (products: Product[]) => void;
+  setProducts?: (products: Product[]) => void;
   loading: boolean;
-  setLoading: (loading: boolean) => void;
+  setLoading?: (loading: boolean) => void;
 }
 
 export default function Products({
@@ -50,15 +50,6 @@ export default function Products({
     <section className="container mx-auto px-4">
       <div className="flex justify-between items-center">
         <h4 className="text-2xl font-bold mb-6">Sản Phẩm Bán Chạy </h4>
-        <button
-          onClick={() => {
-            setLoading(true);
-            setProducts([]);
-            setLoading(false);
-          }}
-        >
-          Filter
-        </button>
       </div>
       <div className={`transition-opacity duration-500`}>
         {loading ? (
