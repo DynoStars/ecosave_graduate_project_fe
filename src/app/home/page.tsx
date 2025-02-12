@@ -4,6 +4,7 @@ import { getCategories, getProducts } from "@/api";
 import { Category, Product } from "@/types";
 import Loading from "../loading";
 
+
 // Server component để hiển thị danh sách sản phẩm
 const ListProducts = async () => {
   const page = 1; // Có thể lấy từ URL hoặc props nếu cần
