@@ -19,13 +19,19 @@ export function StoreInfo({ store }: StoreInfoProps) {
       <div className="flex justify-between items-center text-sm text-gray-600">
         <div className="flex items-center space-x-4 mr-10">
           <div className="w-20 h-20 rounded-full overflow-hidden relative">
-            <Image
-              src={store.avatar}
-              alt={store.store_name}
-              width={300}
-              height={300}
-              className="object-cover w-full h-full"
-            />
+            {store.avatar ? (
+              <Image
+                src={store.avatar}
+                alt={store.store_name}
+                width={300}
+                height={300}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <span className="text-gray-600 font-medium flex items-center justify-center w-full h-full">
+                {store.store_name[0]}
+              </span>
+            )}
           </div>
           <div>
             <h3 className="font-semibold mb-2 text-lg">{store.store_name}</h3>

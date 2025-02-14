@@ -1,4 +1,5 @@
 "use client"; 
+import { formatMoney } from "@/utils";
 import { Heart, Star, ShoppingCart } from "lucide-react"; 
 import { useState, useEffect } from "react";
 
@@ -66,12 +67,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-primary text-[32px] font-bold">
-          {Number(product.discounted_price).toLocaleString()}đ
-        </span>
-        <span className="text-gray-500 line-through text-[32px]">
-          {Number(product.original_price).toLocaleString()}đ
-        </span>
+      <span className="text-primary text-[32px] font-bold">
+        {formatMoney(Number(product.discounted_price), "VND")}
+      </span>
+      <span className="text-gray-500 line-through text-[32px]">
+        {formatMoney(Number(product.original_price), "VND")}
+      </span>
         <span className="text-primary">({product.discount_percent}% off)</span>
       </div>
 

@@ -192,3 +192,21 @@ export const getUrlUpdateUserImg = async (file: File) => {
     throw error;
   }
 };
+
+export const formatDateTime = (isoString: string) => {
+  const date = new Date(isoString);
+  const time = date.toLocaleString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true, 
+  });
+  const day = date.toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  return `${time} ${day}`;
+};
+
+

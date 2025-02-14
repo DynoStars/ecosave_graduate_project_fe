@@ -109,7 +109,7 @@ export default function ProductDetailPage({ loadingProps, product }: { loadingPr
         />
   
         <div className="grid lg:grid-cols-[1fr,2fr] gap-8">
-          {/* <ProductGallery images={product.images} /> */}
+          <ProductGallery images={product.images} />
           <ProductInfo product={product} />
         </div>
   

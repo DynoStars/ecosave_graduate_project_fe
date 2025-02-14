@@ -25,7 +25,7 @@ export interface UserProfile {
   updated_at: string; // Thời gian cập nhật tài khoản
 }
 
-export interface Store {
+export type Store = {
   id: number;
   store_name: string;
   avatar: string;
@@ -34,8 +34,8 @@ export interface Store {
   status: string;
   contact_email: string | null;
   contact_phone: string | null;
-  latitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
   description: string | null;
   user_id: number;
   deleted_at: string | null;
@@ -92,3 +92,15 @@ export interface ProductFilters {
   max_price?: number;
   rating?: number;
 }
+
+export type MapListingType = {
+  listStores: Store[];
+  userLatitude: number;
+  userLongitude: number;
+  loadingProps: boolean;
+  setLoading?: (loading: boolean) => void;
+};
+
+export type GoongMapProps = MapListingType & {
+  setLoading?: (loading: boolean) => void;
+};
