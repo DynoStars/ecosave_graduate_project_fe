@@ -29,6 +29,7 @@ export type Store = {
   id: number;
   store_name: string;
   avatar: string;
+  logo: string;
   store_type: string;
   opening_hours: string | null;
   status: string;
@@ -36,11 +37,14 @@ export type Store = {
   contact_phone: string | null;
   latitude: number;
   longitude: number;
+  soft_description: string ;
+  address : string ;
   description: string | null;
   user_id: number;
   deleted_at: string | null;
   created_at: string;
   updated_at: string;
+  products: Product[];
 }
 
 export interface Category {
@@ -91,6 +95,7 @@ export interface ProductFilters {
   min_price?: number;
   max_price?: number;
   rating?: number;
+  store_id ?: string | number;
 }
 
 export type MapListingType = {

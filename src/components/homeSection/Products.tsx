@@ -11,22 +11,20 @@ import {
   AiOutlineShoppingCart,
 } from "react-icons/ai";
 import { Product } from "@/types";
+import calculateDistance from "@/utils/calculateDistance";
+import useUserLocation from "@/hooks/useUserLocation";
 
 interface ProductsProps {
   products: Product[];
   setProducts?: (products: Product[]) => void;
-  loading: boolean;
+  loading?: boolean;
   setLoading?: (loading: boolean) => void;
 }
 
-export default function Products({
-  products,
-  setProducts,
-  loading,
-  setLoading,
-}: ProductsProps) {
+export default function Products({ products, loading }: ProductsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // Số sản phẩm mỗi trang
+  const userLocation = useUserLocation();
 
   // Trạng thái lưu danh sách sản phẩm đã yêu thích
   const [favoriteProducts, setFavoriteProducts] = useState<number[]>([]);
@@ -105,7 +103,12 @@ export default function Products({
                         {product.category.name}
                       </p>
                       <p className="text-sm text-gray-500 truncate-description-1-line">
-                        {product.store.store_name}
+                        {userLocation
+                          ? `${calculateDistance(
+                              [product.store.latitude, product.store.longitude],
+                              userLocation
+                            )} km`
+                          : "Không có thông tin vị trí"}
                       </p>
                     </div>
                     <Link href={`/product/${product.id}`} className="block">

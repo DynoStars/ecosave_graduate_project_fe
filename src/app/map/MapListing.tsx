@@ -10,9 +10,9 @@ const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: M
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       <div>
-        <h2 className="text-green-600 font-bold text-lg">
+        {listStores.length === 0  && <h2 className="text-green-600 font-bold text-lg">
           10 cửa hàng đang có sản phẩm giảm giá quanh bạn
-        </h2>
+        </h2>}
         <div className="max-h-[425px] overflow-auto scrollbar-container">
         {loading ? (
             <p className="text-center text-gray-600">Đang tải dữ liệu...</p>

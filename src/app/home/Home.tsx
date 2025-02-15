@@ -46,6 +46,24 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const location = [latitude, longitude ];
+          localStorage.setItem("user_location", JSON.stringify(location));
+        },
+        (error) => {
+          console.error("Lỗi khi lấy vị trí:", error);
+        }
+      );
+    } else {
+      console.error("Trình duyệt không hỗ trợ Geolocation");
+    }
+  }, []);
+
+
   return (
     <div className="lg:px-20 px-10 h-full w-full overflow-hidden">
 

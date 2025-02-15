@@ -2,6 +2,23 @@
 import { useEffect, useState } from "react";
 import Script from "next/script";
 import { GoongMapProps } from "@/types";
+export const getDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
+  const R = 6371e3; // Bán kính Trái Đất (mét)
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Khoảng cách tính bằng mét
+};
 const GoongMap = ({
   listStores,
   userLatitude,
@@ -17,23 +34,6 @@ const GoongMap = ({
   console.log(userLocation[0]);
   const accessToken = "yn7zQK2me9A32r6ZVGl5BuBYBwjifSF3dqBbo9Wp";
   // Hàm tính khoảng cách giữa hai tọa độ (sử dụng công thức Haversine)
-  const getDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) => {
-    const R = 6371e3; // Bán kính Trái Đất (mét)
-    const φ1 = (lat1 * Math.PI) / 180;
-    const φ2 = (lat2 * Math.PI) / 180;
-    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Khoảng cách tính bằng mét
-  };
   useEffect(() => {
     if (typeof window !== "undefined" && window.goongjs) {
       // setLoading(true); // Bắt đầu tải bản đồ
@@ -71,20 +71,20 @@ const GoongMap = ({
             store.latitude,
             store.longitude
           );
-          // Tạo nội dung popup với hình ảnh và tên cửa hàng
-          const popupContent = `
-    <div class="popup-content max-w-[200px] cursor-pointer">
-      <a href="/store/${store.id}">
-        <img src="${store.avatar}" alt="${
-            store.store_name
-          }" class="w-full h-24 object-cover rounded-md hover:opacity-90 transition-opacity duration-300" />
-      </a>
-      <h3 class="text-sm font-semibold mt-2">${store.store_name}</h3>
-      <p class="text-xs text-gray-500">${Math.round(
-        distance
-      )}m từ vị trí của bạn</p>
-    </div>
-  `;
+                // Tạo nội dung popup với hình ảnh và tên cửa hàng
+                const popupContent = `
+          <div class="popup-content max-w-[200px] cursor-pointer">
+            <a href="/store/${store.id}">
+              <img src="${store.avatar}" alt="${
+                  store.store_name
+                }" class="w-full h-24 object-cover rounded-md hover:opacity-90 transition-opacity duration-300" />
+            </a>
+            <h3 class="text-sm font-semibold mt-2">${store.store_name}</h3>
+            <p class="text-xs text-gray-500">${Math.round(
+              distance
+            )}m từ vị trí của bạn</p>
+          </div>
+        `;
           const marker = new window.goongjs.Marker({ color: "#FF5733" })
             .setLngLat([store.longitude, store.latitude])
             .addTo(newMap);
