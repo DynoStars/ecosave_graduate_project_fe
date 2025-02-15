@@ -18,7 +18,7 @@ export default function ProductListing({ listProducts, loadingProps, listCategor
   const [products, setProducts] = useState<Product[]>(listProducts);
   const [categories] = useState<Category[]>(listCategories);
 
-    const [loading, setLoading] = useState<boolean>(loadingProps);
+  const [loading, setLoading] = useState<boolean>(loadingProps);
 
 
   return (

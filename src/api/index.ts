@@ -163,6 +163,14 @@ async function getProductsByCategoryId(categoryId : number | string): Promise<Pr
   }
 }
 
+export const getProductDetail = async (id: string) => {
+  try {
+    const response = await axios.get(`${serverUrl}/products/${id}`);
+    return response.data.data;
+  } catch (error) {
+    throw error;
+  }
+};
 async function getNearingStores (latitude : number, longitude : number) : Promise<Store[]> {
   try {
     const response = await axios.get(`${serverUrl}/stores?latitude=${latitude}&longitude=${longitude}`, {
