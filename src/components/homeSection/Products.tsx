@@ -90,7 +90,7 @@ export default function Products({
                       Giảm {product.discount_percent}%
                     </span>
                   )}
-                  <Link href={`/product/${product.id}`} className="block">
+                  <Link href={`/products/${product.id}`} className="block">
                     <Image
                       src={product.images[0]?.image_url || fallbackImage.src}
                       alt={product.name}
