@@ -183,5 +183,18 @@ async function getNearingStores (latitude : number, longitude : number) : Promis
   }
 }
 
+async function getStoreById (id: number | string) : Promise<Store> {
+  try {
+    const response = await axios.get(`${serverUrl}/stores/${id}`, {
+      headers: { "Cache-Control": "no-store" },
+    });
+    return response.data.data as Store;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    throw new Error();
+  }
+}
 
-export { getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
+
+
+export { getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };

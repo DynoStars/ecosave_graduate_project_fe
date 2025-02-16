@@ -14,7 +14,11 @@ const nextConfig = {
       "hcm.fstorage.vn",
       'via.placeholder.com',
       'img.tripi.vn',
-      'cdnphoto.dantri.com.vn'
+      'cdnphoto.dantri.com.vn',
+      'png.pngtree.com',
+      'anhdephd.vn',
+      'encrypted-tbn0.gstatic.com',
+      'chothuenhapho.vn'
     ], // Correct domains for direct image URLs
   },
 };

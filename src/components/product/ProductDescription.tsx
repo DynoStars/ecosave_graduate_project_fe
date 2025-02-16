@@ -1,12 +1,9 @@
+import { Product } from "@/types"
+import { formatDateTime } from "@/utils"
+
 interface ProductDescriptionProps {
   description: string
-  details: {
-    origin: string
-    ingredients: string
-    usage: string
-    storage: string
-    expiration_date: string
-  }
+  details: Product
 }
 
 export function ProductDescription({ description, details }: ProductDescriptionProps) {
@@ -26,23 +23,23 @@ export function ProductDescription({ description, details }: ProductDescriptionP
           <h2 className="text-lg font-medium mb-2 bg-gray-50 p-4">Thông tin</h2>
           <div className="space-y-2">
             <div className="grid gap-2">
-              {/* <div className="flex items-start gap-8 py-2 border-b">
+              <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Ngày hết hạn</span>
-                <span>{details.expiration_date}</span>
-              </div> */}
-              {/* <div className="flex items-start gap-8 py-2 border-b">
+                <span>{formatDateTime(details.expiration_date)}</span>
+              </div>
+              <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Xuất xứ</span>
-                <span>{details.origin}</span>
-              </div> */}
+                <span>{formatDateTime(details.created_at)}</span>
+              </div>
               {/* <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Thành phần</span>
                 <span className="flex-1">{details.ingredients}</span>
-              </div>
-              <div className="flex items-start gap-8 py-2 border-b">
+              </div> */}
+              {/* <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Hướng dẫn sử dụng</span>
                 <span>{details.usage}</span>
-              </div>
-              <div className="flex items-start gap-8 py-2 border-b">
+              </div> */}
+              {/* <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Bảo quản</span>
                 <span className="flex-1">{details.storage}</span>
               </div> */}

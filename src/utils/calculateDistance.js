@@ -1,19 +1,24 @@
-// Hàm tính khoảng cách giữa hai điểm theo công thức Haversine
-export const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const toRad = (degree) => (degree * Math.PI) / 180;
+ const calculateDistance = (userCoords, storeCoords) => {
+  const toRad = (value) => (value * Math.PI) / 180;
 
-    const R = 6371; // Bán kính trái đất (km)
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
+  const [lat1, lon1] = userCoords;
+  const [lat2, lon2] = storeCoords;
 
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const R = 6371; // Bán kính Trái Đất (km)
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
 
-    const distance = R * c; // Khoảng cách tính theo km
-    return distance;
-  };
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+
+  return distance.toFixed(2); // Trả về khoảng cách (km) với 2 chữ số thập phân
+};
+
+export default calculateDistance;

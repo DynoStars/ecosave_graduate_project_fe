@@ -13,7 +13,9 @@ const ClientLocation: React.FC = () => {
           (position) => {
             const { latitude, longitude } = position.coords;
             // Redirect to the MapPage with coordinates as query parameters
-            router.push(`/map?lat=${latitude}&lng=${longitude}`);
+            localStorage.setItem("latitude", String(latitude));
+            localStorage.setItem("longitude", String(longitude));
+            router.push(`?lat=${latitude}&lng=${longitude}`);
           },
           (err) => {
             setError("Không thể lấy vị trí người dùng: " + err.message);
