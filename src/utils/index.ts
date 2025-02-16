@@ -1,7 +1,9 @@
 import { Metadata } from "next";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
+import LOGO from '../assets/images/logo/LOGO.png';
 
 export const API_URL = process.env.NEXT_PUBLIC_SERVER_URL;
+
 
 /**
  * Formats a number with commas as thousand separators.
@@ -29,7 +31,7 @@ export function generateMetadata(pageTitle: string, pageDescription: string): Me
     },
     description: pageDescription,
     icons: {
-      // icon: LOGO, // Use the .src property for the URL path
+      icon: LOGO.src, // Use the .src property for the URL path
     },
   };
 }
@@ -198,7 +200,7 @@ export const formatDateTime = (isoString: string) => {
   const time = date.toLocaleString("en-US", {
     hour: "numeric",
     minute: "2-digit",
-    hour12: true, 
+    hour12: true,
   });
   const day = date.toLocaleString("vi-VN", {
     day: "2-digit",

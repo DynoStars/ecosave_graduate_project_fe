@@ -63,7 +63,6 @@ const GoongMap = ({
           return distance <= 1000;
         });
         // Thêm marker cho các cửa hàng trong phạm vi 1km
-        // Thêm marker cho các cửa hàng trong phạm vi 1km
         storesInRange.forEach((store) => {
           const distance = getDistance(
             userLocation[1],

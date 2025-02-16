@@ -1,23 +1,24 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button"
-import { MapPin, Phone, Car, Store } from "lucide-react"
+"use client";
 
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { MapPin, Phone, Car } from "lucide-react";
+import { Store } from "@/types";
+import { useUserLocation } from "@/hooks/useUserLocation";
+import calculateDistance from "@/utils/calculateDistance";
+import Link from "next/link";
 
 interface StoreInfoProps {
-  store: {
-    store_name: string
-    avatar: string
-    contact_phone: string
-    address: string
-    distance: string
-  }
+  store: Store;
 }
 
-export function StoreInfo({ store }: StoreInfoProps) { 
+export function StoreInfo({ store }: StoreInfoProps) {
+  const userLocation = useUserLocation();
+
   return (
-    <div className="border rounded-lg p-4 space-y-10">
-      <div className="flex justify-between items-center text-sm text-gray-600">
-        <div className="flex items-center space-x-4 mr-10">
+    <div className="border rounded-lg p-4 space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600 gap-6">
+        <div className="flex items-center space-x-4">
           <div className="w-20 h-20 rounded-full overflow-hidden relative">
             {store.avatar ? (
               <Image
@@ -35,30 +36,42 @@ export function StoreInfo({ store }: StoreInfoProps) {
           </div>
           <div>
             <h3 className="font-semibold mb-2 text-lg">{store.store_name}</h3>
-            <Button variant="outline" size="sm" className="flex items-center hover:bg-gray-100 transition-colors duration-200">
-              <Store className="mr-2 hover:text-gray-500 transition-colors duration-200" />
-              <span className="hover:text-gray-500">Xem Shop</span>
-            </Button>
+            <Link href={`/store/${store.id}`}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center hover:bg-gray-100 transition-colors duration-200"
+              >
+                <span className="hover:text-gray-500">Xem Shop</span>
+              </Button>
+            </Link>
           </div>
         </div>
 
-        <div className="flex-1 text-sm text-gray-600 ml-10">
-          <div className="flex justify-between gap-x-3">
-            <div className="flex items-center space-x-2">
-              <MapPin className="w-4 h-4 shrink-0" />
-              <span className="truncate text-[16px]">{store.address}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Phone className="w-4 h-4 shrink-0" />
-              <span className="text-[16px]">{store.contact_phone}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Car className="w-5 h-5 shrink-0" />
-              <span className="text-[16px]">{store.distance}</span>
-            </div>
+        <div className="flex flex-col md:flex-row md:gap-6 w-full md:w-auto">
+          <div className="flex items-center space-x-2">
+            <MapPin className="w-4 h-4 shrink-0" />
+            <span className="truncate text-[16px]">{store.address}</span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Phone className="w-4 h-4 shrink-0" />
+            <span className="text-[16px]">{store.contact_phone}</span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Car className="w-5 h-5 shrink-0" />
+            <span className="text-[16px]">
+              {userLocation
+                ? `${calculateDistance(
+                    [store.latitude, store.longitude],
+                    userLocation
+                  )} km`
+                : "Không có thông tin vị trí"}
+            </span>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

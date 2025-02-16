@@ -12,7 +12,8 @@ import {
 } from "react-icons/ai";
 import { Product } from "@/types";
 import calculateDistance from "@/utils/calculateDistance";
-import useUserLocation from "@/hooks/useUserLocation";
+import {useUserLocation} from "@/hooks/useUserLocation";
+import { formatMoney } from "@/utils";
 
 interface ProductsProps {
   products: Product[];
@@ -100,7 +101,7 @@ export default function Products({ products, loading }: ProductsProps) {
                   <div className="mt-3 px-4">
                     <div className="flex justify-between">
                       <p className="text-sm text-gray-500 truncate-description-1-line">
-                        {product.category.name}
+                        {product.store.store_name}
                       </p>
                       <p className="text-sm text-gray-500 truncate-description-1-line">
                         {userLocation
@@ -118,7 +119,7 @@ export default function Products({ products, loading }: ProductsProps) {
                     </Link>
                     <div className="flex justify-between items-center">
                       <p className="text-primary-light font-bold">
-                        {product.original_price}
+                        {formatMoney(Number(product.original_price), "VND")}
                       </p>
                       <div className="flex text-yellow-400">
                         {Array.from({ length: product.rating }, (_, i) => (

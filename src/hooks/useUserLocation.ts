@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react";
 
 interface UserLocation {
@@ -5,7 +7,7 @@ interface UserLocation {
   longitude: number;
 }
 
-const useUserLocation = () => {
+export const useUserLocation = () => {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
 
   useEffect(() => {
@@ -22,4 +24,4 @@ const useUserLocation = () => {
   return userLocation;
 };
 
-export default useUserLocation;
+

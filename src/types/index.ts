@@ -83,6 +83,7 @@ export interface Product {
   rating: number;
   category: Category;
   images: ProductImage[];
+  reviews : Review[];
 }
 
 export interface ProductFilters {
@@ -108,4 +109,16 @@ export type MapListingType = {
 
 export type GoongMapProps = MapListingType & {
   setLoading?: (loading: boolean) => void;
+};
+
+export type Review = {
+  id: number;
+  user_id: number;
+  product_id: number;
+  rating: number; // Giá trị đánh giá (ví dụ: 1-5 sao)
+  review_content: string; // Nội dung đánh giá
+  image_url: string | null; // URL hình ảnh (nếu có)
+  created_at: string; // Thời gian tạo
+  updated_at: string; // Thời gian cập nhật
+  user: UserProfile; // Thông tin người dùng đánh giá
 };
