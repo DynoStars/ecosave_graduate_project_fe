@@ -12,8 +12,11 @@ import {
 } from "react-icons/ai";
 import { Product } from "@/types";
 import calculateDistance from "@/utils/calculateDistance";
-import {useUserLocation} from "@/hooks/useUserLocation";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import { formatMoney } from "@/utils";
+import { FaSearch } from "react-icons/fa";
+import { getProducts } from "@/api";
+import { useParams } from "next/navigation";
 
 interface ProductsProps {
   products: Product[];
@@ -23,62 +26,113 @@ interface ProductsProps {
 }
 
 export default function Products({ products, loading }: ProductsProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Số sản phẩm mỗi trang
+  const [listProducts, setListProducts] = useState<Product[]>(products);
+  const [currentPage, setCurrentPage] = useState(1);  // Removed duplicate declaration
+  const itemsPerPage = 8; // Number of items per page
   const userLocation = useUserLocation();
-
-  // Trạng thái lưu danh sách sản phẩm đã yêu thích
+  const [searchActive, setSearchActive] = useState<boolean>(false); // State to manage search
+  const [searchQuery, setSearchQuery] = useState("");
+  // State for favorite products
   const [favoriteProducts, setFavoriteProducts] = useState<number[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(loading);
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
-  // Toggle trạng thái yêu thích
+  const params = useParams();
+  const storeId = params.storeId ? parseInt(params.storeId) : undefined;
+
+  // Calculate total pages based on the number of items
+  const totalPages = Math.ceil(listProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentProducts = listProducts.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleSearchProduct = async (query: string) => {
+    setLoadingProducts(true);
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to the first page when searching
+
+    // If a previous timeout exists, clear it
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+
+    // Set a new timeout for debounce
+    const newTimeout = setTimeout(async () => {
+      try {
+        const searchProducts = await getProducts({ name: query.trim(), store_id: storeId });
+        setListProducts(searchProducts);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    }, 500); // Delay of 500ms after the last input
+
+    // Store the timeout id to clear it on subsequent keystrokes
+    setDebounceTimeout(newTimeout);
+  };
+
+  // Toggle favorite product state
   const toggleFavorite = (productId: number) => {
     setFavoriteProducts(
       (prev) =>
         prev.includes(productId)
-          ? prev.filter((id) => id !== productId) // Xóa nếu đã yêu thích
-          : [...prev, productId] // Thêm nếu chưa yêu thích
+          ? prev.filter((id) => id !== productId) // Remove if already favorited
+          : [...prev, productId] // Add if not favorited
     );
   };
 
-  // Tính toán số trang
-  const totalPages = Math.ceil(products.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentProducts = products.slice(startIndex, startIndex + itemsPerPage);
-
   return (
-    <section className="container mx-auto px-4">
-      <div className="flex justify-between items-center">
-        <h4 className="text-2xl font-bold mb-6">Sản Phẩm Bán Chạy </h4>
+    <section className="container mx-auto">
+      <div className="flex justify-between items-center py-4">
+        <h4 className="text-2xl font-bold">Sản Phẩm Bán Chạy</h4>
+        <div className="relative">
+          <button
+            onClick={() => setSearchActive(!searchActive)}
+            className="bg-orange-500 px-4 py-[10px] rounded"
+          >
+            <FaSearch className="text-white cursor-pointer hover:text-primary-light transition-colors duration-300 text-xl" />
+          </button>
+          <input
+            value={searchQuery} // Bind the value of the input to state
+            onChange={(e) => handleSearchProduct(e.target.value)} // Pass input value to the handler
+            type="text"
+            placeholder="Tìm kiếm..."
+            className={`search-input text-secondary-dark ${
+              searchActive ? "open" : ""
+            }`}
+          />
+        </div>
       </div>
+
       <div className={`transition-opacity duration-500`}>
-        {loading ? (
-          <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {[...Array(10)].map((_, index) => (
+        {loadingProducts ? (
+          <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[...Array(12)].map((_, index) => (
               <div key={index} className="bg-white rounded-lg p-4">
-                <div className="bg-gray-300 w-full h-40 rounded-md"></div>{" "}
-                {/* Ảnh sản phẩm */}
+                <div className="bg-gray-300 w-full h-40 rounded-md"></div>
+                {/* Product Image */}
                 <div className="mt-3 space-y-2">
-                  <div className="bg-gray-300 h-4 w-3/4 rounded"></div>{" "}
-                  {/* Tiêu đề */}
-                  <div className="bg-gray-300 h-4 w-1/2 rounded"></div>{" "}
-                  {/* Thông tin phụ */}
+                  <div className="bg-gray-300 h-4 w-3/4 rounded"></div>
+                  {/* Title */}
+                  <div className="bg-gray-300 h-4 w-1/2 rounded"></div>
+                  {/* Additional Info */}
                 </div>
                 <div className="flex justify-between gap-7">
-                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>{" "}
-                  {/* Nút hoặc giá */}
-                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>{" "}
-                  {/* Nút hoặc giá */}
+                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>
+                  {/* Button or Price */}
+                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>
+                  {/* Button or Price */}
                 </div>
               </div>
             ))}
           </div>
-        ) : products.length === 0 ? (
-          <p className="text-center text-gray-500 mt-6">
-            Không có sản phẩm nào
-          </p>
+        ) : listProducts.length === 0 ? (
+          <p className="text-center text-gray-500 mt-6">Không có sản phẩm nào</p>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {currentProducts.map((product) => (
                 <div
                   key={product.id}
@@ -101,9 +155,6 @@ export default function Products({ products, loading }: ProductsProps) {
                   <div className="mt-3 px-4">
                     <div className="flex justify-between">
                       <p className="text-sm text-gray-500 truncate-description-1-line">
-                        {product.store.store_name}
-                      </p>
-                      <p className="text-sm text-gray-500 truncate-description-1-line">
                         {userLocation
                           ? `${calculateDistance(
                               [product.store.latitude, product.store.longitude],
@@ -121,10 +172,9 @@ export default function Products({ products, loading }: ProductsProps) {
                       <p className="text-primary-light font-bold">
                         {formatMoney(Number(product.original_price), "VND")}
                       </p>
-                      <div className="flex text-yellow-400">
-                        {Array.from({ length: product.rating }, (_, i) => (
-                          <AiFillStar key={i} size={16} />
-                        ))}
+                      <div className="gap-2 text-yellow-400 flex justify-center items-center">
+                        <p className="text-black">{product.rating}</p>
+                        <AiFillStar size={16} />
                       </div>
                     </div>
                   </div>

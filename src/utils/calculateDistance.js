@@ -18,7 +18,7 @@
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
 
-  return distance.toFixed(2); // Trả về khoảng cách (km) với 2 chữ số thập phân
+  return distance.toFixed(0); // Trả về khoảng cách (km) với 2 chữ số thập phân
 };
 
 export default calculateDistance;

@@ -32,7 +32,7 @@ export default function RootLayout({
       <body className="bg-white text-gray-900">
         <Provider store={store}>
           {!shouldHideHeader && <Header />}
-          <main className="bg-white overflow-x-hidden relative min-h-[200px]">
+          <main className="bg-white overflow-x-hidden relative min-h-[600px]">
             {children}
           </main>
           {!shouldHideHeader && <Footer />}

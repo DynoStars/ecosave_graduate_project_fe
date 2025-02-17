@@ -30,7 +30,7 @@ export default async function Page() {
   }
   return (
     <Suspense fallback={<Loading />}>
-      <div>
+      <div className="px-10">
         <ProductListing loadingProps={loading} listProducts={products} listCategories={categories} />
       </div>
     </Suspense>
