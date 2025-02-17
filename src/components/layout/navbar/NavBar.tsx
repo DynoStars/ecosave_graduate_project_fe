@@ -1,6 +1,6 @@
 "use clientclient";
 import { useState, useRef } from "react";
-import { FaSearch, FaHeart, FaBell } from "react-icons/fa";
+import { FaHeart, FaBell } from "react-icons/fa";
 import { MdShoppingCart } from "react-icons/md";
 import "./NavBar.css";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import menuItemsData from "../../../assets/json/menuItems.json";
 import { UserProfile } from "@/types";
 import Image from "next/image";
 import defaultAvatar from "../../../assets/images/users/userAvata1.png";
-
+import LOGO from "../../../assets/images/logo/LOGO.png";
 export interface NavbarProps {
   user: UserProfile | null; // Allow user to be null
 }
@@ -23,11 +23,10 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
   );
 
   const [active, setActive] = useState<number>(0);
-  const [searchActive, setSearchActive] = useState<boolean>(false); // State để quản lý tìm kiếm
   const menuRefs = useRef<(HTMLLIElement | null)[]>([]); // Lưu vị trí từng mục menu
 
   // Map icon tương ứng với key từ menuItems2
-  const icons: { [key: string]: JSX.Element } = {
+  const icons: { [kes: string]: JSX.Element } = {
     Notification: <FaBell />,
     Wishlist: <FaHeart />,
     Cart: <MdShoppingCart />,
@@ -43,16 +42,21 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
   return (
     <nav
-      className={` hidden lg:flex items-center justify-between w-full px-6 py-2 shadow-md ${
-        searchActive ? "higher" : ""
-      }`}
+      className={` hidden lg:flex items-center justify-between w-full px-6 py-2 shadow-md`}
     >
       {/* Logo */}
-      <div className="flex items-center space-x-4">
-        <h1 className="text-3xl font-bold text-primary">
-          Eco<span className="text-gray-800">Save</span>
-        </h1>
-      </div>
+      <div className="flex items-center space-x-4 justify-normal">
+      <h1 className="text-3xl font-bold text-primary">
+        Eco<span className="text-gray-800">Save</span>
+      </h1>
+      <Image
+        src={LOGO.src}
+        alt="Logo"
+        width={50}
+        height={50}
+        className="object-contain"
+      />
+    </div>
 
       {/* Menu items */}
       <div className="flex-grow flex justify-center relative">
@@ -78,23 +82,6 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
       {/* Icons */}
       <div className="flex items-center space-x-6">
-        {/* Tìm kiếm */}
-        <div className="relative">
-          <button
-            onClick={() => setSearchActive(!searchActive)}
-            className="bg-orange-500 px-4 py-[10px]  rounded"
-          >
-            {/* Increased button padding */}
-            <FaSearch className="text-white cursor-pointer hover:text-primary-light transition-colors duration-300 text-xl" />
-          </button>
-          <input
-            type="text"
-            placeholder="Tìm kiếm..."
-            className={`search-input text-secondary-dark ${
-              searchActive ? "open" : ""
-            }`}
-          />
-        </div>
 
         {user &&
           Object.keys(menuIcons).map((key) => (

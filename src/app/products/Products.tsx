@@ -28,8 +28,9 @@ export default function ProductListing({
     }, 5000);
     return () => clearInterval(interval);
   }, [banners.length]);
+  
   return (
-    <div className="container mx-auto py-8 px-14 mw-[80%]">
+    <div className="container mx-auto py-8 mw-[100%]">
       <div className="w-full h-[350px] relative">
         {banners.map((image, index) => (
           <Image

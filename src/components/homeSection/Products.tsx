@@ -12,8 +12,11 @@ import {
 } from "react-icons/ai";
 import { Product } from "@/types";
 import calculateDistance from "@/utils/calculateDistance";
-import {useUserLocation} from "@/hooks/useUserLocation";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import { formatMoney } from "@/utils";
+import { useParams } from "next/navigation";
+import { getProducts } from "@/api";
+import { FaSearch } from "react-icons/fa";
 
 interface ProductsProps {
   products: Product[];
@@ -24,11 +27,57 @@ interface ProductsProps {
 
 export default function Products({ products, loading }: ProductsProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Số sản phẩm mỗi trang
+  const [listProducts, setListProducts] = useState<Product[]>(products);
+  const itemsPerPage = 8; // Number of items per page
   const userLocation = useUserLocation();
-
-  // Trạng thái lưu danh sách sản phẩm đã yêu thích
+  const [searchActive, setSearchActive] = useState<boolean>(false); // State to manage search
+  const [searchQuery, setSearchQuery] = useState("");
+  // State for favorite products
   const [favoriteProducts, setFavoriteProducts] = useState<number[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(loading);
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
+
+  const params = useParams();
+  const storeId = params.storeId ? parseInt(params.storeId) : undefined;
+
+  // Calculate total pages based on the number of items
+  const totalPages = Math.ceil(listProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentProducts = listProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  const handleSearchProduct = async (query: string) => {
+    setLoadingProducts(true);
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to the first page when searching
+
+    // If a previous timeout exists, clear it
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+
+    // Set a new timeout for debounce
+    const newTimeout = setTimeout(async () => {
+      try {
+        const searchProducts = await getProducts({
+          name: query.trim(),
+          store_id: storeId,
+        });
+        setListProducts(searchProducts);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    }, 500); // Delay of 500ms after the last input
+
+    // Store the timeout id to clear it on subsequent keystrokes
+    setDebounceTimeout(newTimeout);
+  };
 
   // Toggle trạng thái yêu thích
   const toggleFavorite = (productId: number) => {
@@ -40,19 +89,31 @@ export default function Products({ products, loading }: ProductsProps) {
     );
   };
 
-  // Tính toán số trang
-  const totalPages = Math.ceil(products.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentProducts = products.slice(startIndex, startIndex + itemsPerPage);
-
   return (
     <section className="container mx-auto px-4">
-      <div className="flex justify-between items-center">
-        <h4 className="text-2xl font-bold mb-6">Sản Phẩm Bán Chạy </h4>
+      <div className="flex justify-between items-center py-4">
+        <h4 className="text-2xl font-bold">Sản Phẩm Bán Chạy</h4>
+        <div className="relative">
+          <button
+            onClick={() => setSearchActive(!searchActive)}
+            className="bg-orange-500 px-4 py-[10px] rounded"
+          >
+            <FaSearch className="text-white cursor-pointer hover:text-primary-light transition-colors duration-300 text-xl" />
+          </button>
+          <input
+            value={searchQuery} // Bind the value of the input to state
+            onChange={(e) => handleSearchProduct(e.target.value)} // Pass input value to the handler
+            type="text"
+            placeholder="Tìm kiếm..."
+            className={`search-input text-secondary-dark ${
+              searchActive ? "open" : ""
+            }`}
+          />
+        </div>
       </div>
       <div className={`transition-opacity duration-500`}>
-        {loading ? (
-          <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {loading || loadingProducts ? (
+          <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[...Array(10)].map((_, index) => (
               <div key={index} className="bg-white rounded-lg p-4">
                 <div className="bg-gray-300 w-full h-40 rounded-md"></div>{" "}
@@ -78,7 +139,7 @@ export default function Products({ products, loading }: ProductsProps) {
           </p>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {currentProducts.map((product) => (
                 <div
                   key={product.id}
@@ -100,20 +161,29 @@ export default function Products({ products, loading }: ProductsProps) {
                   </Link>
                   <div className="mt-3 px-4">
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 truncate-description-1-line">
-                        {product.store.store_name}
+                      <p className="flex-1 text-sm max-w-[100px] text-gray-500 truncate-description-1-line">
+                        {product.category.name}
                       </p>
-                      <p className="text-sm text-gray-500 truncate-description-1-line">
-                        {userLocation
-                          ? `${calculateDistance(
-                              [product.store.latitude, product.store.longitude],
-                              userLocation
-                            )} km`
-                          : "Không có thông tin vị trí"}
-                      </p>
+                      <div className="flex-1 text-gray-500 flex justify-between items-center">
+                        <p className="text-sm truncate-description-1-line">
+                          {userLocation
+                            ? `${calculateDistance(
+                                [
+                                  product.store.latitude,
+                                  product.store.longitude,
+                                ],
+                                userLocation
+                              )} km`
+                            : "Không có thông tin vị trí"}
+                        </p>
+                        <p className="w-[1px] h-[70%] bg-gray-400"></p>
+                        <p className="text-sm max-w-[60px] truncate-description-1-line">
+                          {product.store.store_name}
+                        </p>
+                      </div>
                     </div>
                     <Link href={`/product/${product.id}`} className="block">
-                      <h3 className="text-md font-semibold truncate-description-1-line hover:text-primary">
+                      <h3 className="text-xl font-semibold truncate-description-1-line hover:text-primary">
                         {product.name}
                       </h3>
                     </Link>
@@ -121,10 +191,8 @@ export default function Products({ products, loading }: ProductsProps) {
                       <p className="text-primary-light font-bold">
                         {formatMoney(Number(product.original_price), "VND")}
                       </p>
-                      <div className="flex text-yellow-400">
-                        {Array.from({ length: product.rating }, (_, i) => (
-                          <AiFillStar key={i} size={16} />
-                        ))}
+                      <div className="flex justify-center items-center gap-1 ">
+                        {product.rating} <AiFillStar className="text-yellow-400" size={16} />
                       </div>
                     </div>
                   </div>

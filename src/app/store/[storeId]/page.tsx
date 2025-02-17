@@ -1,24 +1,44 @@
 import React, { Suspense } from "react";
 import StorePage from "./Store";
 import Loading from "@/app/loading";
-import { Product, Store } from "@/types";
-import { getProducts, getStoreById } from "@/api";
+import { Product, Store, Category } from "@/types";
+import { getCategories, getProducts, getStoreById } from "@/api";
 import { generateMetadata as generateMeta } from "@/utils";
+
 type Props = {
   params: { storeId: string };
   searchParams: { [key: string]: string | string[] | undefined };
 };
+
 export async function generateMetadata({ params }: Props) {
-  const storeDetail = await getStoreById(Number(params.storeId));
-  return generateMeta(storeDetail?.store_name || "Store", "To see all available nearing stores that contain experiential promotional information");
+  try {
+    const storeDetail = await getStoreById(Number(params.storeId));
+    return generateMeta(
+      storeDetail?.store_name || "Store",
+      "To see all available nearing stores that contain experiential promotional information"
+    );
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return generateMeta("Store", "Default store description");
+  }
 }
+
 export default async function StoreDetailPage({ params }: Props) {
   const { storeId } = params;
   let storeDetail: Store | null = null;
   let products: Product[] = [];
+  let categories: Category[] = [];
+
   try {
-    storeDetail = await getStoreById(Number(storeId));
-    products = await getProducts({ store_id: Number(storeId) });
+    const [storeData, productData, categoryData] = await Promise.all([
+      getStoreById(Number(storeId)),
+      getProducts({ store_id: Number(storeId) }),
+      getCategories(),
+    ]);
+
+    storeDetail = storeData;
+    products = productData || [];
+    categories = categoryData || [];
   } catch (error) {
     console.error("Failed to fetch store data:", error);
     return (
@@ -27,10 +47,15 @@ export default async function StoreDetailPage({ params }: Props) {
       </div>
     );
   }
+
   return (
     <Suspense fallback={<Loading />}>
       <div className="flex justify-center items-center px-10">
-        {storeDetail ? <StorePage store={storeDetail} products={products} /> : <p>Không tìm thấy cửa hàng.</p>}
+        {storeDetail ? (
+          <StorePage store={storeDetail} products={products} categories={categories} />
+        ) : (
+          <p>Không tìm thấy cửa hàng.</p>
+        )}
       </div>
     </Suspense>
   );

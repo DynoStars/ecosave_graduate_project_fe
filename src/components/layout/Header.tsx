@@ -2,11 +2,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Navbar from "./navbar/NavBar";
-import { FaSearch, FaHeart, FaBell, FaBars, FaTimes } from "react-icons/fa";
+import { FaHeart, FaBell, FaBars, FaTimes } from "react-icons/fa";
 import Link from "next/link";
 import menuItemsData from "../../assets/json/menuItems.json"; // Adjust the path based on your project structure
 import defaultAvatar from "../../assets/images/users/userAvata1.png";
-
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store"; // Assuming you have a root state type
 import Image from "next/image";
@@ -17,16 +16,11 @@ const Header: React.FC = () => {
   const dispatch = useDispatch();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   // const [language, setLanguage] = useState("English");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  // Use useSelector to get the user data from the Redux state
   const { user } = useSelector((state: RootState) => state.user);
-
   // Define menuItems as an object
   const [menuItems] = useState<{ [key: string]: string }>(
     menuItemsData.menuItems1
   );
-
   useEffect(() => {
     const fetchUser = async () => {
       // Kiểm tra nếu thông tin người dùng chưa có trong Redux
@@ -43,27 +37,12 @@ const Header: React.FC = () => {
         }
       }
     };
-
     fetchUser();  // Gọi hàm bất đồng bộ bên trong useEffect
   }, [dispatch, user]);
-
-
-
   // Toggle sidebar
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
-  // Toggle search input
-  const toggleSearch = () => {
-    setIsSearchOpen(!isSearchOpen);
-  };
-
-  // Handle language change
-  // const handleLanguageChange = (event: SelectChangeEvent) => {
-  //   setLanguage(event.target.value);
-  // };
-
   return (
     <header className="sticky top-0 z-50 bg-white">
       {/* Top Header */}
@@ -73,10 +52,8 @@ const Header: React.FC = () => {
            Tiếng Việt
         </div>
       </div>
-
       {/* Desktop Navbar */}
       <Navbar user={user} />
-
       {/* Mobile Navbar */}
       <div className="lg:hidden flex items-center justify-between px-2 py-4 shadow-md">
         {/* Menu Icon */}
@@ -87,12 +64,7 @@ const Header: React.FC = () => {
         <h1 className="text-2xl font-bold text-primary">
           Eco<span className="text-gray-800">Save</span>
         </h1>
-
         <div className="flex items-center space-x-4">
-          <FaSearch
-            className="text-gray-600 cursor-pointer hover:text-primary"
-            onClick={toggleSearch}
-          />
           <Link href="/notifications">
             <p>
               <FaBell className="text-gray-600 relative cursor-pointer hover:text-primary">
@@ -114,18 +86,6 @@ const Header: React.FC = () => {
           </Link>
         </div>
       </div>
-
-      {/* Mobile Search */}
-      {isSearchOpen && (
-        <div className="lg:hidden px-4 py-2">
-          <input
-            type="text"
-            placeholder="Tìm kiếm"
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2"
-          />
-        </div>
-      )}
-
       {/* Sidebar */}
       <div
         className={`fixed inset-0 bg-opacity-50 z-40 transition-opacity ${
@@ -173,5 +133,4 @@ const Header: React.FC = () => {
     </header>
   );
 };
-
 export default Header;

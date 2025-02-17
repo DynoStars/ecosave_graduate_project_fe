@@ -16,7 +16,7 @@
   }
   /* Khi input được mở (toggled state) */
   .search-input.open {
-    width: 57em; /* Chiều rộng khi mở */
+    width: 22em; /* Chiều rộng khi mở */
     opacity: 1; /* Hiển thị input */
     pointer-events: auto; /* Cho phép tương tác khi input hiển thị */
     /* z-index : 99999; */
