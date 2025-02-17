@@ -14,9 +14,9 @@ import { Product } from "@/types";
 import calculateDistance from "@/utils/calculateDistance";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { formatMoney } from "@/utils";
-import { FaSearch } from "react-icons/fa";
-import { getProducts } from "@/api";
 import { useParams } from "next/navigation";
+import { getProducts } from "@/api";
+import { FaSearch } from "react-icons/fa";
 
 interface ProductsProps {
   products: Product[];
@@ -26,8 +26,8 @@ interface ProductsProps {
 }
 
 export default function Products({ products, loading }: ProductsProps) {
+  const [currentPage, setCurrentPage] = useState(1);
   const [listProducts, setListProducts] = useState<Product[]>(products);
-  const [currentPage, setCurrentPage] = useState(1);  // Removed duplicate declaration
   const itemsPerPage = 8; // Number of items per page
   const userLocation = useUserLocation();
   const [searchActive, setSearchActive] = useState<boolean>(false); // State to manage search
@@ -45,7 +45,10 @@ export default function Products({ products, loading }: ProductsProps) {
   // Calculate total pages based on the number of items
   const totalPages = Math.ceil(listProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentProducts = listProducts.slice(startIndex, startIndex + itemsPerPage);
+  const currentProducts = listProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const handleSearchProduct = async (query: string) => {
     setLoadingProducts(true);
@@ -60,7 +63,10 @@ export default function Products({ products, loading }: ProductsProps) {
     // Set a new timeout for debounce
     const newTimeout = setTimeout(async () => {
       try {
-        const searchProducts = await getProducts({ name: query.trim(), store_id: storeId });
+        const searchProducts = await getProducts({
+          name: query.trim(),
+          store_id: storeId,
+        });
         setListProducts(searchProducts);
       } catch (error) {
         console.log(error);
@@ -73,18 +79,18 @@ export default function Products({ products, loading }: ProductsProps) {
     setDebounceTimeout(newTimeout);
   };
 
-  // Toggle favorite product state
+  // Toggle trạng thái yêu thích
   const toggleFavorite = (productId: number) => {
     setFavoriteProducts(
       (prev) =>
         prev.includes(productId)
-          ? prev.filter((id) => id !== productId) // Remove if already favorited
-          : [...prev, productId] // Add if not favorited
+          ? prev.filter((id) => id !== productId) // Xóa nếu đã yêu thích
+          : [...prev, productId] // Thêm nếu chưa yêu thích
     );
   };
 
   return (
-    <section className="container mx-auto">
+    <section className="container mx-auto px-4">
       <div className="flex justify-between items-center py-4">
         <h4 className="text-2xl font-bold">Sản Phẩm Bán Chạy</h4>
         <div className="relative">
@@ -105,31 +111,32 @@ export default function Products({ products, loading }: ProductsProps) {
           />
         </div>
       </div>
-
       <div className={`transition-opacity duration-500`}>
-        {loadingProducts ? (
+        {loading || loadingProducts ? (
           <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[...Array(12)].map((_, index) => (
+            {[...Array(10)].map((_, index) => (
               <div key={index} className="bg-white rounded-lg p-4">
-                <div className="bg-gray-300 w-full h-40 rounded-md"></div>
-                {/* Product Image */}
+                <div className="bg-gray-300 w-full h-40 rounded-md"></div>{" "}
+                {/* Ảnh sản phẩm */}
                 <div className="mt-3 space-y-2">
-                  <div className="bg-gray-300 h-4 w-3/4 rounded"></div>
-                  {/* Title */}
-                  <div className="bg-gray-300 h-4 w-1/2 rounded"></div>
-                  {/* Additional Info */}
+                  <div className="bg-gray-300 h-4 w-3/4 rounded"></div>{" "}
+                  {/* Tiêu đề */}
+                  <div className="bg-gray-300 h-4 w-1/2 rounded"></div>{" "}
+                  {/* Thông tin phụ */}
                 </div>
                 <div className="flex justify-between gap-7">
-                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>
-                  {/* Button or Price */}
-                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>
-                  {/* Button or Price */}
+                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>{" "}
+                  {/* Nút hoặc giá */}
+                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>{" "}
+                  {/* Nút hoặc giá */}
                 </div>
               </div>
             ))}
           </div>
-        ) : listProducts.length === 0 ? (
-          <p className="text-center text-gray-500 mt-6">Không có sản phẩm nào</p>
+        ) : products.length === 0 ? (
+          <p className="text-center text-gray-500 mt-6">
+            Không có sản phẩm nào
+          </p>
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -154,17 +161,29 @@ export default function Products({ products, loading }: ProductsProps) {
                   </Link>
                   <div className="mt-3 px-4">
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 truncate-description-1-line">
-                        {userLocation
-                          ? `${calculateDistance(
-                              [product.store.latitude, product.store.longitude],
-                              userLocation
-                            )} km`
-                          : "Không có thông tin vị trí"}
+                      <p className="flex-1 text-sm max-w-[100px] text-gray-500 truncate-description-1-line">
+                        {product.category.name}
                       </p>
+                      <div className="flex-1 text-gray-500 flex justify-between items-center">
+                        <p className="text-sm truncate-description-1-line">
+                          {userLocation
+                            ? `${calculateDistance(
+                                [
+                                  product.store.latitude,
+                                  product.store.longitude,
+                                ],
+                                userLocation
+                              )} km`
+                            : "Không có thông tin vị trí"}
+                        </p>
+                        <p className="w-[1px] h-[70%] bg-gray-400"></p>
+                        <p className="text-sm max-w-[60px] truncate-description-1-line">
+                          {product.store.store_name}
+                        </p>
+                      </div>
                     </div>
                     <Link href={`/product/${product.id}`} className="block">
-                      <h3 className="text-md font-semibold truncate-description-1-line hover:text-primary">
+                      <h3 className="text-xl font-semibold truncate-description-1-line hover:text-primary">
                         {product.name}
                       </h3>
                     </Link>
@@ -172,9 +191,8 @@ export default function Products({ products, loading }: ProductsProps) {
                       <p className="text-primary-light font-bold">
                         {formatMoney(Number(product.original_price), "VND")}
                       </p>
-                      <div className="gap-2 text-yellow-400 flex justify-center items-center">
-                        <p className="text-black">{product.rating}</p>
-                        <AiFillStar size={16} />
+                      <div className="flex justify-center items-center gap-1 ">
+                        {product.rating} <AiFillStar className="text-yellow-400" size={16} />
                       </div>
                     </div>
                   </div>
