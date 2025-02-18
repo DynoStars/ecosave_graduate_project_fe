@@ -27,10 +27,10 @@ export function ProductDescription({ description, details }: ProductDescriptionP
                 <span className="text-gray-600 w-[180px]">Ngày hết hạn</span>
                 <span>{formatDateTime(details.expiration_date)}</span>
               </div>
-              <div className="flex items-start gap-8 py-2 border-b">
+              {/* <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Xuất xứ</span>
                 <span>{formatDateTime(details.created_at)}</span>
-              </div>
+              </div> */}
               {/* <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Thành phần</span>
                 <span className="flex-1">{details.ingredients}</span>

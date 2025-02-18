@@ -1,5 +1,5 @@
 "use clientclient";
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FaHeart, FaBell } from "react-icons/fa";
 import { MdShoppingCart } from "react-icons/md";
 import "./NavBar.css";
@@ -9,6 +9,7 @@ import { UserProfile } from "@/types";
 import Image from "next/image";
 import defaultAvatar from "../../../assets/images/users/userAvata1.png";
 import LOGO from "../../../assets/images/logo/LOGO.png";
+import { getCart } from "@/api";
 export interface NavbarProps {
   user: UserProfile | null; // Allow user to be null
 }
@@ -39,7 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
     Cart: "/cart",
     Profile: "/account",
   };
-
+  
   return (
     <nav
       className={` hidden lg:flex items-center justify-between w-full px-6 py-2 shadow-md`}
