@@ -167,6 +167,13 @@ export const formatMoney = (money: number, currency: string = CURRENCY_UNIT): st
   return `${formattedMoney} ${currency.toUpperCase()}`;
 };
 
+export const formatCurrency = (amount : number) => {
+  // Divide the amount by 100 to get it in thousands
+  const formattedAmount = (amount / 100).toLocaleString('vi-VN');
+  return `${formattedAmount}đ`;
+};
+
+
 /**
  * Gets the URL for updating a user's image.
  * @param {File} file The file to upload.

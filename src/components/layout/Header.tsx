@@ -12,7 +12,11 @@ import Image from "next/image";
 import { MdShoppingCart } from "react-icons/md";
 import { fetchUserInfo } from "@/api";
 import { setUser } from "@/redux/userSlice";
-const Header: React.FC = () => {
+interface HeaderProps {
+  checkLogin: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ checkLogin }) => {
   const dispatch = useDispatch();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   // const [language, setLanguage] = useState("English");
@@ -47,13 +51,13 @@ const Header: React.FC = () => {
     <header className="sticky top-0 z-50 bg-white">
       {/* Top Header */}
       <div className="hidden lg:flex items-center justify-between bg-primary text-white px-6 text-xsm">
-        <p>99 Tô Hiến Thành - DN</p>
+        <p>{user?.address || "99 Tô Hiến Thành - DN"}</p>
         <div className="flex items-center space-x-4">
            Tiếng Việt
         </div>
       </div>
       {/* Desktop Navbar */}
-      <Navbar user={user} />
+      <Navbar user={user} checkLogin={checkLogin} />
       {/* Mobile Navbar */}
       <div className="lg:hidden flex items-center justify-between px-2 py-4 shadow-md">
         {/* Menu Icon */}

@@ -1,42 +1,47 @@
-"use client";
+"use client"
 
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import { usePathname } from "next/navigation";
-import { Provider } from "react-redux"; // Import Provider
-import { store } from "@/redux/store"; // Import store
 import "./globals.css";
+import { isLogin } from "@/utils/helpers/isLogin";
+import ClientProvider from "./ClientProvider";
+import { usePathname } from 'next/navigation'; // Import usePathname
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Server-side logic to determine if the user is logged in
+  const checkLogin = isLogin();
+
+  // Get the current pathname
   const pathname = usePathname();
-  const shouldHideHeader =
-    pathname && (pathname.includes("/login") || pathname.includes("/register"));
 
   return (
     <html lang="en">
       <head>
-        <link
-          href="https://cdn.jsdelivr.net/npm/@goongmaps/goong-js@1.0.9/dist/goong-js.css"
-          rel="stylesheet"
-        />
         <script
           src="https://cdn.jsdelivr.net/npm/@goongmaps/goong-js@1.0.9/dist/goong-js.js"
           defer
         ></script>
-        <link href="https://cdn.jsdelivr.net/npm/@goongmaps/goong-js@1.0.9/dist/goong-js.css" rel="stylesheet" />
+        <link
+          href="https://cdn.jsdelivr.net/npm/@goongmaps/goong-js@1.0.9/dist/goong-js.css"
+          rel="stylesheet"
+        />
       </head>
-      <body className="bg-white text-gray-900">
-        <Provider store={store}>
-          {!shouldHideHeader && <Header />}
+      <body className="bg-white text-gray-900 scrollbar-container">
+        <ClientProvider>
+          {/* Render the header if not on login or register pages */}
+          {!(pathname === "/login" || pathname === "/register") && (
+            <Header checkLogin={checkLogin} />
+          )}
           <main className="bg-white overflow-x-hidden relative min-h-[600px]">
             {children}
           </main>
-          {!shouldHideHeader && <Footer />}
-        </Provider>
+          {/* Render the footer if not on login or register pages */}
+          {!(pathname === "/login" || pathname === "/register") && <Footer />}
+        </ClientProvider>
       </body>
     </html>
   );

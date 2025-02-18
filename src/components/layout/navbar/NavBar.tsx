@@ -1,4 +1,4 @@
-"use clientclient";
+"use client";
 import { useState, useRef } from "react";
 import { FaHeart, FaBell } from "react-icons/fa";
 import { MdShoppingCart } from "react-icons/md";
@@ -11,9 +11,10 @@ import defaultAvatar from "../../../assets/images/users/userAvata1.png";
 import LOGO from "../../../assets/images/logo/LOGO.png";
 export interface NavbarProps {
   user: UserProfile | null; // Allow user to be null
+  checkLogin: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ user }) => {
+const Navbar: React.FC<NavbarProps> = ({ user, checkLogin }) => {
   // Lấy dữ liệu từ JSON
   const [menuItems] = useState<{ [key: string]: string }>(
     menuItemsData.menuItems1
@@ -21,6 +22,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
   const [menuIcons] = useState<{ [key: string]: string }>(
     menuItemsData.menuItems2
   );
+
 
   const [active, setActive] = useState<number>(0);
   const menuRefs = useRef<(HTMLLIElement | null)[]>([]); // Lưu vị trí từng mục menu
@@ -46,17 +48,17 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
     >
       {/* Logo */}
       <div className="flex items-center space-x-4 justify-normal">
-      <h1 className="text-3xl font-bold text-primary">
-        Eco<span className="text-gray-800">Save</span>
-      </h1>
-      <Image
-        src={LOGO.src}
-        alt="Logo"
-        width={50}
-        height={50}
-        className="object-contain"
-      />
-    </div>
+        <h1 className="text-3xl font-bold text-primary">
+          Eco<span className="text-gray-800">Save</span>
+        </h1>
+        <Image
+          src={LOGO.src}
+          alt="Logo"
+          width={50}
+          height={50}
+          className="object-contain"
+        />
+      </div>
 
       {/* Menu items */}
       <div className="flex-grow flex justify-center relative">
@@ -82,7 +84,6 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
       {/* Icons */}
       <div className="flex items-center space-x-6">
-
         {user &&
           Object.keys(menuIcons).map((key) => (
             <Link href={links[key]} key={key}>

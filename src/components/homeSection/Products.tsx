@@ -13,7 +13,7 @@ import {
 import { Product } from "@/types";
 import calculateDistance from "@/utils/calculateDistance";
 import { useUserLocation } from "@/hooks/useUserLocation";
-import { formatMoney } from "@/utils";
+import { formatCurrency, formatMoney } from "@/utils";
 import { useParams } from "next/navigation";
 import { getProducts } from "@/api";
 import { FaSearch } from "react-icons/fa";
@@ -189,7 +189,7 @@ export default function Products({ products, loading }: ProductsProps) {
                     </Link>
                     <div className="flex justify-between items-center">
                       <p className="text-primary-light font-bold">
-                        {formatMoney(Number(product.original_price), "VND")}
+                        {formatCurrency(Number(product.original_price))}
                       </p>
                       <div className="flex justify-center items-center gap-1 ">
                         {product.rating} <AiFillStar className="text-yellow-400" size={16} />
