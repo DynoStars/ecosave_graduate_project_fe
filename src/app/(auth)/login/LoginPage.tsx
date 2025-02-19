@@ -44,8 +44,6 @@ const Login = ({ csrf }: LoginProps) => {
           dispatch(setUser(user));
           // Set auth token in cookies
           document.cookie = `authToken=${access_token}; path=/; secure`;
-          document.cookie = `isLogin=${true}; path=/; secure`;
-
           router.push("/"); // Redirect to homepage
         } else {
           // Thêm thông báo khi data không hợp lệ
@@ -75,7 +73,7 @@ const Login = ({ csrf }: LoginProps) => {
       console.error("Error during sign in:", error);
     }
   };
-  
+
 
   return (
     <div className="h-screen flex flex-col lg:flex-row items-center justify-center overflow-hidden relative">
