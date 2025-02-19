@@ -195,16 +195,21 @@ async function getStoreById (id: number | string) : Promise<Store> {
   }
 }
 
-export const getCart = async (userId : number) => {
+export const getCart = async () => {
   const token = localStorage.getItem("access_token");
   if (!token) {
-      setTimeout(() => {
-          window.location.href = "http://localhost:3000/login"; // Chuyển hướng đến trang đăng nhập
-      }, 1000);
-      throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi xem giỏ hàng!");
+    setTimeout(() => {
+      window.location.href = "http://localhost:3000/login"; 
+    }, 1000);
+    throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi xem giỏ hàng!");
   }
+  
   try {
-    const response = await axios.get(`${serverUrl}/cart/${userId}`);
+    const response = await axios.get(`${serverUrl}/cart`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching cart:', error);
