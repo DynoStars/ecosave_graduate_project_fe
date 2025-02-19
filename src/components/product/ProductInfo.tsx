@@ -6,7 +6,7 @@ import { Heart, Star, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import ToastNotification from "../toast/ToastNotification";
 import { createPortal } from "react-dom";
-import { addToCart } from "@/api"; 
+import { addToCart } from "@/api";
 interface ProductInfoProps {
   product: Product;
 }
@@ -42,6 +42,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
     }
   };
 
+  const handlyPayOneProduct = () => {
+      
+  }
+
   return (
     <div className="space-y-4 p-4 sm:p-6">
        <div className="relative">
@@ -50,7 +54,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <span className="bg-red-50 text-error text-sm px-2 py-0.5 rounded">-{product.discount_percent}%</span>
       </div>
       <div className="absolute">
-        {toast && createPortal(<ToastNotification message={toast.message} keyword={toast.keyword} />, document.body)}      
+        {toast && createPortal(<ToastNotification message={toast.message} keyword={toast.keyword} />, document.body)}
       </div>
       </div>
       <div className="flex items-center gap-4 flex-wrap">
@@ -125,7 +129,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         >
           <ShoppingCart className="w-5 h-5" />
         </button>
-        <button className="h-12 w-full sm:w-96 bg-primary hover:bg-primary/90 text-white font-semibold rounded">
+        <button onClick={() => handlyPayOneProduct()} className="h-12 w-full sm:w-96 bg-primary hover:bg-primary/90 text-white font-semibold rounded">
           Mua ngay
         </button>
       </div>

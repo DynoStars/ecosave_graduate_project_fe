@@ -59,13 +59,6 @@
 .editMode {
   background-color: lightgreen;
 }
-/* .scrollbar-container {
-  width: 5px;
-}
-.scrollbar-container:hover {
-  overflow-y: auto;
-} */
-/* Tùy chỉnh thanh cuộn */
 .scrollbar-container::-webkit-scrollbar {
   width: 5px;
 }
@@ -77,17 +70,12 @@
   background-color: white;
   border-radius: 10px;
 }
-/* .bg-icon {
-  background-image: url("../../src/assets/images/icons/Orange.png");
-} */
-/* global.css */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
-.shadown{
+.shadow {
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
-
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
@@ -127,7 +115,7 @@
   transition: all 0.3s ease;
 }
 .hidden-line {
-   display: hidden;
+   display: none;
 }
 .rounded-20{
    border-radius: 15px;

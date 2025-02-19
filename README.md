@@ -37,3 +37,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## install map
 npm install @goongmaps/goong-js
+
+
+## update next version
+npm next update

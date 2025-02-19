@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  webpack(config) {
+    config.optimization.minimize = false; // Tắt tối ưu hóa CSS
+    return config;
+  },
   images: {
     domains: [
       "127.0.0.1",
@@ -18,7 +22,8 @@ const nextConfig = {
       'png.pngtree.com',
       'anhdephd.vn',
       'encrypted-tbn0.gstatic.com',
-      'chothuenhapho.vn'
+      'chothuenhapho.vn',
+      'www.shutterstock.com'
     ], // Correct domains for direct image URLs
   },
 };

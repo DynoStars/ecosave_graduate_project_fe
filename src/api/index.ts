@@ -87,7 +87,7 @@ const register = async (formData: FormData) => {
       formData,
       {
         headers: {
-          
+
           "Content-Type": "application/json",
         },
       }
@@ -240,4 +240,29 @@ export const addToCart = async (productId: number, quantity: number) => {
 
   return responseData;
 };
-export { getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
+
+type PaymentResponse = {
+  status : string;
+  message : string;
+  data: string;
+
+}
+
+async function makeNewPayment(total: number): Promise<PaymentResponse> {
+  try {
+    const res = await axios.post(
+      `${serverUrl}/payment`,
+      { total }, // The payload should be in the second argument
+      {
+        headers: {
+          "Cache-Control": "no-store"
+        }
+      }
+    );
+    return res.data; // Return the response data
+  } catch (error) {
+    console.error("Payment error:", error);
+    throw new Error("Payment processing failed"); // Provide a meaningful error message
+  }
+}
+export { makeNewPayment,getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
