@@ -1,6 +1,8 @@
 import { FormData } from '@/app/(auth)/register/Register';
 import { Category, Product, ProductFilters, Store } from '@/types';
 import axios from 'axios';
+import { useState } from "react";
+
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 const MAP_KEY = process.env.NEXT_PUBLIC_MAP_KEY;
 // Fetch the CSRF token
@@ -85,6 +87,7 @@ const register = async (formData: FormData) => {
       formData,
       {
         headers: {
+          
           "Content-Type": "application/json",
         },
       }
@@ -191,4 +194,50 @@ async function getStoreById (id: number | string) : Promise<Store> {
     throw new Error();
   }
 }
+
+export const getCart = async (userId : number) => {
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+      setTimeout(() => {
+          window.location.href = "http://localhost:3000/login"; // Chuyển hướng đến trang đăng nhập
+      }, 1000);
+      throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi xem giỏ hàng!");
+  }
+  try {
+    const response = await axios.get(`${serverUrl}/cart/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    throw error;
+  }
+};
+
+export const addToCart = async (productId: number, quantity: number) => {
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+      setTimeout(() => {
+          window.location.href = "http://localhost:3000/login"; // Chuyển hướng đến trang đăng nhập
+      }, 1000);
+      throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi thêm sản phẩm vào giỏ hàng.");
+  }
+
+  const response = await fetch(`${serverUrl}/cart/add`, {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ product_id: productId, quantity }),
+  });
+
+  const responseData = await response.json();
+  if (!response.ok) {
+      if (responseData.error === "This product is out of stock.") {
+          throw new Error("Hiện tại sản phẩm đang hết hàng, vui lòng xem lại sau.");
+      }
+      throw new Error(`Lỗi API (${response.status}): ${responseData.error || "Đã xảy ra lỗi."}`);
+  }
+
+  return responseData;
+};
 export { getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };

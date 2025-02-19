@@ -1,9 +1,12 @@
 "use client";
-import { Product } from "@/types";
+
+import type { Product } from "@/types";
 import { formatMoney } from "@/utils";
 import { Heart, Star, ShoppingCart } from "lucide-react";
 import { useState } from "react";
-
+import ToastNotification from "../toast/ToastNotification";
+import { createPortal } from "react-dom";
+import { addToCart } from "@/api"; 
 interface ProductInfoProps {
   product: Product;
 }
@@ -11,32 +14,49 @@ interface ProductInfoProps {
 export function ProductInfo({ product }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(1);
   const [isWishlist, setIsWishlist] = useState(false);
+  const [toast, setToast] = useState<{ message: string; keyword: "SUCCESS" | "ERROR" | "WARNING" | "INFO" } | null>(null);
 
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
-    return new Date(dateString).toLocaleDateString('vi-VN', options);
-  };
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("vi-VN", { year: "numeric", month: "2-digit", day: "2-digit" });
 
   const calculateDaysUntilExpiration = (expirationDate: string) => {
     const today = new Date();
     const expiration = new Date(expirationDate);
-    const timeDiff = expiration.getTime() - today.getTime();
-    return Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return Math.ceil((expiration.getTime() - today.getTime()) / (1000 * 3600 * 24));
   };
 
   const daysUntilExpiration = calculateDaysUntilExpiration(product.expiration_date);
 
+  const handleAddToCart = async () => {
+    try {
+        await addToCart(product.id, quantity);
+        setToast({ message: "Sản phẩm đã được thêm vào giỏ hàng!", keyword: "SUCCESS" });
+        setTimeout(() => setToast(null), 3000);
+    } catch (error: unknown) {
+        let errorMessage = "Đã xảy ra lỗi khi thêm vào giỏ hàng.";
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        setToast({ message: errorMessage, keyword: "ERROR" });
+        setTimeout(() => setToast(null), 3000);
+    }
+  };
+
   return (
     <div className="space-y-4 p-4 sm:p-6">
+       <div className="relative">
       <div className="flex items-center gap-2 flex-wrap">
         <h1 className="text-xl sm:text-2xl font-medium">{product.name}</h1>
         <span className="bg-red-50 text-error text-sm px-2 py-0.5 rounded">-{product.discount_percent}%</span>
       </div>
-
+      <div className="absolute">
+        {toast && createPortal(<ToastNotification message={toast.message} keyword={toast.keyword} />, document.body)}      
+      </div>
+      </div>
       <div className="flex items-center gap-4 flex-wrap">
         <div className="text-lg font-medium">{product.rating}</div>
         <div className="flex gap-0.5">
-          {Array(5).fill(null).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <Star
               key={i}
               className={`w-4 h-4 ${i < Math.floor(Number(product.rating)) ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"}`}
@@ -81,19 +101,28 @@ export function ProductInfo({ product }: ProductInfoProps) {
             +
           </button>
         </div>
-        <span className="text-gray-500 text-sm">
-          {product.stock_quantity} sản phẩm có sẵn
-        </span>
-      </div>
+          {product.stock_quantity > 0 ? (
+            <span className="text-gray-500 text-sm">
+              {product.stock_quantity} sản phẩm có sẵn
+            </span>
+          ) : (
+            <span className="text-red-500 text-sm">
+              Hiện tại sản phẩm đang hết hàng.
+            </span>
+          )}
+        </div>
 
       <div className="flex gap-4 mt-6 flex-wrap">
         <button
           onClick={() => setIsWishlist(!isWishlist)}
           className="h-12 w-12 border rounded flex items-center justify-center hover:bg-gray-50"
         >
-          <Heart className={`w-5 h-5 ${isWishlist ? 'fill-red-500 text-red-500' : ''}`} />
+          <Heart className={`w-5 h-5 ${isWishlist ? "fill-red-500 text-red-500" : ""}`} />
         </button>
-        <button className="flex items-center justify-center h-12 border rounded hover:bg-gray-50 w-32">
+        <button
+            onClick={handleAddToCart}
+          className="flex items-center justify-center h-12 border rounded hover:bg-gray-50 w-32"
+        >
           <ShoppingCart className="w-5 h-5" />
         </button>
         <button className="h-12 w-full sm:w-96 bg-primary hover:bg-primary/90 text-white font-semibold rounded">
