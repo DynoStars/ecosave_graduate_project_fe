@@ -13,13 +13,13 @@ import {
 import { Product } from "@/types";
 import calculateDistance from "@/utils/calculateDistance";
 import { useUserLocation } from "@/hooks/useUserLocation";
-import { formatCurrency, formatMoney } from "@/utils";
+import { formatMoney } from "@/utils";
 import { useParams } from "next/navigation";
 import { getProducts } from "@/api";
 import { FaSearch } from "react-icons/fa";
 import ToastNotification from "../toast/ToastNotification";
 import { createPortal } from "react-dom";
-import { addToCart } from "@/api"; 
+import { addToCart } from "@/api";
 interface ProductsProps {
   products: Product[];
   setProducts?: (products: Product[]) => void;
@@ -111,7 +111,7 @@ export default function Products({ products, loading }: ProductsProps) {
   return (
     <section className="container mx-auto px-4">
       <div className="absolute">
-        {toast && createPortal(<ToastNotification message={toast.message} keyword={toast.keyword} />, document.body)}      
+        {toast && createPortal(<ToastNotification message={toast.message} keyword={toast.keyword} />, document.body)}
       </div>
       <div className="flex justify-between items-center py-4">
         <h4 className="text-2xl font-bold">Sản Phẩm Bán Chạy</h4>
@@ -211,7 +211,7 @@ export default function Products({ products, loading }: ProductsProps) {
                     </Link>
                     <div className="flex justify-between items-center">
                       <p className="text-primary-light font-bold">
-                        {formatCurrency(Number(product.original_price))}
+                        {formatMoney (Number(product.original_price), 'VND')}
                       </p>
                       <div className="flex justify-center items-center gap-1 ">
                         {product.rating} <AiFillStar className="text-yellow-400" size={16} />

@@ -194,29 +194,32 @@ async function getStoreById (id: number | string) : Promise<Store> {
     throw new Error();
   }
 }
-
-type PaymentResponse = {
-  status : string;
-  message : string;
-  data: string;
-
+interface PaymentResponse {
+  status: string;
+  message: string;
+  data: string; // URL thanh toán VNPay
 }
 
-async function makeNewPayment(total: number): Promise<PaymentResponse> {
+async function makeNewPayment(total: number): Promise<string> {
   try {
-    const res = await axios.post(
+    const res = await axios.post<PaymentResponse>(
       `${serverUrl}/payment`,
-      { total }, // The payload should be in the second argument
+      { total },
       {
         headers: {
-          "Cache-Control": "no-store"
-        }
+          "Cache-Control": "no-store",
+        },
       }
     );
-    return res.data; // Return the response data
+
+    if (res.data.status !== "success" || !res.data.data) {
+      throw new Error("VNPay response is invalid");
+    }
+
+    return res.data.data; // Trả về URL thanh toán
   } catch (error) {
     console.error("Payment error:", error);
-    throw new Error("Payment processing failed"); // Provide a meaningful error message
+    throw new Error("Payment processing failed");
   }
 }
 

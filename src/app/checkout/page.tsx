@@ -12,7 +12,6 @@ export default function CheckoutPage() {
     // If no token, redirect to login
     redirect("/login");
   }
-
   return (
     <Suspense fallback={<Loading />}>
       <div>
