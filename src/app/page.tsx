@@ -27,6 +27,7 @@ export default async function HomePage() {
     );
   }
 
+
   if (!products || products.length === 0) {
     return (
       <div className="text-center text-primary">
