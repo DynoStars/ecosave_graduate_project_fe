@@ -29,7 +29,7 @@ const GoongMap = ({
 }: GoongMapProps) => {
   const [map, setMap] = useState<any>(null);
   const [markers, setMarkers] = useState<any[]>([]);
-  const [userLocation, setUserLocation] = useState<[number, number]>([
+  const [userLocation] = useState<[number, number]>([
     userLongitude,
     userLatitude,
   ]);

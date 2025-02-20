@@ -1,25 +1,41 @@
 "use client";
-import { useState } from "react";
-import { FaHeart } from "react-icons/fa";
+import { useState, useMemo } from "react";
 import Image from "next/image";
-import GoongMap from "./MapPage";
+import GoongMap, { getDistance } from "./MapPage";
 import { MapListingType } from "@/types";
 import Link from "next/link";
-import notFoundImage from '../../assets/icons/LOGO-notfound.png';
+import notFoundImage from "../../assets/icons/LOGO-notfound.png";
+
 const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: MapListingType) => {
   const [loading, setLoading] = useState<boolean>(loadingProps);
+
+  // 🛠 Tính toán danh sách đã sắp xếp (memoized để tối ưu hiệu suất)
+  const sortedStores = useMemo(() => {
+    return listStores
+      .map((listing) => ({
+        ...listing,
+        distance: getDistance(
+          userLatitude,
+          userLongitude,
+          listing.latitude,
+          listing.longitude
+        ) / 1000, // Đổi sang km
+      }))
+      .sort((a, b) => a.distance - b.distance); // Sắp xếp từ gần đến xa
+  }, [listStores, userLatitude, userLongitude]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       <div>
-        {listStores.length === 0 && (
+        {sortedStores.length === 0 && (
           <h2 className="text-green-600 font-bold text-lg text-center">
-            {listStores.length} cửa hàng đang có sản phẩm giảm giá quanh bạn
+            {sortedStores.length} cửa hàng đang có sản phẩm giảm giá quanh bạn
           </h2>
         )}
         <div className="max-h-[425px] overflow-auto scrollbar-container">
           {loading ? (
             <p className="text-center text-gray-600 animate-pulse">Đang tải dữ liệu...</p>
-          ) : listStores.length === 0 ? (
+          ) : sortedStores.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-96 text-center">
               <Image
                 src={notFoundImage.src}
@@ -32,7 +48,7 @@ const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: M
               <p className="text-gray-500">Hãy quay lại sau để xem các ưu đãi mới nhất!</p>
             </div>
           ) : (
-            listStores.map((listing) => (
+            sortedStores.map((listing) => (
               <Link key={listing.id} href={`/store/${listing.id}`}>
                 <div className="rounded-lg p-4 flex gap-4 mb-4 hover:bg-gray-100 transition duration-300">
                   <Image
@@ -50,8 +66,10 @@ const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: M
                     <p className="text-xs text-gray-500 mb-2">
                       📧 {listing.contact_email} | 📞 {listing.contact_phone}
                     </p>
+                    <p className="text-sm font-medium text-gray-700">
+                      📍 {listing.distance.toFixed(2)} km away
+                    </p>
                   </div>
-                  <FaHeart className="text-gray-400 hover:text-red-500 cursor-pointer transition duration-300" />
                 </div>
               </Link>
             ))
@@ -61,7 +79,7 @@ const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: M
       <div className="relative">
         <GoongMap
           loadingProps={loadingProps}
-          listStores={listStores}
+          listStores={sortedStores}
           userLatitude={userLatitude}
           userLongitude={userLongitude}
           setLoading={setLoading}
@@ -70,4 +88,5 @@ const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: M
     </div>
   );
 };
+
 export default MapListing;
