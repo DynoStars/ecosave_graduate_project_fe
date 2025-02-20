@@ -17,7 +17,9 @@ import { formatCurrency, formatMoney } from "@/utils";
 import { useParams } from "next/navigation";
 import { getProducts } from "@/api";
 import { FaSearch } from "react-icons/fa";
-
+import ToastNotification from "../toast/ToastNotification";
+import { createPortal } from "react-dom";
+import { addToCart } from "@/api"; 
 interface ProductsProps {
   products: Product[];
   setProducts?: (products: Product[]) => void;
@@ -38,7 +40,9 @@ export default function Products({ products, loading }: ProductsProps) {
   const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(
     null
   );
-
+  const [quantity, setQuantity] = useState(1);
+  const [isWishlist, setIsWishlist] = useState(false);
+  const [toast, setToast] = useState<{ message: string; keyword: "SUCCESS" | "ERROR" | "WARNING" | "INFO" } | null>(null);
   const params = useParams();
   const storeId = params.storeId ? parseInt(params.storeId) : undefined;
 
@@ -89,8 +93,26 @@ export default function Products({ products, loading }: ProductsProps) {
     );
   };
 
+  const handleAddToCart = async (product: Product) => {
+    try {
+        await addToCart(product.id, quantity);
+        setToast({ message: "Sản phẩm đã được thêm vào giỏ hàng!", keyword: "SUCCESS" });
+        setTimeout(() => setToast(null), 3000);
+    } catch (error: unknown) {
+        let errorMessage = "Đã xảy ra lỗi khi thêm vào giỏ hàng.";
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        setToast({ message: errorMessage, keyword: "ERROR" });
+        setTimeout(() => setToast(null), 3000);
+    }
+  };
+
   return (
     <section className="container mx-auto px-4">
+      <div className="absolute">
+        {toast && createPortal(<ToastNotification message={toast.message} keyword={toast.keyword} />, document.body)}      
+      </div>
       <div className="flex justify-between items-center py-4">
         <h4 className="text-2xl font-bold">Sản Phẩm Bán Chạy</h4>
         <div className="relative">
@@ -212,7 +234,7 @@ export default function Products({ products, loading }: ProductsProps) {
                       )}
                     </button>
 
-                    <button className="p-2 w-[75%] flex justify-center bg-primary rounded-full text-white hover:bg-primary-light">
+                    <button onClick={() => handleAddToCart(product)} className="p-2 w-[75%] flex justify-center bg-primary rounded-full text-white hover:bg-primary-light">
                       <AiOutlineShoppingCart size={20} />
                     </button>
                   </div>
