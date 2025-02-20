@@ -122,3 +122,16 @@ export type Review = {
   updated_at: string; // Thời gian cập nhật
   user: UserProfile; // Thông tin người dùng đánh giá
 };
+
+
+export interface PaymentItem {
+  id: number;
+  name: string;
+  price: string | number;
+  quantity: number;
+  picture: string;
+}
+
+export interface PaymentState {
+  items: PaymentItem[];
+}
