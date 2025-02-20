@@ -87,7 +87,7 @@ const register = async (formData: FormData) => {
       formData,
       {
         headers: {
-          
+
           "Content-Type": "application/json",
         },
       }
@@ -194,16 +194,44 @@ async function getStoreById (id: number | string) : Promise<Store> {
     throw new Error();
   }
 }
+interface PaymentResponse {
+  status: string;
+  message: string;
+  data: string; // URL thanh toán VNPay
+}
+
+async function makeNewPayment(total: number): Promise<string> {
+  try {
+    const res = await axios.post<PaymentResponse>(
+      `${serverUrl}/payment`,
+      { total },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
+
+    if (res.data.status !== "success" || !res.data.data) {
+      throw new Error("VNPay response is invalid");
+    }
+
+    return res.data.data; // Trả về URL thanh toán
+  } catch (error) {
+    console.error("Payment error:", error);
+    throw new Error("Payment processing failed");
+  }
+}
 
 export const getCart = async () => {
   const token = localStorage.getItem("access_token");
   if (!token) {
     setTimeout(() => {
-      window.location.href = "http://localhost:3000/login"; 
+      window.location.href = "http://localhost:3000/login";
     }, 1000);
     throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi xem giỏ hàng!");
   }
-  
+
   try {
     const response = await axios.get(`${serverUrl}/cart`, {
       headers: {
@@ -245,4 +273,4 @@ export const addToCart = async (productId: number, quantity: number) => {
 
   return responseData;
 };
-export { getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
+export { makeNewPayment, getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
