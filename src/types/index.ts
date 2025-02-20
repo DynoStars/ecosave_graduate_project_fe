@@ -127,7 +127,7 @@ export type Review = {
 export interface PaymentItem {
   id: number;
   name: string;
-  price: number;
+  price: string | number;
   quantity: number;
   picture: string;
 }

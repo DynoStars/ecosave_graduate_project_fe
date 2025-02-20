@@ -7,27 +7,17 @@ import BannerAds from '../../assets/images/banner/banner_ads_1.png';
 import { makeNewPayment } from "@/api";
 import CheckoutFormGetInfo from "./CheckoutFormGetInfo";
 import OrderCard from "./OrderCard";
-import { Product } from "@/types";
+import { PaymentItem } from "@/types";
 
 
-const CheckoutComponent = ({ products }: { products: Product[] }) => {
+const CheckoutComponent = ({ products }: { products: PaymentItem[] }) => {
   const router = useRouter();
 
 
-  // Sample data for selected products
-  const initialSelectedItems = [
-    { id: 1, name: "Sản phẩm 1", price: 50, quantity: 2, picture: "https://www.shutterstock.com/image-photo/red-apple-cut-half-water-600nw-2532255795.jpg" },
-    { id: 2, name: "Sản phẩm 2", price: 30, quantity: 1, picture: "https://www.shutterstock.com/image-photo/red-apple-cut-half-water-600nw-2532255795.jpg" },
-    { id: 3, name: "Sản phẩm 3", price: 60, quantity: 3, picture: "https://www.shutterstock.com/image-photo/red-apple-cut-half-water-600nw-2532255795.jpg" },
-    { id: 4, name: "Sản phẩm 4", price: 40, quantity: 2, picture: "https://www.shutterstock.com/image-photo/red-apple-cut-half-water-600nw-2532255795.jpg" },
-    { id: 5, name: "Sản phẩm 5", price: 25, quantity: 1, picture: "https://www.shutterstock.com/image-photo/red-apple-cut-half-water-600nw-2532255795.jpg" },
-  ];
+  const [selectedItems, setSelectedItems] = useState(products);
 
 
-  const [selectedItems, setSelectedItems] = useState(initialSelectedItems);
-
-
-  const totalPrice = selectedItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalPrice = selectedItems.reduce((total, item) => total + Number(item.price) * item.quantity, 0);
 
 
   const handleRemoveItem = (id: string) => {

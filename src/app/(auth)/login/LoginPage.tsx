@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/userSlice";
 import { signIn } from "next-auth/react";
+import { loginErrors } from "../../../errorsCustome/loginErrors";
 const Login = ({ csrf }: LoginProps) => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
@@ -30,21 +31,30 @@ const Login = ({ csrf }: LoginProps) => {
     e.preventDefault();
     setEmailError(!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email));
     setPasswordError(password.length < 6);
+
     if (isFormValid) {
       setLoading(true);
       setErrorMessage(null); // Reset previous errors
       try {
         const data = await logIn(email, password, csrfToken);
         const { access_token, refresh_token, user } = data;
-        // Store tokens and user data in localStorage
-        localStorage.setItem('access_token', access_token);
-        localStorage.setItem('refresh_token', refresh_token);
-        dispatch(setUser(user));
-        // Set auth token in cookies
-        document.cookie = `authToken=${access_token}; path=/; secure; httpOnly`;
-        router.push("/"); // Redirect to homepage
-      } catch(error) {
-        setErrorMessage("Đăng nhập không thành công, vui lòng thử lại." + error  );
+        if (data) {
+          localStorage.setItem("access_token", access_token);
+          localStorage.setItem("refresh_token", refresh_token);
+          dispatch(setUser(user));
+          // Set auth token in cookies
+          document.cookie = `authToken=${access_token}; path=/; secure`;
+          router.push("/"); // Redirect to homepage
+        } else {
+          // Thêm thông báo khi data không hợp lệ
+          setErrorMessage("Dữ liệu không hợp lệ, vui lòng thử lại.");
+        }
+      } catch (error: any) {
+        const errorCode: keyof typeof loginErrors.errors =
+          error?.response?.status || 500; // Explicitly type errorCode
+        const errorDetail =
+          loginErrors.errors[errorCode] || loginErrors.errors["500"]; // Safely index into loginErrors
+        setErrorMessage(`${errorDetail.customMessage}`); // Hiển thị thông báo lỗi từ customMessage
       } finally {
         setLoading(false);
       }
