@@ -164,16 +164,8 @@ export const formatMoney = (money: number, currency: string = CURRENCY_UNIT): st
     maximumFractionDigits: 0
   }).format(adjustedMoney);
 
-<<<<<<< HEAD
-  // Định dạng giá trị tiền
-  const formattedMoney = formatter.format(adjustedMoney);
-
-  // Trả về chuỗi kết quả kèm theo đơn vị tiền tệ viết hoa
-  return `${formattedMoney} ${currency}`;
-=======
   // Thêm đơn vị tiền tệ vào cuối chuỗi kết quả
   return `${formattedMoney} ${currency.toUpperCase()}`;
->>>>>>> 1a304d3718a963ecfcceb16fd3d58b4316e51e5a
 };
 
 export const formatCurrency = (amount: string | number) => {
