@@ -19,7 +19,7 @@ import { getProducts } from "@/api";
 import { FaSearch } from "react-icons/fa";
 import ToastNotification from "../toast/ToastNotification";
 import { createPortal } from "react-dom";
-import { addToCart } from "@/api"; 
+import { addToCart } from "@/api";
 interface ProductsProps {
   products: Product[];
   setProducts?: (products: Product[]) => void;
@@ -111,7 +111,7 @@ export default function Products({ products, loading }: ProductsProps) {
   return (
     <section className="container mx-auto px-4">
       <div className="absolute">
-        {toast && createPortal(<ToastNotification message={toast.message} keyword={toast.keyword} />, document.body)}      
+        {toast && createPortal(<ToastNotification message={toast.message} keyword={toast.keyword} />, document.body)}
       </div>
       <div className="flex justify-between items-center py-4">
         <h4 className="text-2xl font-bold">Sản Phẩm Bán Chạy</h4>
@@ -133,7 +133,7 @@ export default function Products({ products, loading }: ProductsProps) {
           />
         </div>
       </div>
-      <div className={`transition-opacity duration-500`}>
+      <div>
         {loading || loadingProducts ? (
           <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[...Array(10)].map((_, index) => (
@@ -211,7 +211,7 @@ export default function Products({ products, loading }: ProductsProps) {
                     </Link>
                     <div className="flex justify-between items-center">
                       <p className="text-primary-light font-bold">
-                        {formatMoney(Number(product.original_price), "VND")}
+                        {formatMoney (Number(product.original_price), 'VND')}
                       </p>
                       <div className="flex justify-center items-center gap-1 ">
                         {product.rating} <AiFillStar className="text-yellow-400" size={16} />

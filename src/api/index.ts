@@ -1,5 +1,6 @@
 import { FormData } from '@/app/(auth)/register/Register';
-import { Category, Product, ProductFilters, Store } from '@/types';
+import { ApiResponse, Category, OrderData, Product, ProductFilters, Store } from '@/types';
+import getCookie from '@/utils/helpers/getCookie';
 import axios from 'axios';
 import { useState } from "react";
 
@@ -87,7 +88,7 @@ const register = async (formData: FormData) => {
       formData,
       {
         headers: {
-          
+
           "Content-Type": "application/json",
         },
       }
@@ -98,7 +99,7 @@ const register = async (formData: FormData) => {
     console.error("Lỗi khi đăng ký:", error);
   }
 };
- async function getProducts(filters: ProductFilters): Promise<Product[]> {
+async function getProducts(filters: ProductFilters): Promise<Product[]> {
   try {
     const params: any = { ...filters };
     if (filters.category_id && filters.category_id.length > 0) {
@@ -117,7 +118,7 @@ const register = async (formData: FormData) => {
     return [];
   }
 }
-async function getProductByStoreId (storeId: string | number) {
+async function getProductByStoreId(storeId: string | number) {
   try {
     const response = await axios.get(`${serverUrl}/products?store_id=${storeId}`, {
       headers: { "Cache-Control": "no-store" },
@@ -153,7 +154,7 @@ async function getCategories(): Promise<Category[]> {
     return [];
   }
 }
-async function getProductsByCategoryId(categoryId : number | string): Promise<Product[]> {
+async function getProductsByCategoryId(categoryId: number | string): Promise<Product[]> {
   try {
     const response = await axios.get(`${serverUrl}/products?category_id=${categoryId}`, {
       headers: { "Cache-Control": "no-store" },
@@ -172,7 +173,7 @@ export const getProductDetail = async (id: string) => {
     throw error;
   }
 };
-async function getNearingStores (latitude : number, longitude : number) : Promise<Store[]> {
+async function getNearingStores(latitude: number, longitude: number): Promise<Store[]> {
   try {
     const response = await axios.get(`${serverUrl}/stores?latitude=${latitude}&longitude=${longitude}`, {
       headers: { "Cache-Control": "no-store" },
@@ -183,7 +184,7 @@ async function getNearingStores (latitude : number, longitude : number) : Promis
     return [];
   }
 }
-async function getStoreById (id: number | string) : Promise<Store> {
+async function getStoreById(id: number | string): Promise<Store> {
   try {
     const response = await axios.get(`${serverUrl}/stores/${id}`, {
       headers: { "Cache-Control": "no-store" },
@@ -192,6 +193,43 @@ async function getStoreById (id: number | string) : Promise<Store> {
   } catch (error) {
     console.error("Error fetching data:", error);
     throw new Error();
+  }
+}
+interface PaymentResponse {
+  status: string;
+  message: string;
+  data: string; // URL thanh toán VNPay
+}
+
+async function makeNewPayment(total: number): Promise<string> {
+  const token = localStorage.getItem("access_token");
+  console.log(token)
+  if (!token) {
+    setTimeout(() => {
+      window.location.href = "http://localhost:3000/login";
+    }, 1000);
+    throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi xem giỏ hàng!");
+  }
+  try {
+    const res = await axios.post<PaymentResponse>(
+      `${serverUrl}/payment`,
+      { total },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+           'Authorization': `Bearer ${token}`
+        },
+      }
+    );
+
+    if (res.data.status !== "success" || !res.data.data) {
+      throw new Error("VNPay response is invalid");
+    }
+
+    return res.data.data; // Trả về URL thanh toán
+  } catch (error) {
+    console.error("Payment error:", error);
+    throw new Error("Payment processing failed");
   }
 }
 

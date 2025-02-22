@@ -74,7 +74,7 @@
   border-radius: 10px;
 }
 .scrollbar-container::-webkit-scrollbar-thumb {
-  background-color: white;
+  background-color: #009883;
   border-radius: 10px;
 }
 /* .bg-icon {
@@ -211,4 +211,14 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+
+.origin-marker {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #007bff;
+  border: 3px solid white;
+  /* animation: pulse 1s infinite alternate ease-in-out; */
 }

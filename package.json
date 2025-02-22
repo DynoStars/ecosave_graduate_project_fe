@@ -17,6 +17,8 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@goongmaps/goong-js": "^1.0.9",
+    "@goongmaps/goong-map-react": "^1.1.2",
+    "@goongmaps/goong-sdk": "^1.0.7",
     "@mui/icons-material": "^6.3.1",
     "@mui/material": "^6.2.0",
     "@radix-ui/react-avatar": "^1.1.3",

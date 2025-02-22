@@ -151,21 +151,48 @@ export const CURRENCY_UNIT: string = process.env.CURRENCY_UNIT || 'vnd';
  * @returns {string} The formatted money.
  */
 export const formatMoney = (money: number, currency: string = CURRENCY_UNIT): string => {
-  // Nếu đơn vị tiền là VND, nhân tiền lên 1000
-  const adjustedMoney = currency.toLowerCase() === 'vnd' ? money * 1000 : money;
+  // Làm tròn số tiền để loại bỏ phần thập phân
+  const roundedMoney = Math.round(money);
 
-  // Tạo đối tượng Intl.NumberFormat để định dạng số với phân tách dấu chấm
-  const formatter = new Intl.NumberFormat('vi-VN', {
+  // Nếu đơn vị tiền không phải VND, nhân số tiền lên 1000
+  const adjustedMoney = currency.toLowerCase() !== 'vnd' ? roundedMoney * 1000 : roundedMoney;
+
+  // Định dạng số tiền theo chuẩn Việt Nam, không có phần thập phân
+  const formattedMoney = new Intl.NumberFormat('vi-VN', {
     style: 'decimal',
     minimumFractionDigits: 0,
-  });
+    maximumFractionDigits: 0
+  }).format(adjustedMoney);
 
+<<<<<<< HEAD
   // Định dạng giá trị tiền
   const formattedMoney = formatter.format(adjustedMoney);
 
   // Trả về chuỗi kết quả kèm theo đơn vị tiền tệ viết hoa
   return `${formattedMoney} ${currency}`;
+=======
+  // Thêm đơn vị tiền tệ vào cuối chuỗi kết quả
+  return `${formattedMoney} ${currency.toUpperCase()}`;
+>>>>>>> 1a304d3718a963ecfcceb16fd3d58b4316e51e5a
 };
+
+export const formatCurrency = (amount: string | number) => {
+  if (typeof amount === "string") {
+    // Chuẩn hóa chuỗi số từ định dạng '2.238,944' thành '2238.944'
+    const normalizedAmount = amount.replace(/\./g, "").replace(",", ".");
+    const parsedAmount = parseFloat(normalizedAmount);
+
+    if (isNaN(parsedAmount)) return "0đ"; // Trả về "0đ" nếu chuỗi không hợp lệ
+    amount = parsedAmount;
+  }
+
+  // Chia cho 100 nếu cần thiết (theo logic cũ) và loại bỏ phần thập phân
+  const formattedAmount = Math.floor(amount / 100).toLocaleString("vi-VN");
+
+  return `${formattedAmount}đ`;
+};
+
+
 
 /**
  * Gets the URL for updating a user's image.
@@ -211,4 +238,18 @@ export const formatDateTime = (isoString: string) => {
   return `${time} ${day}`;
 };
 
+export const getCurrentDateTime = () => {
+  const now = new Date();
 
+  // Lấy giờ và phút theo định dạng 12 giờ (AM/PM)
+  const hours = now.getHours() % 12 || 12; // Chuyển 0 giờ thành 12
+  const minutes = now.getMinutes().toString().padStart(2, "0"); // Định dạng 2 chữ số
+  const ampm = now.getHours() >= 12 ? "PM" : "AM";
+
+  // Lấy ngày, tháng, năm
+  const day = now.getDate().toString().padStart(2, "0");
+  const month = (now.getMonth() + 1).toString().padStart(2, "0"); // Tháng bắt đầu từ 0
+  const year = now.getFullYear();
+
+  return `${hours}:${minutes} ${ampm} ${day}/${month}/${year}`;
+};
