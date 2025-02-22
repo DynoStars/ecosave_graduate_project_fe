@@ -45,10 +45,10 @@ const CheckoutFormGetInfo: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center w-full">
+    <div className="flex justify-center items-center w-full z-10">
       <form
         onSubmit={handleSubmit}
-        className="w-full bg-white rounded-lg p-6"
+        className="w-full bg-white rounded-lg"
       >
         <h2 className="text-2xl font-bold mb-6">Thông Tin Đơn Hàng</h2>
 

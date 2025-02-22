@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -20,32 +19,23 @@ import FoundersSection from "@/components/homeSection/FoundersSection";
 import BenefitsSection from "@/components/homeSection/BenefitsSection";
 import { Category, Product } from "@/types";
 import HomeMapSecsion from "@/components/Map";
-
 type HomeType = {
   listCategories: Category[];
   listProducts: Product[];
   loadingProps : boolean;
 };
-
 export default function Home({ listCategories, listProducts, loadingProps }: HomeType) {
-
   const [categories] = useState<Category[]>(listCategories);
-
   const [loading, setLoading] = useState<boolean>(loadingProps);
-
   const [products, setProducts] = useState<Product[]>(listProducts);
-
   const images = [Image1.src, Image1.src, Image2.src, Image2.src]; // Danh sách ảnh
   const [index, setIndex] = useState(0);
-
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 2) % images.length);
     }, 3000); // Chuyển đổi ảnh mỗi 3 giây
-
     return () => clearInterval(interval);
   }, []);
-
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -62,11 +52,8 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
       console.error("Trình duyệt không hỗ trợ Geolocation");
     }
   }, []);
-
-
   return (
     <div className="lg:px-20 px-10 h-full w-full overflow-hidden">
-
       <section className="relative px-4 flex flex-col md:flex-row items-center justify-between h-[600px]">
         {/* Background Icons */}
         <Image
@@ -83,7 +70,6 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
           alt="background login image"
           className="bg-image hidden absolute -right-40 bottom-4 lg:block"
         />
-
         {/* Nội dung bên trái */}
         <div className="max-w-xl">
           <h1 className="text-6xl font-bold leading-tight text-gray-900">
@@ -132,7 +118,6 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
             </div>
           </div>
         </div>
-
         {/* Ảnh Slider */}
         <div className="relative w-1/2 h-full overflow-hidden">
           <motion.div
@@ -158,7 +143,6 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
               className="w-72 h-[80%] object-cover rounded-lg shadow-md"
             />
           </motion.div>
-
           {/* Box số liệu */}
           <div className="absolute top-20 left-0 space-x-3 bg-white flex items-center shadow-lg p-4 rounded-lg border border-primary">
             <Image
@@ -205,7 +189,6 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
       <section className="relative min-h-96 flex flex-col md:flex-row items-start justify-between h-auto">
         <Products products={products} setProducts={setProducts} loading={loading} setLoading={setLoading} />
       </section>
-
       <section className="relative flex flex-col md:flex-row items-center justify-between h-auto">
         <ValuesSection />
       </section>

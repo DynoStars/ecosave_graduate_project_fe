@@ -2,35 +2,44 @@
 import React, { useEffect, useState } from "react";
 import Direction from "./Direction";
 import CarLoading from "@/components/loading/CarLoading";
+import getCookie from "@/utils/helpers/getCookie";
+
 export default function Page() {
-  const [userLocation, setUserLocation] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [storeLocation, setStoreLocation] = useState<[number, number] | null>(null);
+
   useEffect(() => {
-    // Kiểm tra window để đảm bảo chỉ chạy trên client-side
     if (typeof window !== "undefined") {
       const location = localStorage.getItem("user_location");
-      if (location) setUserLocation(location);
+      if (location) {
+        try {
+          setUserLocation(JSON.parse(location));
+        } catch (error) {
+          console.error("Lỗi parse user_location:", error);
+        }
+      }
+    }
+
+    const storedLocation = getCookie("storeLocation");
+    if (storedLocation) {
+      try {
+        setStoreLocation(JSON.parse(storedLocation));
+      } catch (error) {
+        console.error("Lỗi parse storeLocation:", error);
+      }
     }
   }, []);
-  // Kiểm tra nếu chưa có userLocation
-  if (!userLocation) {
+
+  if (!userLocation || !storeLocation) {
     return (
       <div className="flex justify-center items-center h-[600px]">
         <CarLoading />
       </div>
     );
   }
-  try {
-    const [lat, lng] = JSON.parse(userLocation);
-    return (
-      <>
-        <Direction
-          origin={`${lat},${lng}`}
-          destination="16.080000,108.243000"
-        />
-      </>
-    );
-  } catch (error) {
-    console.error("Lỗi parse userLocation:", error);
-    return <div>Lỗi khi lấy vị trí của bạn.</div>;
-  }
+
+  const [ulat, ulng] = userLocation;
+  const [slat, slng] = storeLocation;
+
+  return <Direction origin={`${ulat},${ulng}`} destination={`${slat},${slng}`} />;
 }

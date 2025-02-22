@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { formatMoney } from "@/utils";
 interface OrderCardProps {
   id: string; // The unique ID for the product
@@ -16,7 +15,6 @@ const OrderCard: React.FC<OrderCardProps> = ({
   picture,
   name,
   price,
-  onRemove,
   quantity,
 }) => {
   return (
@@ -43,14 +41,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         {/* The quantity display is fixed, no dynamic increment/decrement */}
         <span className="text-lg text-black">{quantity}</span>
       </div>
-      <div className="flex items-center ml-4">
-        <button
-          onClick={() => onRemove(id)}
-          className="text-gray-400 hover:text-red-300 hover:bg-red-100 rounded-full p-2"
-        >
-          <DeleteIcon />
-        </button>
-      </div>
+
     </div>
   );
 };

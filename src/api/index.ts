@@ -1,5 +1,6 @@
 import { FormData } from '@/app/(auth)/register/Register';
-import { Category, Product, ProductFilters, Store } from '@/types';
+import { ApiResponse, Category, OrderData, Product, ProductFilters, Store } from '@/types';
+import getCookie from '@/utils/helpers/getCookie';
 import axios from 'axios';
 import { useState } from "react";
 
@@ -98,7 +99,7 @@ const register = async (formData: FormData) => {
     console.error("Lỗi khi đăng ký:", error);
   }
 };
- async function getProducts(filters: ProductFilters): Promise<Product[]> {
+async function getProducts(filters: ProductFilters): Promise<Product[]> {
   try {
     const params: any = { ...filters };
     if (filters.category_id && filters.category_id.length > 0) {
@@ -117,7 +118,7 @@ const register = async (formData: FormData) => {
     return [];
   }
 }
-async function getProductByStoreId (storeId: string | number) {
+async function getProductByStoreId(storeId: string | number) {
   try {
     const response = await axios.get(`${serverUrl}/products?store_id=${storeId}`, {
       headers: { "Cache-Control": "no-store" },
@@ -153,7 +154,7 @@ async function getCategories(): Promise<Category[]> {
     return [];
   }
 }
-async function getProductsByCategoryId(categoryId : number | string): Promise<Product[]> {
+async function getProductsByCategoryId(categoryId: number | string): Promise<Product[]> {
   try {
     const response = await axios.get(`${serverUrl}/products?category_id=${categoryId}`, {
       headers: { "Cache-Control": "no-store" },
@@ -172,7 +173,7 @@ export const getProductDetail = async (id: string) => {
     throw error;
   }
 };
-async function getNearingStores (latitude : number, longitude : number) : Promise<Store[]> {
+async function getNearingStores(latitude: number, longitude: number): Promise<Store[]> {
   try {
     const response = await axios.get(`${serverUrl}/stores?latitude=${latitude}&longitude=${longitude}`, {
       headers: { "Cache-Control": "no-store" },
@@ -183,7 +184,7 @@ async function getNearingStores (latitude : number, longitude : number) : Promis
     return [];
   }
 }
-async function getStoreById (id: number | string) : Promise<Store> {
+async function getStoreById(id: number | string): Promise<Store> {
   try {
     const response = await axios.get(`${serverUrl}/stores/${id}`, {
       headers: { "Cache-Control": "no-store" },
@@ -201,6 +202,14 @@ interface PaymentResponse {
 }
 
 async function makeNewPayment(total: number): Promise<string> {
+  const token = localStorage.getItem("access_token");
+  console.log(token)
+  if (!token) {
+    setTimeout(() => {
+      window.location.href = "http://localhost:3000/login";
+    }, 1000);
+    throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi xem giỏ hàng!");
+  }
   try {
     const res = await axios.post<PaymentResponse>(
       `${serverUrl}/payment`,
@@ -208,6 +217,7 @@ async function makeNewPayment(total: number): Promise<string> {
       {
         headers: {
           "Cache-Control": "no-store",
+           'Authorization': `Bearer ${token}`
         },
       }
     );
@@ -248,29 +258,61 @@ export const getCart = async () => {
 export const addToCart = async (productId: number, quantity: number) => {
   const token = localStorage.getItem("access_token");
   if (!token) {
-      setTimeout(() => {
-          window.location.href = "http://localhost:3000/login"; // Chuyển hướng đến trang đăng nhập
-      }, 1000);
-      throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi thêm sản phẩm vào giỏ hàng.");
+    setTimeout(() => {
+      window.location.href = "http://localhost:3000/login"; // Chuyển hướng đến trang đăng nhập
+    }, 1000);
+    throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi thêm sản phẩm vào giỏ hàng.");
   }
 
   const response = await fetch(`${serverUrl}/cart/add`, {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ product_id: productId, quantity }),
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ product_id: productId, quantity }),
   });
 
   const responseData = await response.json();
   if (!response.ok) {
-      if (responseData.error === "This product is out of stock.") {
-          throw new Error("Hiện tại sản phẩm đang hết hàng, vui lòng xem lại sau.");
-      }
-      throw new Error(`Lỗi API (${response.status}): ${responseData.error || "Đã xảy ra lỗi."}`);
+    if (responseData.error === "This product is out of stock.") {
+      throw new Error("Hiện tại sản phẩm đang hết hàng, vui lòng xem lại sau.");
+    }
+    throw new Error(`Lỗi API (${response.status}): ${responseData.error || "Đã xảy ra lỗi."}`);
   }
 
   return responseData;
 };
-export { makeNewPayment, getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
+
+const createNewOrder = async (orderData: OrderData): Promise<ApiResponse> => {
+  try {
+    const authToken = getCookie("authToken");
+    if (!authToken) {
+      console.error("Bạn chưa đăng nhập.");
+      return { success: false, message: "Bạn chưa đăng nhập." };
+    }
+
+    const res = await axios.post<ApiResponse>(
+      `${serverUrl}/orders`,
+      orderData,
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("✅ Tạo đơn hàng thành công:", res.data);
+    return { success: true, data: res.data };
+
+  } catch (error: any) {
+    console.error("Lỗi khi tạo đơn hàng:", error.response?.data || error.message);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Có lỗi xảy ra khi tạo đơn hàng.",
+      errors: error.response?.data?.errors || {},
+    };
+  }
+};
+export { createNewOrder,makeNewPayment, getProductByStoreId, getStoreById, getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
