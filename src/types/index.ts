@@ -124,7 +124,7 @@ export type Review = {
 };
 
 export interface CartItemProps {
-  product: Product;
+  product: CartProduct;
   onRemove: (id: number) => void;
   onQuantityChange: (productId: number, newQuantity: number) => void; 
 }
@@ -139,3 +139,25 @@ export interface CartSummaryProps {
   total: number;
   savings: number;
 }
+
+export interface CartProduct {
+  product_id: number;
+  name: string;
+  quantity: number;
+  stock_quantity: number;
+  original_price: string;
+  discounted_price: string;
+  subtotal: number;
+  images: ProductImage[];
+  isRemoving?: boolean;
+}
+
+export interface ProductImage {
+  id: number;
+  product_id: number;
+  image_url: string;
+  image_order: number;
+  created_at: string;
+  updated_at: string;
+}
+

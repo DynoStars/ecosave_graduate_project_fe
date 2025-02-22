@@ -1,117 +1,19 @@
-// "use client";
-
-// import { useParams } from "next/navigation";
-// import { getCartDetail } from "@/api";
-// import React, { useEffect, useState } from "react";
-// import type { Product } from "@/types";
-// import { DeliveryAddress } from "@/components/cart/DeliveryAddress";
-// import { CartItem } from "@/components/cart/CartItem";
-// import { CartSummary } from "@/components/cart/CartSummary";
-
-// const CartPage: React.FC = () => {
-//   const [cartItems, setCartItems] = useState<Product[]>([]);
-//   const [loading, setLoading] = useState<boolean>(true);
-//   const [error, setError] = useState<string | null>(null);
-//   const params = useParams();
-
-//   console.log("Params:", params); // Kiểm tra giá trị params
-
-//   // Sửa lỗi key trong params
-//   const storeId = params.storeId && !isNaN(parseInt(params.storeId)) 
-//   ? parseInt(params.storeId) 
-//   : null;
-
-// console.log("Store ID:", storeId); // Kiểm tra giá trị storeId
-
-//   useEffect(() => {
-//     if (!storeId) {
-//       setError("Store ID không hợp lệ.");
-//       setLoading(false);
-//       return;
-//     }
-
-//     const fetchCart = async () => {
-//       try {
-//         setLoading(true);
-//         const cartData = await getCartDetail(storeId);
-
-//         console.log("Cart Data Detail:", cartData); // Kiểm tra dữ liệu trả về
-
-//         if (cartData?.data?.store?.items?.length > 0) {
-//           setCartItems(cartData.data.items);
-//         } else {
-//           setCartItems([]);
-//           setError("Giỏ hàng trống.");
-//         }
-//       } catch (err: any) {
-//         setError(err.message || "Không thể tải giỏ hàng.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchCart();
-//   }, [storeId]);
-
-//   const handleRemoveItem = (id: number): void => {
-//     console.log("Removing item:", id);
-//   };
-
-//   if (loading) {
-//     return <p className="text-center mt-4">Đang tải giỏ hàng...</p>;
-//   }
-
-//   if (error) {
-//     return <p className="text-center text-red-500">{error}</p>;
-//   }
-
-//   return (
-//     <div className="max-w-4xl mx-auto p-6">
-//       <h1 className="text-xl font-medium mb-6">Chi tiết giỏ hàng</h1>
-
-//       {Array.isArray(cartItems) && cartItems.length > 0 ?  (
-//         <>
-//           <DeliveryAddress
-//             storeAddress={cartItems[0]?.store?.address || ""}
-//             userAddress="Trường Cao Đẳng Lương Thực - Thực Phẩm"
-//             onChangeAddress={() => console.log("Change address")}
-//           />
-
-//           <div className="bg-white rounded-lg shadow">
-//             {cartItems.map((item) => (
-//               <CartItem key={item.id} product={item} onRemove={handleRemoveItem} />
-//             ))}
-//           </div>
-
-//           <CartSummary
-//             subtotal={cartItems.reduce((sum, item) => sum + Number(item.discounted_price), 0)}
-//             savings={cartItems.reduce(
-//               (sum, item) => sum + (Number(item.original_price) - Number(item.discounted_price)),
-//               0
-//             )}
-//           />
-//         </>
-//       ) : (
-//         <p className="text-center text-gray-500">Giỏ hàng của bạn đang trống.</p>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default CartPage;
 "use client";
 
 import { useParams } from "next/navigation";
-import { getCartDetail } from "@/api";
-import React, { useEffect, useState } from "react";
-import type { Product } from "@/types";
+import { getCartDetail, updateCartItemQuantity, removeCartItem } from "@/api";
+import React, { useEffect, useState, useCallback } from "react";
+import { debounce } from 'lodash';
+import type { CartProduct } from "@/types";
 import { DeliveryAddress } from "@/components/cart/DeliveryAddress";
 import { CartItem } from "@/components/cart/CartItem";
 import { CartSummary } from "@/components/cart/CartSummary";
+import { ShoppingCart, AlertCircle, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 const CartPage: React.FC = () => {
-  const [cartItems, setCartItems] = useState<Product[]>([]);
-  const [cartData, setCartData] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<CartProduct[]>([]);
+  const [cartData, setCartData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const params = useParams();
@@ -120,88 +22,164 @@ const CartPage: React.FC = () => {
     ? parseInt(params.storeId) 
     : null;
 
-  const handleQuantityChange = (productId: number, newQuantity: number) => {
+  const debouncedUpdateQuantity = debounce(async (storeId: number, productId: number, newQuantity: number) => {
+    try {
+      await updateCartItemQuantity(storeId, productId, newQuantity);
+    } catch (error) {
+      console.error("Failed to update quantity:", error);
+      setCartItems((prevItems) =>
+        prevItems.map((item) =>
+          item.product_id === productId ? { ...item, quantity: item.quantity } : item
+        )
+      );
+      setError("Không thể cập nhật số lượng. Vui lòng thử lại.");
+    }
+  }, 500);
+
+  const handleQuantityChange = useCallback((productId: number, newQuantity: number) => {
+    if (!storeId) return;
+
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === productId ? { ...item, stock_quantity: newQuantity } : item
+        item.product_id === productId 
+          ? { ...item, quantity: newQuantity, subtotal: newQuantity * Number(item.discounted_price) } 
+          : item
       )
     );
-  };
 
-  useEffect(() => {
+    debouncedUpdateQuantity(storeId, productId, newQuantity);
+  }, [storeId, debouncedUpdateQuantity]);
+
+  const handleRemoveItem = useCallback(async (productId: number) => {
+    if (!storeId) return;
+
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.product_id === productId ? { ...item, isRemoving: true } : item
+      )
+    );
+
+    try {
+      await removeCartItem(storeId, productId);
+      setCartItems((prevItems) => prevItems.filter((item) => item.product_id !== productId));
+    } catch (error) {
+      console.error("Failed to remove item:", error);
+      setCartItems((prevItems) =>
+        prevItems.map((item) =>
+          item.product_id === productId ? { ...item, isRemoving: false } : item
+        )
+      );
+      setError("Không thể xóa sản phẩm. Vui lòng thử lại.");
+    }
+  }, [storeId]);
+
+  const fetchCart = async () => {
     if (!storeId) {
       setError("Store ID không hợp lệ.");
       setLoading(false);
       return;
     }
 
-    const fetchCart = async () => {
-      try {
-        setLoading(true);
-        const cartData = await getCartDetail(storeId);
-        console.log("Cart Data Detail:", cartData);
-        console.log("user address ",cartData?.data?.user?.address)
-        const items = cartData?.data?.store?.items;
-        console.log("items: ",items);
-        if (Array.isArray(items)) {
-          setCartData(cartData)
-          setCartItems(items);
-        } else {
-          setCartItems([]);
-          setError("Giỏ hàng trống.");
-        }
-      } catch (err: any) {
-        setError(err.message || "Không thể tải giỏ hàng.");
+    try {
+      setLoading(true);
+      const cartData = await getCartDetail(storeId);
+      setCartData(cartData.data);
+      const items = cartData.data?.store?.items;
+      if (Array.isArray(items) && items.length > 0) {
+        setCartItems(items);
+      } else {
         setCartItems([]);
-      } finally {
-        setLoading(false);
+        setError("Giỏ hàng trống.");
       }
-    };
+    } catch (err: any) {
+      setError(err.message || "Không thể tải giỏ hàng. Vui lòng thử lại sau.");
+      setCartItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCart();
   }, [storeId]);
 
-  const handleRemoveItem = (id: number): void => {
-    console.log("Removing item:", id);
-  };
+  const calculateTotal = () => cartItems.reduce((sum, item) => sum + Number(item.subtotal), 0);
+  const calculateSavings = () => cartItems.reduce(
+    (sum, item) => sum + (Number(item.original_price) * item.quantity - Number(item.subtotal)),
+    0
+  );
 
   if (loading) {
-    return <p className="text-center mt-4">Đang tải giỏ hàng...</p>;
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-teal-500"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center text-red-500">{error}</p>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+        <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
+        <p className="text-red-500 mb-4 text-xl font-semibold">{error}</p>
+        <button 
+          onClick={() => fetchCart()} 
+          className="bg-teal-500 hover:bg-teal-600 text-white py-3 px-8 rounded-full transition-colors duration-300 shadow-lg text-lg font-medium"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-xl font-medium mb-6">Chi tiết giỏ hàng</h1>
+    <div className="min-h-screen bg-gray-100 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-xl font-bold mb-8 text-gray-800 flex items-center">
+          <ShoppingCart className="mr-3" /> Chi tiết giỏ hàng
+        </h1>
 
-      {Array.isArray(cartItems) && cartItems.length > 0 ? (
-        <>
-          <DeliveryAddress
-            storeAddress={cartData?.data?.store?.store_address || ""}
-            userAddress={cartData?.data?.user?.address || ""}
-            onChangeAddress={() => console.log("Change address")}
-          />
+        {cartItems.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <DeliveryAddress
+                storeAddress={cartData?.store?.store_address || ""}
+                userAddress={cartData?.user?.address || ""}
+                onChangeAddress={() => console.log("Change address")}
+              />
 
-          <div className="bg-white rounded-lg shadow">
-            {cartItems.map((item) => (
-              <CartItem key={item.id} product={item} onRemove={handleRemoveItem} />
-            ))}
+              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                {cartItems.map((item) => (
+                  <CartItem 
+                    key={item.product_id} 
+                    product={item} 
+                    onRemove={handleRemoveItem}
+                    onQuantityChange={handleQuantityChange}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-1">
+              <CartSummary
+                total={calculateTotal()}
+                savings={calculateSavings()}
+              />
+            </div>
           </div>
-
-          <CartSummary
-            total={cartItems.reduce((sum, item) => sum + Number(item.subtotal), 0)}
-            savings={cartItems.reduce(
-              (sum, item) => sum + (Number(item.original_price) * item.quantity - Number(item.subtotal)),
-              0
-            )}
-          />
-        </>
-      ) : (
-        <p className="text-center text-gray-500">Giỏ hàng của bạn đang trống.</p>
-      )}
+        ) : (
+          <div className="text-center py-16 bg-white rounded-lg shadow-lg">
+            <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
+            <p className="text-2xl text-gray-600 mb-8">Giỏ hàng của bạn đang trống.</p>
+            <Link 
+              href="/products" 
+              className="inline-flex items-center justify-center bg-teal-500 hover:bg-teal-600 text-white py-3 px-8 rounded-full transition-colors duration-300 text-lg font-medium"
+            >
+              <ArrowLeft className="mr-2" /> Tiếp tục mua sắm
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

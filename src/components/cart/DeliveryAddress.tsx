@@ -32,4 +32,3 @@ export const DeliveryAddress: React.FC<DeliveryAddressProps> = ({
     </div>
   );
 };
-

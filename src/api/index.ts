@@ -312,7 +312,7 @@ export const updateCartItemQuantity = async (storeId: number, productId: number,
   }
 
   try {
-    const response = await axios.put(`${serverUrl}/cart/update`, {
+    const response = await axios.put(`${serverUrl}/cart/update-quantity`, {
       store_id: storeId,
       product_id: productId,
       quantity: quantity
@@ -324,7 +324,6 @@ export const updateCartItemQuantity = async (storeId: number, productId: number,
     });
 
     return response.data;
-
   } catch (error: any) {
     if (error.response) {
       console.error("Lỗi API khi cập nhật item:", error.response.data);
@@ -348,7 +347,7 @@ export const removeCartItem = async (storeId: number, productId: number) => {
   }
 
   try {
-    const response = await axios.delete(`${serverUrl}/cart/remove`, {
+    const response = await axios.delete(`${serverUrl}/cart/remove-item`, {
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
