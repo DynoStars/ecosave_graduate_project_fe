@@ -1,5 +1,5 @@
 "use client";
-import { createNewOrder, getStoreById } from "@/api";
+import { getStoreById, createNewOrder } from "@/api";
 import Loading from "@/app/loading";
 import ToastNotification from "@/components/toast/ToastNotification";
 import { RootState } from "@/redux/store";
@@ -27,77 +27,70 @@ const OrderReceipt = () => {
   const { user } = useSelector((state: RootState) => state.user);
   const [store, setStore] = useState<Store>();
   useEffect(() => {
-    let isMounted = true; // Cờ kiểm tra component còn mounted không
+    let isMounted = true; // To track component mount state
+
     const fetchOrder = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const paramsObject: { [key: string]: string | null } = {};
-      params.forEach((value, key) => {
-        paramsObject[key] = value;
-      });
-      if (!isMounted) return; // Ngăn chặn cập nhật trạng thái nếu component đã unmount
-      setUrlParams(paramsObject);
-      const responseCode = paramsObject["vnp_ResponseCode"];
-      if (responseCode === "00") {
-        const storedOrderData = getCookie("orderData");
-        if (storedOrderData) {
-          const orderDataObject = JSON.parse(storedOrderData);
-          orderDataObject.status = "completed";
-          const orderItems = getCookie("orderItems");
-          try {
-            const orderStore = await getStoreById(
-              Number(orderDataObject.store_id)
-            );
-            const storeLocation = [orderStore.latitude, orderStore.longitude];
-            document.cookie = `storeLocation=${encodeURIComponent(
-              JSON.stringify(storeLocation)
-            )}; path=/; secure`;
-            setStore(orderStore);
-          } catch (error) {
-            console.log(error);
-          }
-          if (orderItems) {
-            const allOrderItems = JSON.parse(orderItems);
-            setSelectedItems(allOrderItems);
-          }
-          try {
-            const response = await createNewOrder(orderDataObject);
-            if (!isMounted) return;
-            if (response) {
-              setToast({
-                message: `Đơn hàng đã được tạo thành công!`,
-                keyword: "SUCCESS",
-              });
-              setPaymentStatus("success");
-              setLoading(false);
-            } else {
-              setToast({
-                message: `Lỗi khi tạo đơn hàng`,
-                keyword: "ERROR",
-              });
-            }
-          } catch (error) {
-            if (!isMounted) return;
-            setToast({
-              message: `Lỗi khi tạo đơn hàng: ${error}`,
-              keyword: "ERROR",
-            });
-          }
-          router.replace(window.location.pathname);
-          document.cookie =
-            "orderData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          document.cookie =
-            "orderItems=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        }
-      } else {
+      try {
+        // Parse URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const paramsObject: { [key: string]: string | null } = {};
+        params.forEach((value, key) => (paramsObject[key] = value));
+
         if (!isMounted) return;
-        setPaymentStatus("failure");
+        setUrlParams(paramsObject);
+
+        const responseCode = paramsObject["vnp_ResponseCode"];
+        if (responseCode !== "00") {
+          if (isMounted) setPaymentStatus("failure");
+          return;
+        }
+
+        // Retrieve order data from cookies
+        const storedOrderData = getCookie("orderData");
+        if (!storedOrderData) return;
+
+        const orderDataObject = JSON.parse(storedOrderData);
+        orderDataObject.status = "completed"; // Mark as completed
+
+        // Fetch store data
+        const orderStore = await getStoreById(Number(orderDataObject.store_id));
+        if (isMounted) {
+          setStore(orderStore);
+          document.cookie = `storeLocation=${encodeURIComponent(
+            JSON.stringify([orderStore.latitude, orderStore.longitude])
+          )}; path=/; secure`;
+        }
+
+        // Retrieve and set order items
+        const orderItems = getCookie("orderItems");
+        if (orderItems) {
+          const allOrderItems = JSON.parse(orderItems);
+          if (isMounted) setSelectedItems(allOrderItems);
+        }
+
+        // Create a new order
+        await createNewOrder(orderDataObject);
+        if (!isMounted) return;
+      } catch (error) {
+        console.log(error);
+      } finally {
+        if (isMounted) setLoading(false);
+
+        // Cleanup: Delete cookies
+        document.cookie =
+          "orderData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie =
+          "orderItems=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        router.replace(window.location.pathname);
       }
     };
+
     fetchOrder();
+
     return () => {
-      isMounted = false; // Dọn dẹp khi component bị unmount
+      isMounted = false; // Cleanup function to avoid state updates after unmount
     };
-  }, []);
+  }, [router]);
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -190,26 +183,27 @@ const OrderReceipt = () => {
           </Link>
         </div>
       </div>
-      {/* Modal hóa đơn */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-xl shadow-2xl border border-gray-300 w-full max-w-md relative">
-            <header className="text-center mb-6">
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-300 w-full max-w-md relative flex flex-col max-h-[90vh]">
+            {/* Header - Cố định */}
+            <header className="p-4 border-b border-gray-200 text-center sticky top-0 bg-white z-10">
               <h1 className="text-3xl font-extrabold tracking-wide">
                 Eco<span className="text-primary">Save</span>
               </h1>
               <h2 className="text-xl font-semibold mt-2">HÓA ĐƠN LẤY HÀNG</h2>
             </header>
-            <section className="mb-6">
-              <div className="space-y-2 text-sm">
+
+            {/* Nội dung có thể cuộn */}
+            <div className="p-4 overflow-y-auto flex-grow">
+              <section className="mb-4 text-sm space-y-2">
                 <p>
                   <span className="font-semibold">Tên khách hàng:</span>{" "}
                   {user?.username || "Gia Bao"}
                 </p>
                 <p>
-                  <span className="font-semibold">ID thẻ khách hàng:</span>
-                  {user?.phone_number || "0895234734"}
-                  01822929
+                  <span className="font-semibold">ID thẻ khách hàng:</span>{" "}
+                  {user?.phone_number || "0895234734"}01822929
                 </p>
                 <p>
                   <span className="font-semibold">Tên cửa hàng:</span>{" "}
@@ -223,64 +217,73 @@ const OrderReceipt = () => {
                   <span className="font-semibold">Ngày mua:</span>{" "}
                   {getCurrentDateTime()}
                 </p>
+              </section>
+
+              {/* Bảng sản phẩm */}
+              <table className="w-full text-sm border-t border-b border-gray-300">
+                <thead>
+                  <tr className="text-left font-semibold border-b border-gray-300 bg-gray-100">
+                    <th className="py-2 px-2">Mặt hàng</th>
+                    <th className="py-2 px-2 text-right">Đơn giá</th>
+                    <th className="py-2 px-2 text-right">Số lượng</th>
+                    <th className="py-2 px-2 text-right">Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedItems.map((item, index) => {
+                    const numericPrice =
+                      typeof item.price === "string"
+                        ? parseFloat(
+                            item.price.replace(/\./g, "").replace(",", ".")
+                          )
+                        : item.price;
+                    const total = numericPrice * Number(item.quantity);
+                    return (
+                      <tr
+                        key={index}
+                        className="border-b border-dashed border-gray-200"
+                      >
+                        <td className="py-2 px-2">{item.name}</td>
+                        <td className="py-2 px-2 text-right">
+                          {formatCurrency(numericPrice)}
+                        </td>
+                        <td className="py-2 px-2 text-right">
+                          {item.quantity}
+                        </td>
+                        <td className="py-2 px-2 text-right">
+                          {formatCurrency(total)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {/* Tổng thanh toán */}
+              <div className="text-right mt-4 text-sm space-y-2">
+                <p>
+                  <span className="font-semibold">TỔNG TIỀN T.TOÁN:</span>{" "}
+                  {formatCurrency(urlParams["vnp_Amount"])}
+                </p>
+                <p>
+                  <span className="font-semibold">TIỀN KHÁCH TRẢ:</span>{" "}
+                  {formatCurrency(urlParams["vnp_Amount"])}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Điểm tích lũy (10.000đ = 1 điểm): 8.9
+                </p>
               </div>
-            </section>
-            <table className="w-full mb-6 border-t border-b border-gray-300">
-              <thead>
-                <tr className="text-left text-sm font-semibold border-b border-gray-300">
-                  <th className="py-2">Mặt hàng</th>
-                  <th className="py-2 text-right">Đơn giá</th>
-                  <th className="py-2 text-right">Số lượng</th>
-                  <th className="py-2 text-right">Thành tiền</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {selectedItems.map((item, index) => {
-                  // Chuyển đổi item.price về dạng số trước khi nhân với số lượng
-                  const numericPrice =
-                    typeof item.price === "string"
-                      ? parseFloat(
-                          item.price.replace(/\./g, "").replace(",", ".")
-                        )
-                      : item.price;
-                  const total = numericPrice * Number(item.quantity);
-                  return (
-                    <tr
-                      key={index}
-                      className="border-b border-dashed border-gray-200"
-                    >
-                      <td className="py-2">{item.name}</td>
-                      <td className="py-2 text-right">
-                        {formatCurrency(numericPrice)}
-                      </td>
-                      <td className="py-2 text-right">{item.quantity}</td>
-                      <td className="py-2 text-right">
-                        {formatCurrency(total)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            <div className="text-right mb-6 text-sm space-y-2">
-              <p>
-                <span className="font-semibold">TỔNG TIỀN T.TOÁN:</span>
-                {formatCurrency(urlParams["vnp_Amount"])}
-              </p>
-              <p>
-                <span className="font-semibold">TIỀN KHÁCH TRẢ:</span>
-                {formatCurrency(urlParams["vnp_Amount"])}
-              </p>
-              <p className="text-xs text-gray-500">
-                Điểm tích lũy (10.000đ = 1 điểm): 8.9
-              </p>
             </div>
-            <footer className="text-center text-xs text-gray-500 mb-6">
+
+            {/* Footer cố định */}
+            <footer className="p-4 border-t border-gray-200 text-center text-xs text-gray-500 sticky bottom-0 bg-white">
               www.ecosave.space
             </footer>
+
+            {/* Nút đóng */}
             <button
               onClick={toggleModal}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              className="absolute top-4 right-4 text-red-500 z-50 hover:text-gray-700 text-2xl"
             >
               &times;
             </button>

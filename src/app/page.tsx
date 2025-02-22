@@ -10,13 +10,14 @@ import Home from "./home/Home";
 import Loading from "./loading";
 export default async function HomePage() {
   const page = 1; // Có thể lấy từ URL hoặc props nếu cần
-  let products: Product[] | null = null;
-  let categories: Category[] | null = null;
+  let products: Product[] | [] = [];
+  let categories: Category[] | [] = [];
   let loading = true;
 
   try {
     products = await getProducts({page});
     categories = await getCategories();
+    console.log(categories)
     loading = false;
   } catch (error) {
     console.error("Failed to fetch data:", error);

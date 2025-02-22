@@ -130,25 +130,12 @@ async function getProductByStoreId(storeId: string | number) {
     return [];
   }
 }
-// getProducts({ category_id: [1, 3, 5], page: 1 }).then((products) =>
-//   console.log(products)
-// );
-// // 🔹 Lấy danh sách sản phẩm với phân trang và lọc theo danh mục
-// getProducts({ page: 1, category_id: 3 }).then((products) =>
-//   console.log(products)
-// );
-// // 🔹 Tìm kiếm sản phẩm theo tên và khoảng giá
-// getProducts({ name: "Bánh", min_price: 50000, max_price: 200000 }).then(
-//   (products) => console.log(products)
-// );
-// // 🔹 Lọc theo đánh giá
-// getProducts({ rating: 4 }).then((products) => console.log(products));
 async function getCategories(): Promise<Category[]> {
   try {
     const response = await axios.get(`${serverUrl}/categories`, {
       headers: { "Cache-Control": "no-store" },
     });
-    return response.data.data as Category[];
+    return response.data as Category[];
   } catch (error) {
     console.error("Error fetching data:", error);
     return [];
@@ -201,7 +188,7 @@ interface PaymentResponse {
   data: string; // URL thanh toán VNPay
 }
 
-async function makeNewPayment(total: number): Promise<string> {
+export async function makeNewPayment(total: number): Promise<string> {
   const token = localStorage.getItem("access_token");
   console.log(token)
   if (!token) {
@@ -310,7 +297,7 @@ export const getCartDetail = async (storeId: number) => {
 
   if (!token) {
     alert("Vui lòng đăng nhập để xem giỏ hàng!");
-    window.location.href = "http://localhost:3000/login"; 
+    window.location.href = "http://localhost:3000/login";
     return null;
   }
 
@@ -409,6 +396,44 @@ export const removeCartItem = async (storeId: number, productId: number) => {
       console.error("Lỗi không xác định:", error.message);
       throw new Error("Đã xảy ra lỗi không xác định.");
     }
+  }
+};
+
+// Define a type for the order data
+export interface OrderData {
+  id: number;
+  user_id: number;
+  store_id: number;
+  total_price: number;
+  status: "pending" | "completed"; // Enum-like constraint
+  order_code: string;
+}
+
+export const createNewOrder = async (orderData: OrderData): Promise<OrderData | null> => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    alert("Vui lòng đăng nhập để tạo đơn hàng!");
+    return null; // Return null if no token is found
+  }
+
+  try {
+    const res = await axios.post(
+      `${serverUrl}/orders`, // API endpoint
+      orderData, // Order data payload
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Order created successfully:", res.data);
+    return res.data.data; // Return response data
+  } catch (error) {
+    console.error("Error creating order:", error);
+    throw error; // Rethrow for handling in the calling function
   }
 };
 

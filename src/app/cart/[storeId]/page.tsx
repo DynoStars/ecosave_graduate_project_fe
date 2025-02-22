@@ -1,15 +1,19 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getCartDetail, updateCartItemQuantity, removeCartItem } from "@/api";
+import { getCartDetail, updateCartItemQuantity, removeCartItem, makeNewPayment } from "@/api";
 import React, { useEffect, useState, useCallback } from "react";
 import { debounce } from 'lodash';
-import type { CartProduct } from "@/types";
+import type { CartProduct, PaymentItem } from "@/types";
 import { DeliveryAddress } from "@/components/cart/DeliveryAddress";
 import { CartItem } from "@/components/cart/CartItem";
 import { CartSummary } from "@/components/cart/CartSummary";
 import { ShoppingCart, AlertCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useRouter } from "next/navigation";
+import { addPaymentItem } from "@/redux/paymentSlice";
 
 const CartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartProduct[]>([]);
@@ -17,9 +21,13 @@ const CartPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const params = useParams();
+  const { user } = useSelector((state: RootState) => state.user);
+  const router = useRouter();
+  const dispatch = useDispatch();
 
-  const storeId = params.storeId && !isNaN(parseInt(params.storeId)) 
-    ? parseInt(params.storeId) 
+
+  const storeId = params.storeId && !isNaN(parseInt(params.storeId))
+    ? parseInt(params.storeId)
     : null;
 
   const debouncedUpdateQuantity = debounce(async (storeId: number, productId: number, newQuantity: number) => {
@@ -41,8 +49,8 @@ const CartPage: React.FC = () => {
 
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.product_id === productId 
-          ? { ...item, quantity: newQuantity, subtotal: newQuantity * Number(item.discounted_price) } 
+        item.product_id === productId
+          ? { ...item, quantity: newQuantity, subtotal: newQuantity * Number(item.discounted_price) }
           : item
       )
     );
@@ -85,6 +93,7 @@ const CartPage: React.FC = () => {
       const cartData = await getCartDetail(storeId);
       setCartData(cartData.data);
       const items = cartData.data?.store?.items;
+      console.log(items)
       if (Array.isArray(items) && items.length > 0) {
         setCartItems(items);
       } else {
@@ -109,6 +118,39 @@ const CartPage: React.FC = () => {
     0
   );
 
+  const handlePayment = async () => {
+
+    // if (!user) {
+    //   setToast({
+    //     message: "Vui lòng đăng nhập trước khi mua sản phẩm!",
+    //     keyword: "WARNING",
+    //   });
+    //   }
+
+    cartItems.forEach((product) => {
+      const paymentProductItem: PaymentItem = {
+        id: product.product_id,
+        name: product.name,
+        price: product.discounted_price,
+        quantity : product.quantity,
+        picture: product.images[0].image_url,
+        storeId: storeId ?? 1,
+      };
+      dispatch(addPaymentItem(paymentProductItem));
+    })
+
+
+
+    // setToast({
+    //   message: "Sản phẩm đã được thêm vào thanh toán!",
+    //   keyword: "SUCCESS",
+    // });
+    // setTimeout(() => setToast(null), 3000);
+    router.push("/checkout");
+    console.log(cartItems)
+
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -122,8 +164,8 @@ const CartPage: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
         <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
         <p className="text-red-500 mb-4 text-xl font-semibold">{error}</p>
-        <button 
-          onClick={() => fetchCart()} 
+        <button
+          onClick={() => fetchCart()}
           className="bg-teal-500 hover:bg-teal-600 text-white py-3 px-8 rounded-full transition-colors duration-300 shadow-lg text-lg font-medium"
         >
           Thử lại
@@ -150,9 +192,9 @@ const CartPage: React.FC = () => {
 
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                 {cartItems.map((item) => (
-                  <CartItem 
-                    key={item.product_id} 
-                    product={item} 
+                  <CartItem
+                    key={item.product_id}
+                    product={item}
                     onRemove={handleRemoveItem}
                     onQuantityChange={handleQuantityChange}
                   />
@@ -164,6 +206,7 @@ const CartPage: React.FC = () => {
               <CartSummary
                 total={calculateTotal()}
                 savings={calculateSavings()}
+                handlePayment={handlePayment}
               />
             </div>
           </div>
@@ -171,8 +214,8 @@ const CartPage: React.FC = () => {
           <div className="text-center py-16 bg-white rounded-lg shadow-lg">
             <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
             <p className="text-2xl text-gray-600 mb-8">Giỏ hàng của bạn đang trống.</p>
-            <Link 
-              href="/products" 
+            <Link
+              href="/products"
               className="inline-flex items-center justify-center bg-teal-500 hover:bg-teal-600 text-white py-3 px-8 rounded-full transition-colors duration-300 text-lg font-medium"
             >
               <ArrowLeft className="mr-2" /> Tiếp tục mua sắm
