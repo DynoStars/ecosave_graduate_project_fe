@@ -157,7 +157,7 @@ const ShoppingCart: React.FC = () => {
                         {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(store.total_amount)}
                       </div>
                       <Link
-                        href={`/store/${store.store_id}`}
+                        href={`/cart/${store.store_id}`}
                         className="bg-emerald-50 text-emerald-700 px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-emerald-100 transition-colors flex items-center font-medium text-sm lg:text-base whitespace-nowrap"
                       >
                         Xem chi tiết

@@ -123,6 +123,45 @@ export type Review = {
   user: UserProfile; // Thông tin người dùng đánh giá
 };
 
+export interface CartItemProps {
+  product: CartProduct;
+  onRemove: (id: number) => void;
+  onQuantityChange: (productId: number, newQuantity: number) => void; 
+}
+
+export interface DeliveryAddressProps {
+  storeAddress: string;
+  userAddress: string;
+  onChangeAddress: () => void;
+}
+
+export interface CartSummaryProps {
+  total: number;
+  savings: number;
+}
+
+export interface CartProduct {
+  product_id: number;
+  name: string;
+  quantity: number;
+  stock_quantity: number;
+  original_price: string;
+  discounted_price: string;
+  subtotal: number;
+  images: ProductImage[];
+  isRemoving?: boolean;
+}
+
+export interface ProductImage {
+  id: number;
+  product_id: number;
+  image_url: string;
+  image_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+
 
 export interface PaymentItem {
   id: number;
