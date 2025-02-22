@@ -164,7 +164,7 @@ export const formatMoney = (money: number, currency: string = CURRENCY_UNIT): st
   const formattedMoney = formatter.format(adjustedMoney);
 
   // Trả về chuỗi kết quả kèm theo đơn vị tiền tệ viết hoa
-  return `${formattedMoney} ${currency.toUpperCase()}`;
+  return `${formattedMoney} ${currency}`;
 };
 
 /**

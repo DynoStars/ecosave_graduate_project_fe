@@ -122,3 +122,20 @@ export type Review = {
   updated_at: string; // Thời gian cập nhật
   user: UserProfile; // Thông tin người dùng đánh giá
 };
+
+export interface CartItemProps {
+  product: Product;
+  onRemove: (id: number) => void;
+  onQuantityChange: (productId: number, newQuantity: number) => void; 
+}
+
+export interface DeliveryAddressProps {
+  storeAddress: string;
+  userAddress: string;
+  onChangeAddress: () => void;
+}
+
+export interface CartSummaryProps {
+  total: number;
+  savings: number;
+}

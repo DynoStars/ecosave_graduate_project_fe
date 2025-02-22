@@ -197,52 +197,182 @@ async function getStoreById (id: number | string) : Promise<Store> {
 
 export const getCart = async () => {
   const token = localStorage.getItem("access_token");
+
   if (!token) {
-    setTimeout(() => {
-      window.location.href = "http://localhost:3000/login"; 
-    }, 1000);
-    throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi xem giỏ hàng!");
+    alert("Vui lòng đăng nhập để xem giỏ hàng!");
+    window.location.href = "http://localhost:3000/login";
+    return null;
   }
-  
+
   try {
     const response = await axios.get(`${serverUrl}/cart`, {
       headers: {
-        'Authorization': `Bearer ${token}`
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
       }
     });
+
     return response.data;
-  } catch (error) {
-    console.error('Error fetching cart:', error);
-    throw error;
+
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Lỗi API:", error.response.data);
+      throw new Error(error.response.data?.error || "Không thể lấy dữ liệu giỏ hàng");
+    } else if (error.request) {
+      console.error("Không thể kết nối đến server:", error.request);
+      throw new Error("Không thể kết nối đến máy chủ, vui lòng thử lại.");
+    } else {
+      console.error("Lỗi không xác định:", error.message);
+      throw new Error("Đã xảy ra lỗi không xác định.");
+    }
   }
 };
 
 export const addToCart = async (productId: number, quantity: number) => {
   const token = localStorage.getItem("access_token");
+
   if (!token) {
-      setTimeout(() => {
-          window.location.href = "http://localhost:3000/login"; // Chuyển hướng đến trang đăng nhập
-      }, 1000);
-      throw new Error("Vui lòng đăng ký hoặc đăng nhập trước khi thêm sản phẩm vào giỏ hàng.");
+    alert("Vui lòng đăng nhập trước khi thêm sản phẩm vào giỏ hàng!");
+    window.location.href = "http://localhost:3000/login";
+    return null;
   }
 
-  const response = await fetch(`${serverUrl}/cart/add`, {
-      method: "POST",
+  try {
+    const response = await axios.post(`${serverUrl}/cart/add`, {
+      product_id: productId,
+      quantity: quantity
+    }, {
       headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ product_id: productId, quantity }),
-  });
-
-  const responseData = await response.json();
-  if (!response.ok) {
-      if (responseData.error === "This product is out of stock.") {
-          throw new Error("Hiện tại sản phẩm đang hết hàng, vui lòng xem lại sau.");
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
       }
-      throw new Error(`Lỗi API (${response.status}): ${responseData.error || "Đã xảy ra lỗi."}`);
+    });
+
+    return response.data;
+
+  } catch (error: any) {
+    if (error.response) {
+      if (error.response.data?.error === "This product is out of stock.") {
+        throw new Error("Hiện tại sản phẩm đang hết hàng, vui lòng xem lại sau.");
+      }
+      console.error("Lỗi API khi thêm vào giỏ hàng:", error.response.data);
+      throw new Error(error.response.data?.error || "Không thể thêm sản phẩm vào giỏ hàng.");
+    } else if (error.request) {
+      console.error("Không thể kết nối đến server:", error.request);
+      throw new Error("Không thể kết nối đến máy chủ, vui lòng thử lại.");
+    } else {
+      console.error("Lỗi không xác định:", error.message);
+      throw new Error("Đã xảy ra lỗi không xác định.");
+    }
+  }
+};
+
+export const getCartDetail = async (storeId: number) => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    alert("Vui lòng đăng nhập để xem giỏ hàng!");
+    window.location.href = "http://localhost:3000/login"; 
+    return null;
   }
 
-  return responseData;
+  try {
+    const response = await axios.get(`${serverUrl}/cart/${storeId}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    return response.data;
+
+  } catch (error: any) {
+    if (error.response) {
+      // Lỗi từ API (ví dụ: 404, 401, 500)
+      console.error("Lỗi API:", error.response.data);
+      throw new Error(error.response.data?.error || "Lỗi khi tải giỏ hàng");
+    } else if (error.request) {
+      // Lỗi do không kết nối được với server
+      console.error("Không thể kết nối đến server:", error.request);
+      throw new Error("Không thể kết nối đến máy chủ, vui lòng thử lại.");
+    } else {
+      // Lỗi không xác định
+      console.error("Lỗi không xác định:", error.message);
+      throw new Error("Đã xảy ra lỗi không xác định.");
+    }
+  }
 };
+
+export const updateCartItemQuantity = async (storeId: number, productId: number, quantity: number) => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    alert("Vui lòng đăng nhập để cập nhật giỏ hàng!");
+    return null;
+  }
+
+  try {
+    const response = await axios.put(`${serverUrl}/cart/update`, {
+      store_id: storeId,
+      product_id: productId,
+      quantity: quantity
+    }, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    return response.data;
+
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Lỗi API khi cập nhật item:", error.response.data);
+      throw new Error(error.response.data?.error || "Không thể cập nhật giỏ hàng");
+    } else if (error.request) {
+      console.error("Không thể kết nối đến server:", error.request);
+      throw new Error("Không thể kết nối đến máy chủ, vui lòng thử lại.");
+    } else {
+      console.error("Lỗi không xác định:", error.message);
+      throw new Error("Đã xảy ra lỗi không xác định.");
+    }
+  }
+};
+
+export const removeCartItem = async (storeId: number, productId: number) => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    alert("Vui lòng đăng nhập để xóa sản phẩm khỏi giỏ hàng!");
+    return null;
+  }
+
+  try {
+    const response = await axios.delete(`${serverUrl}/cart/remove`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      data: {
+        store_id: storeId,
+        product_id: productId
+      }
+    });
+
+    return response.data;
+
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Lỗi API khi xóa item:", error.response.data);
+      throw new Error(error.response.data?.error || "Không thể xóa sản phẩm khỏi giỏ hàng");
+    } else if (error.request) {
+      console.error("Không thể kết nối đến server:", error.request);
+      throw new Error("Không thể kết nối đến máy chủ, vui lòng thử lại.");
+    } else {
+      console.error("Lỗi không xác định:", error.message);
+      throw new Error("Đã xảy ra lỗi không xác định.");
+    }
+  }
+};
+
 export { getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
