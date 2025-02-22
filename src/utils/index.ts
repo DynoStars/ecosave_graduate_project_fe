@@ -168,11 +168,22 @@ export const formatMoney = (money: number, currency: string = CURRENCY_UNIT): st
   return `${formattedMoney} ${currency.toUpperCase()}`;
 };
 
-export const formatCurrency = (amount : number) => {
-  // Divide the amount by 100 to get it in thousands
-  const formattedAmount = (amount / 100).toLocaleString('vi-VN');
+export const formatCurrency = (amount: string | number) => {
+  if (typeof amount === "string") {
+    // Chuẩn hóa chuỗi số từ định dạng '2.238,944' thành '2238.944'
+    const normalizedAmount = amount.replace(/\./g, "").replace(",", ".");
+    const parsedAmount = parseFloat(normalizedAmount);
+
+    if (isNaN(parsedAmount)) return "0đ"; // Trả về "0đ" nếu chuỗi không hợp lệ
+    amount = parsedAmount;
+  }
+
+  // Chia cho 100 nếu cần thiết (theo logic cũ) và loại bỏ phần thập phân
+  const formattedAmount = Math.floor(amount / 100).toLocaleString("vi-VN");
+
   return `${formattedAmount}đ`;
 };
+
 
 
 /**
@@ -219,4 +230,18 @@ export const formatDateTime = (isoString: string) => {
   return `${time} ${day}`;
 };
 
+export const getCurrentDateTime = () => {
+  const now = new Date();
 
+  // Lấy giờ và phút theo định dạng 12 giờ (AM/PM)
+  const hours = now.getHours() % 12 || 12; // Chuyển 0 giờ thành 12
+  const minutes = now.getMinutes().toString().padStart(2, "0"); // Định dạng 2 chữ số
+  const ampm = now.getHours() >= 12 ? "PM" : "AM";
+
+  // Lấy ngày, tháng, năm
+  const day = now.getDate().toString().padStart(2, "0");
+  const month = (now.getMonth() + 1).toString().padStart(2, "0"); // Tháng bắt đầu từ 0
+  const year = now.getFullYear();
+
+  return `${hours}:${minutes} ${ampm} ${day}/${month}/${year}`;
+};

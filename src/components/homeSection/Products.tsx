@@ -133,7 +133,7 @@ export default function Products({ products, loading }: ProductsProps) {
           />
         </div>
       </div>
-      <div className={`transition-opacity duration-500`}>
+      <div>
         {loading || loadingProducts ? (
           <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[...Array(10)].map((_, index) => (

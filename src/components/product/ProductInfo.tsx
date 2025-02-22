@@ -7,15 +7,18 @@ import { useState } from "react";
 import ToastNotification from "../toast/ToastNotification";
 import { createPortal } from "react-dom";
 import { addToCart } from "@/api";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addPaymentItem } from "@/redux/paymentSlice";
 import { useRouter } from "next/navigation";
+import { RootState } from "@/redux/store";
 
 interface ProductInfoProps {
   product: Product;
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
+    const { user } = useSelector((state: RootState) => state.user);
+
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const [isWishlist, setIsWishlist] = useState(false);
@@ -63,20 +66,28 @@ export function ProductInfo({ product }: ProductInfoProps) {
   };
 
   const handlyPayOneProduct = () => {
-    console.log('adddedddddd')
+     if (!user) {
+      setToast({
+        message: "Vui lòng đăng nhập trước khi mua sản phẩm!",
+        keyword: "WARNING",
+      });
+      }
     const paymentItem: PaymentItem = {
       id: product.id,
       name: product.name,
       price: product.discounted_price,
       quantity,
       picture: product.images[0].image_url,
+      storeId: product.store_id,
     };
 
     dispatch(addPaymentItem(paymentItem));
-    setToast({ message: "Sản phẩm đã được thêm vào thanh toán!", keyword: "SUCCESS" });
+    setToast({
+      message: "Sản phẩm đã được thêm vào thanh toán!",
+      keyword: "SUCCESS",
+    });
     setTimeout(() => setToast(null), 3000);
-    router.push('/checkout')
-
+    router.push("/checkout");
   };
 
   return (
@@ -185,7 +196,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </button>
         <button
           onClick={handlyPayOneProduct}
-          className="h-12 w-full sm:w-96 bg-primary active:bg-red-400 hover:bg-primary/90 text-white font-semibold rounded"
+          className="h-12 w-full sm:w-96 bg-primary active:bg-primary-light hover:bg-primary/90 text-white font-semibold rounded"
         >
           Mua ngay
         </button>

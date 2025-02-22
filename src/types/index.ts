@@ -130,8 +130,27 @@ export interface PaymentItem {
   price: string | number;
   quantity: number;
   picture: string;
+  storeId : number | string;
 }
 
 export interface PaymentState {
   items: PaymentItem[];
+}
+
+
+// Định nghĩa kiểu dữ liệu cho đơn hàng
+export interface OrderData {
+  user_id: number;
+  store_id: number;
+  total_price: number;
+  status: "completed" | "cancelled";
+  order_code: string;
+}
+
+// Định nghĩa kiểu dữ liệu cho phản hồi từ API
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  errors?: Record<string, string[]>;
 }
