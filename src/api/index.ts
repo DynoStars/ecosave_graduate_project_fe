@@ -135,7 +135,7 @@ async function getCategories(): Promise<Category[]> {
     const response = await axios.get(`${serverUrl}/categories`, {
       headers: { "Cache-Control": "no-store" },
     });
-    return response.data as Category[];
+    return response.data.data as Category[];
   } catch (error) {
     console.error("Error fetching data:", error);
     return [];

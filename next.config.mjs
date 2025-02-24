@@ -19,7 +19,11 @@ const nextConfig = {
       'anhdephd.vn',
       'encrypted-tbn0.gstatic.com',
       'chothuenhapho.vn',
-      "www.shutterstock.com"
+      "www.shutterstock.com",
+      'example.com',
+      'cdn.pixabay.com',
+      'encrypted-tbn0.gstatic.com',
+      'cdn.magicdecor.in'
     ], // Correct domains for direct image URLs
   },
 };

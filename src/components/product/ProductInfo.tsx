@@ -11,14 +11,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { addPaymentItem } from "@/redux/paymentSlice";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/redux/store";
+import { increment } from "@/redux/cartSlice";
 
 interface ProductInfoProps {
   product: Product;
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
-    const { user } = useSelector((state: RootState) => state.user);
-
+  const { user } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const [isWishlist, setIsWishlist] = useState(false);
@@ -55,6 +55,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
         keyword: "SUCCESS",
       });
       setTimeout(() => setToast(null), 3000);
+      dispatch(increment());
+
     } catch (error: unknown) {
       let errorMessage = "Đã xảy ra lỗi khi thêm vào giỏ hàng.";
       if (error instanceof Error) {
