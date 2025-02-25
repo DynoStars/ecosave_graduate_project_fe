@@ -1,7 +1,12 @@
 "use client";
 import { useState, useRef } from "react";
 import { Badge, Drawer } from "@mui/material";
-import { Favorite, Notifications, ShoppingCart } from "@mui/icons-material";
+import {
+  Favorite,
+  Notifications,
+  ShoppingCart,
+  Close,
+} from "@mui/icons-material";
 import "./NavBar.css";
 import Link from "next/link";
 import menuItemsData from "../../../assets/json/menuItems.json";
@@ -154,11 +159,23 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
       {/* Sidebar Notification Drawer */}
       <Drawer anchor="right" open={isSidebarOpen} onClose={toggleSidebar}>
-        <div className="w-[300px]  lg:w-[500px] min-h-full h-auto bg-white p-6">
-          <h2 className="text-lg font-semibold">Thông báo sản phẩm gần bạn</h2>
-          <p className="text-gray-600">
-            Bạn có {notificationCount} thông báo mới
-          </p>
+        <div className="w-[300px] lg:w-[500px] min-h-full h-auto bg-white p-6">
+          <div className="bg-primary flex justify-between items-center p-4 rounded-t-lg sticky top-0 z-30">
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                Thông báo sản phẩm gần bạn
+              </h2>
+              <p className="text-gray-200">
+                Bạn có {notificationCount} thông báo mới
+              </p>
+            </div>
+            <button
+              onClick={toggleSidebar}
+              className="text-white hover:text-gray-300"
+            >
+              <Close fontSize="large" />
+            </button>
+          </div>
           <NotificationsComponent />
         </div>
       </Drawer>
