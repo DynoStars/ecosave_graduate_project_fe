@@ -2,11 +2,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './userSlice';
 import paymentReducer from "./paymentSlice";
+import notificationReducer from "./notificationSlice";
+import cartReducer from "./cartSlice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer, // Add your user reducer here
     payment: paymentReducer, // Add your user reducer here
+    notifications: notificationReducer,
+    cart: cartReducer,
   },
 });
 

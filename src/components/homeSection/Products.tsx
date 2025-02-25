@@ -20,6 +20,8 @@ import { FaSearch } from "react-icons/fa";
 import ToastNotification from "../toast/ToastNotification";
 import { createPortal } from "react-dom";
 import { addToCart } from "@/api";
+import { useDispatch } from "react-redux";
+import { increment } from "@/redux/cartSlice";
 interface ProductsProps {
   products: Product[];
   setProducts?: (products: Product[]) => void;
@@ -28,6 +30,7 @@ interface ProductsProps {
 }
 
 export default function Products({ products, loading }: ProductsProps) {
+  const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const [listProducts, setListProducts] = useState<Product[]>(products);
   const itemsPerPage = 8; // Number of items per page
@@ -97,6 +100,7 @@ export default function Products({ products, loading }: ProductsProps) {
     try {
         await addToCart(product.id, quantity);
         setToast({ message: "Sản phẩm đã được thêm vào giỏ hàng!", keyword: "SUCCESS" });
+        dispatch(increment());
         setTimeout(() => setToast(null), 3000);
     } catch (error: unknown) {
         let errorMessage = "Đã xảy ra lỗi khi thêm vào giỏ hàng.";

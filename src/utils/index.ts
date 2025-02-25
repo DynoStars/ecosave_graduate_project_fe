@@ -155,7 +155,7 @@ export const formatMoney = (money: number, currency: string = CURRENCY_UNIT): st
   const roundedMoney = Math.round(money);
 
   // Nếu đơn vị tiền không phải VND, nhân số tiền lên 1000
-  const adjustedMoney = currency.toLowerCase() !== 'vnd' ? roundedMoney * 1000 : roundedMoney;
+  const adjustedMoney = currency.toLowerCase() !== 'vnd' ? roundedMoney  : roundedMoney;
 
   // Định dạng số tiền theo chuẩn Việt Nam, không có phần thập phân
   const formattedMoney = new Intl.NumberFormat('vi-VN', {
@@ -165,7 +165,7 @@ export const formatMoney = (money: number, currency: string = CURRENCY_UNIT): st
   }).format(adjustedMoney);
 
   // Thêm đơn vị tiền tệ vào cuối chuỗi kết quả
-  return `${formattedMoney} ${currency.toUpperCase()}`;
+  return `${formattedMoney} ${currency}`;
 };
 
 export const formatCurrency = (amount: string | number) => {

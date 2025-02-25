@@ -50,9 +50,6 @@ export type Store = {
 export interface Category {
   id: number;
   name: string;
-  description: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface ProductImage {
@@ -126,7 +123,7 @@ export type Review = {
 export interface CartItemProps {
   product: CartProduct;
   onRemove: (id: number) => void;
-  onQuantityChange: (productId: number, newQuantity: number) => void; 
+  onQuantityChange: (productId: number, newQuantity: number) => void;
 }
 
 export interface DeliveryAddressProps {
@@ -138,6 +135,7 @@ export interface DeliveryAddressProps {
 export interface CartSummaryProps {
   total: number;
   savings: number;
+  handlePayment : () => void;
 }
 
 export interface CartProduct {
@@ -150,6 +148,11 @@ export interface CartProduct {
   subtotal: number;
   images: ProductImage[];
   isRemoving?: boolean;
+  store_id?: string;
+  price?: string | number;
+  picture?: string;
+  storeId ?: number | string;
+  orderId ?: number | string;
 }
 
 export interface ProductImage {
@@ -170,6 +173,7 @@ export interface PaymentItem {
   quantity: number;
   picture: string;
   storeId : number | string;
+  orderId ?: number | string;
 }
 
 export interface PaymentState {
