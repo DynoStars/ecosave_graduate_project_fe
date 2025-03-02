@@ -5,6 +5,8 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ShoppingCartIcon as CartIcon, MapPin, Package, Loader2 } from "lucide-react"
+import { useDispatch } from "react-redux";
+import { setTotalItems } from "@/redux/cartSlice";
 
 interface CartItem {
   product_id: number
@@ -49,14 +51,16 @@ const ShoppingCart: React.FC = () => {
   const [cartData, setCartData] = useState<CartData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
         const response = await getCart()
-        
+
         if (response.status === "success") {
           setCartData(response.data)
+          dispatch(setTotalItems(response.data.length));
         } else {
           setError(response.message || "Failed to fetch cart data")
         }
@@ -172,7 +176,7 @@ const ShoppingCart: React.FC = () => {
               <div className="text-gray-600">
                 Tổng số loại sản phẩm: <span className="font-medium">{cartData?.total_products}</span>
               </div>
-              <Link 
+              <Link
                 href="/products"
                 className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition-colors"
               >

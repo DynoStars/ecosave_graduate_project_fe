@@ -27,6 +27,7 @@ const CheckoutComponent = ({ products }: { products: PaymentItem[] }) => {
   };
   const handleBuyClick = async () => {
     const orderData = {
+      id : Math.floor(10 + Math.random() * 90),
       user_id: user?.id || 1,
       store_id: products[0].storeId,
       total_price: totalPrice.toFixed(0),
