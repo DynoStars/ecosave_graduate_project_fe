@@ -14,8 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-const realTimeServerURL =
-  process.env.REALTIME_SERVER_KEY || "http://localhost:4000";
+const realTimeServerURL = "http://localhost:4000";
 
 interface Notification {
   event: string;
@@ -51,6 +50,7 @@ export default function NotificationsComponent() {
   }, []);
 
   useEffect(() => {
+    console.log('newwwww' + newNotifications)
     if (newNotifications.length > 0) {
       setNotifications((prev) => {
         const uniqueNotifications = newNotifications.filter(

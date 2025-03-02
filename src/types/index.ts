@@ -197,3 +197,51 @@ export interface ApiResponse<T = any> {
   data?: T;
   errors?: Record<string, string[]>;
 }
+
+
+export type ProductScan = {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  price: number;
+  discountPercentage: number;
+  rating: number;
+  stock: number;
+  tags: string[];
+  brand: string;
+  sku: string;
+  weight: number;
+  dimensions: {
+    width: number;
+    height: number;
+    depth: number;
+  };
+  warrantyInformation: string;
+  shippingInformation: string;
+  availabilityStatus: string;
+  manufacturingDate: string; // Ngày sản xuất
+  expiryDate: string; // Ngày hết hạn
+  reviews: {
+    rating: number;
+    comment: string;
+    date: string;
+    reviewerName: string;
+    reviewerEmail: string;
+  }[];
+  returnPolicy: string;
+  minimumOrderQuantity: number;
+  meta: {
+    createdAt: string;
+    updatedAt: string;
+    barcode: string;
+    qrCode: string;
+  };
+  thumbnail: string;
+  images: string[];
+};
+
+export interface ScanProductInfoProps {
+  barcode: string;
+  setProductForAiGenerate: (product: ProductScan) => void;
+}

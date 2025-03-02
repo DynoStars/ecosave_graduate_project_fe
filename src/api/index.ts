@@ -1,5 +1,5 @@
 import { FormData } from '@/app/(auth)/register/Register';
-import { ApiResponse, Category, OrderData, Product, ProductFilters, Store } from '@/types';
+import { ApiResponse, Category, OrderData, Product, ProductFilters, ProductScan, Store } from '@/types';
 import getCookie from '@/utils/helpers/getCookie';
 import axios from 'axios';
 import { useState } from "react";
@@ -437,4 +437,74 @@ export const createNewOrder = async (orderData: OrderData): Promise<OrderData | 
   }
 };
 
+export const storeSaveProductToReceiptNotification = async (userId: number, code: string, expiryDate?: string) => {
+  const token = localStorage.getItem("access_token");
+
+  try {
+    const res = await axios.post(
+      `${serverUrl}/save-product`, // Đúng endpoint API
+      {
+        user_id: userId,
+        code: code,
+        expiry_date: expiryDate || null, // Nếu không có ngày hết hạn, truyền null
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Sản phẩm đã lưu thành công:", res.data);
+    return res.data; // Trả về dữ liệu từ server
+
+  } catch (err) {
+    console.error("Lỗi khi lưu sản phẩm:", err);
+    return null;
+  }
+};
+
+export const fetchSaveProducts = async (userId: number, expiryDate: string) => {
+  try {
+    const token = localStorage.getItem("access_token"); // Nếu API yêu cầu token
+    const res = await axios.get(`${serverUrl}/save-products`, {
+      params: { user_id: userId, expiry_date: expiryDate },
+      headers: {
+        Authorization: `Bearer ${token}`, // Thêm nếu cần authentication
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Trích xuất danh sách code từ API response
+    const productCodes = res.data.map((product: { code: string }) => product.code);
+    return productCodes;
+
+  } catch (error) {
+    console.error("Lỗi khi lấy sản phẩm đã lưu:", error);
+    return [];
+  }
+};
+export async function getSaveProductOfUser(userId: number, expiryDate: string): Promise<string[] | null> {
+  const url = `${serverUrl}/save-products`; // API URL
+  const token = localStorage.getItem("access_token");
+
+  try {
+      const response = await axios.get<{ success: boolean; productIds: string[] }>(url, {
+          params: { user_id: userId, expiry_date: expiryDate },
+          headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.success) {
+          console.log('Product IDs:', response.data.productIds);
+          return response.data.productIds; // Trả về mảng productIds
+      } else {
+          console.warn('API returned false success status');
+          return null;
+      }
+  } catch (error) {
+      console.error('Error fetching product IDs:', error);
+      return null;
+  }
+}
 export { getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };

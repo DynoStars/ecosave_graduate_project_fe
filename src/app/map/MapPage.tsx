@@ -86,6 +86,9 @@ const GoongMap = ({
               <p class="text-xs text-gray-500">${Math.round(
                 distance
               )}m từ vị trí của bạn</p>
+                <p className="text-sm text-gray-600 mb-1">
+                      ${store.address}
+                    </p>
             </div>
           `;
 

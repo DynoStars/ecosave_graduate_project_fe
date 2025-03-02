@@ -19,6 +19,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import useNotifications from "@/hooks/useNotifications";
 import useCart from "@/hooks/useCart";
+import RemainderComponent from "@/components/remainder/RemainderComponent";
+import { getCurrentDate } from "@/utils/helpers/getCurrentDate";
 
 export interface NavbarProps {
   user: UserProfile | null;
@@ -31,6 +33,8 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
     (state: RootState) => state.notifications.count
   );
 
+  const currentDate = getCurrentDate();
+
   const [menuItems] = useState<{ [key: string]: string }>(
     menuItemsData.menuItems1
   );
@@ -42,6 +46,8 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const menuRefs = useRef<(HTMLLIElement | null)[]>([]);
   const totalItems = useSelector((state: RootState) => state.cart.totalItems);
+  const [typeOfNotification, setTypeOfNotification] = useState<
+    "new" | "reminder">("new");
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -160,6 +166,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
       {/* Sidebar Notification Drawer */}
       <Drawer anchor="right" open={isSidebarOpen} onClose={toggleSidebar}>
         <div className="w-[300px] lg:w-[500px] min-h-full h-auto bg-white p-6">
+          {/* Header */}
           <div className="bg-primary flex justify-between items-center p-4 rounded-t-lg sticky top-0 z-30">
             <div>
               <h2 className="text-lg font-semibold text-white">
@@ -176,7 +183,34 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
               <Close fontSize="large" />
             </button>
           </div>
-          <NotificationsComponent />
+
+          {/* Tabs */}
+          <div className="w-full flex">
+            <div
+              onClick={() => setTypeOfNotification("new")}
+              className={`w-1/2 py-2 text-center cursor-pointer transition-colors ${
+                typeOfNotification === "new"
+                  ? " text-black font-semibold border border-b-4 border-primary"
+                  : "bg-white hover:bg-primary-light border text-gray-800"
+              }`}
+            >
+              Sản phẩm mới
+            </div>
+            <div
+              onClick={() => setTypeOfNotification("reminder")}
+              className={`w-1/2 py-2 text-center cursor-pointer transition-colors ${
+                typeOfNotification === "reminder"
+                  ? " text-black font-semibold border border-b-4 border-primary"
+                   : "bg-white hover:bg-primary-light border text-gray-800"
+              }`}
+            >
+              Sản phẩm nhắc nhở
+            </div>
+          </div>
+
+          {/* Nội dung */}
+          {typeOfNotification === 'new' && <NotificationsComponent />}
+          {typeOfNotification === 'reminder' && <RemainderComponent currentDate={currentDate} user={user}/>}
         </div>
       </Drawer>
     </nav>

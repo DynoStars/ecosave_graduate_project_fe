@@ -6,7 +6,12 @@ import { MapListingType } from "@/types";
 import Link from "next/link";
 import notFoundImage from "../../assets/icons/LOGO-notfound.png";
 
-const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: MapListingType) => {
+const MapListing = ({
+  listStores,
+  userLatitude,
+  userLongitude,
+  loadingProps,
+}: MapListingType) => {
   const [loading, setLoading] = useState<boolean>(loadingProps);
 
   // 🛠 Tính toán danh sách đã sắp xếp (memoized để tối ưu hiệu suất)
@@ -14,12 +19,13 @@ const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: M
     return listStores
       .map((listing) => ({
         ...listing,
-        distance: getDistance(
-          userLatitude,
-          userLongitude,
-          listing.latitude,
-          listing.longitude
-        ) / 1000, // Đổi sang km
+        distance:
+          getDistance(
+            userLatitude,
+            userLongitude,
+            listing.latitude,
+            listing.longitude
+          ) / 1000, // Đổi sang km
       }))
       .sort((a, b) => a.distance - b.distance); // Sắp xếp từ gần đến xa
   }, [listStores, userLatitude, userLongitude]);
@@ -34,7 +40,9 @@ const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: M
         )}
         <div className="max-h-[425px] overflow-auto scrollbar-container">
           {loading ? (
-            <p className="text-center text-gray-600 animate-pulse">Đang tải dữ liệu...</p>
+            <p className="text-center text-gray-600 animate-pulse">
+              Đang tải dữ liệu...
+            </p>
           ) : sortedStores.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-96 text-center">
               <Image
@@ -45,7 +53,9 @@ const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: M
                 className="mb-6"
               />
               <p className="text-gray-600 text-lg">Không có cửa hàng nào cả</p>
-              <p className="text-gray-500">Hãy quay lại sau để xem các ưu đãi mới nhất!</p>
+              <p className="text-gray-500">
+                Hãy quay lại sau để xem các ưu đãi mới nhất!
+              </p>
             </div>
           ) : (
             sortedStores.map((listing) => (
@@ -59,15 +69,23 @@ const MapListing = ({ listStores, userLatitude, userLongitude, loadingProps }: M
                     className="rounded-lg object-cover"
                   />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1">{listing.store_name}</h3>
-                    <p className="text-sm text-gray-600 mb-1">{listing.store_type}</p>
-                    <p className="text-xs text-gray-500 mb-1">{listing.opening_hours}</p>
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-semibold text-lg mb-1">
+                        {listing.store_name}
+                      </h3>{" "}
+                      <p className="text-sm font-medium text-gray-700">
+                        📍 {listing.distance.toFixed(2)} km gần bạn
+                      </p>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-1">
+                      {listing.store_type}
+                    </p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      {listing.address}
+                    </p>
                     <p className="text-xs mb-1">{listing.description}</p>
                     <p className="text-xs text-gray-500 mb-2">
-                      📧 {listing.contact_email} | 📞 {listing.contact_phone}
-                    </p>
-                    <p className="text-sm font-medium text-gray-700">
-                      📍 {listing.distance.toFixed(2)} km away
+                      📧 {listing.contact_email} | 📞 {listing.contact_phone} | {listing.opening_hours}
                     </p>
                   </div>
                 </div>
