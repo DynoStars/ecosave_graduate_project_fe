@@ -150,19 +150,17 @@ export const CURRENCY_UNIT: string = process.env.CURRENCY_UNIT || 'vnd';
  * @param {string} currency The currency unit.
  * @returns {string} The formatted money.
  */
+
 export const formatMoney = (money: number, currency: string = CURRENCY_UNIT): string => {
   // Làm tròn số tiền để loại bỏ phần thập phân
   const roundedMoney = Math.round(money);
-
-  // Nếu đơn vị tiền không phải VND, nhân số tiền lên 1000
-  const adjustedMoney = currency.toLowerCase() !== 'vnd' ? roundedMoney  : roundedMoney;
 
   // Định dạng số tiền theo chuẩn Việt Nam, không có phần thập phân
   const formattedMoney = new Intl.NumberFormat('vi-VN', {
     style: 'decimal',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(adjustedMoney);
+  }).format(roundedMoney);
 
   // Thêm đơn vị tiền tệ vào cuối chuỗi kết quả
   return `${formattedMoney} ${currency}`;

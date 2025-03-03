@@ -208,7 +208,7 @@ export default function Products({ products, loading }: ProductsProps) {
                         </p>
                       </div>
                     </div>
-                    <Link href={`/product/${product.id}`} className="block">
+                    <Link href={`/products/${product.id}`} className="block">
                       <h3 className="text-xl font-semibold truncate-description-1-line hover:text-primary">
                         {product.name}
                       </h3>
