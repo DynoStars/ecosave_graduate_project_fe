@@ -204,7 +204,7 @@ export async function makeNewPayment(total: number): Promise<string> {
       {
         headers: {
           "Cache-Control": "no-store",
-           'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
       }
     );
@@ -436,17 +436,19 @@ export const createNewOrder = async (orderData: OrderData): Promise<OrderData | 
     throw error; // Rethrow for handling in the calling function
   }
 };
-
 export const storeSaveProductToReceiptNotification = async (userId: number, code: string, expiryDate?: string) => {
   const token = localStorage.getItem("access_token");
 
+  // Chuyển đổi định dạng ngày
+  const formattedExpiryDate = expiryDate ? new Date(expiryDate).toISOString().split("T")[0] : null;
+
   try {
     const res = await axios.post(
-      `${serverUrl}/save-product`, // Đúng endpoint API
+      `${serverUrl}/save-products`,
       {
         user_id: userId,
         code: code,
-        expiry_date: expiryDate || null, // Nếu không có ngày hết hạn, truyền null
+        expiry_date: formattedExpiryDate, // Định dạng YYYY-MM-DD
       },
       {
         headers: {
@@ -457,13 +459,14 @@ export const storeSaveProductToReceiptNotification = async (userId: number, code
     );
 
     console.log("Sản phẩm đã lưu thành công:", res.data);
-    return res.data; // Trả về dữ liệu từ server
+    return res.data;
 
   } catch (err) {
     console.error("Lỗi khi lưu sản phẩm:", err);
     return null;
   }
 };
+
 
 export const fetchSaveProducts = async (userId: number, expiryDate: string) => {
   try {
@@ -490,21 +493,46 @@ export async function getSaveProductOfUser(userId: number, expiryDate: string): 
   const token = localStorage.getItem("access_token");
 
   try {
-      const response = await axios.get<{ success: boolean; productIds: string[] }>(url, {
-          params: { user_id: userId, expiry_date: expiryDate },
-          headers: { Authorization: `Bearer ${token}` },
-      });
+    const response = await axios.get<{ success: boolean; productIds: string[] }>(url, {
+      params: { user_id: userId, expiry_date: expiryDate },
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      if (response.data.success) {
-          console.log('Product IDs:', response.data.productIds);
-          return response.data.productIds; // Trả về mảng productIds
-      } else {
-          console.warn('API returned false success status');
-          return null;
-      }
-  } catch (error) {
-      console.error('Error fetching product IDs:', error);
+    if (response.data.success) {
+      console.log('Product IDs:', response.data.productIds);
+      return response.data.productIds; // Trả về mảng productIds
+    } else {
+      console.warn('API returned false success status');
       return null;
+    }
+  } catch (error) {
+    console.error('Error fetching product IDs:', error);
+    return null;
   }
 }
-export { getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
+export const checkProductExists = async (userId: number, code: string) => {
+  const token = localStorage.getItem("access_token"); // Lấy token từ localStorage
+
+  try {
+    const res = await axios.post(
+      `${serverUrl}/check-product-exists`,
+      {
+        user_id: userId,
+        code: code,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Thêm token vào headers
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return res.data.exists; // Trả về true nếu sản phẩm đã tồn tại, ngược lại false
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra sản phẩm:", error);
+    return false; // Mặc định trả về false nếu có lỗi
+  }
+};
+
+export { getProductByStoreId, getStoreById, getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };

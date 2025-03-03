@@ -1,9 +1,14 @@
-import { FC } from "react";
-
 import Button from "@/components/button/ButtonScan";
+import { getAccessToken } from "@/utils/helpers/getAccessToken";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 const ScanComponent = () => {
+  const token = getAccessToken();
+  if (!token) {
+    // If no token, redirect to login
+    redirect("/login");
+  }
   return (
     <div className="flex flex-col items-center justify-center bg-white h-[500px] text-center px-4">
       {/* Logo */}

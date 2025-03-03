@@ -1,6 +1,6 @@
 import { ProductScan } from "@/types";
 
-const serverUrl = process.env.REALTIME_SERVER_KEY;
+const serverUrl = process.env.REALTIME_SERVER_KEY || "http://localhost:4000/api" ;
 
 import axios from 'axios';
 
@@ -19,7 +19,7 @@ export const fetchProductByBarcode = async (barcode : string | number) => {
   };
 
   export async function getProductsByIds(productIds: string[]): Promise<ProductScan[] | null> {
-    const url = `http://localhost:4000/api/products/by-ids`; // API URL
+    const url = `${serverUrl}/products/by-ids`; // API URL
 
     try {
         const response = await axios.post<{ status: string; code: number; message: string; data: ProductScan[] }>(url, { productIds });

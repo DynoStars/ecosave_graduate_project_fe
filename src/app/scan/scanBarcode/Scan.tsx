@@ -7,7 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import ScanProduct from "./ScanProductInfo";
 import ScanAIGenerate from "./ScanAIGenerate";
 import { ProductScan } from "@/types";
-import { storeSaveProductToReceiptNotification } from "@/api";
+import {
+  checkProductExists,
+  storeSaveProductToReceiptNotification,
+} from "@/api";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import ToastNotification from "@/components/toast/ToastNotification";
@@ -15,7 +18,8 @@ import ToastNotification from "@/components/toast/ToastNotification";
 const BarcodeScanner = () => {
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.user);
-
+  const [loading, setLoading] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
   const videoRef = useRef<HTMLDivElement>(null);
   const [barcode, setBarcode] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(true);
@@ -26,6 +30,25 @@ const BarcodeScanner = () => {
     message: string;
     keyword: "SUCCESS" | "ERROR" | "WARNING" | "INFO";
   } | null>(null);
+
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      if (!user || !barcode) return; // Kiểm tra nếu user hoặc barcode không tồn tại
+
+      try {
+        setLoading(true);
+        const exists = await checkProductExists(user.id, barcode); // Gọi API kiểm tra
+        if(exists) setIsSaved(true); // Cập nhật trạng thái đã lưu hay chưa
+
+      } catch (error) {
+        console.error("Lỗi khi kiểm tra sản phẩm:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkIfSaved(); // Gọi hàm kiểm tra khi barcode thay đổi
+  }, [user, barcode]); // Chạy lại khi user hoặc barcode thay đổi
 
   useEffect(() => {
     if (!isScanning || !videoRef.current) return;
@@ -89,31 +112,57 @@ const BarcodeScanner = () => {
   };
 
   const storeProductToRemainder = async () => {
+    if (isSaved) return; // Tránh lưu lại nếu sản phẩm đã được lưu trước đó
+
+    setLoading(true);
+
+    if (!user || !product) {
+      setToast({
+        message: "Người dùng hoặc sản phẩm không hợp lệ!",
+        keyword: "ERROR",
+      });
+      return null;
+    }
+
     try {
-      if (!user || !product) {
-        console.log("Người dùng hoặc sản phẩm không hợp lệ!");
+      const isStore = await storeSaveProductToReceiptNotification(
+        user.id,
+        product._id,
+        product.expiryDate
+      );
+
+      if (!isStore) {
+        setToast({
+          message: "Sản phẩm đã tồn tại",
+          keyword: "ERROR",
+        });
+        setIsSaved(true); // Đánh dấu sản phẩm đã được lưu
         return null;
       }
 
-      const isStore = await storeSaveProductToReceiptNotification(
-        user.id,
-        product.id.toString(),
-        product.expiryDate
-      );
       setToast({
         message: "Lưu sản phẩm thành công",
         keyword: "SUCCESS",
       });
 
-      console.log("Kết quả lưu sản phẩm:", isStore);
+      setIsSaved(true); // Cập nhật trạng thái đã lưu
       return isStore;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Lỗi khi lưu sản phẩm:", error);
+
+      let errorMessage = "Đã xảy ra lỗi!";
+      if (error.response?.data) {
+        errorMessage = error.response.data.error || error.response.data.message;
+      }
+
       setToast({
-        message: "Sản phẩm đã tồn tại",
+        message: errorMessage,
         keyword: "ERROR",
       });
+
       return null;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -204,9 +253,18 @@ const BarcodeScanner = () => {
               </button>
               <button
                 onClick={storeProductToRemainder}
-                className="px-4 py-2 bg-primary hover:bg-primary-light transition shadow-lg rounded"
+                disabled={loading || isSaved}
+                className={`px-4 py-2 rounded shadow-lg transition ${
+                  isSaved
+                    ? "bg-gray-400 cursor-not-allowed" // Nếu đã lưu, đổi màu xám và vô hiệu hóa
+                    : "bg-primary hover:bg-primary-light"
+                } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                ⭐ Lưu để theo dõi sản phẩm
+                {isSaved
+                  ? "✔️ Đã lưu"
+                  : loading
+                  ? "⏳ Đang lưu..."
+                  : "⭐ Lưu để theo dõi sản phẩm"}
               </button>
             </div>
           </motion.div>

@@ -200,7 +200,7 @@ export interface ApiResponse<T = any> {
 
 
 export type ProductScan = {
-  id: number;
+  _id: string;
   title: string;
   description: string;
   category: string;
