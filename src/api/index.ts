@@ -409,7 +409,7 @@ export interface OrderData {
   order_code: string;
 }
 
-export const createNewOrder = async (orderData: OrderData): Promise<OrderData | null> => {
+export const createNewOrder = async (orderData: OrderData): Promise<number | null> => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
@@ -430,7 +430,7 @@ export const createNewOrder = async (orderData: OrderData): Promise<OrderData | 
     );
 
     console.log("Order created successfully:", res.data);
-    return res.data.data; // Return response data
+    return res.data.data.id; // Return response data
   } catch (error) {
     console.error("Error creating order:", error);
     throw error; // Rethrow for handling in the calling function
