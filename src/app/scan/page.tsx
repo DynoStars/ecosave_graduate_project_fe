@@ -2,7 +2,6 @@ import Button from "@/components/button/ButtonScan";
 import { getAccessToken } from "@/utils/helpers/getAccessToken";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-
 const ScanComponent = () => {
   const token = getAccessToken();
   if (!token) {
@@ -15,12 +14,10 @@ const ScanComponent = () => {
       <div className="w-32 h-32 bg-primary text-white flex items-center justify-center rounded-full mb-4">
         <span className="text-3xl font-bold">EcoSave</span>
       </div>
-
       {/* Tiêu đề */}
       <h1 className="text-4xl font-bold text-gray-700 mb-10">
         Lưu thông tin để nhắc nhở ngày hết hạn sản phẩm
       </h1>
-
       {/* Nút chức năng */}
       <div className="flex gap-4">
         <Link href="/scan/scanBarcode" passHref>
@@ -39,5 +36,4 @@ const ScanComponent = () => {
     </div>
   );
 };
-
 export default ScanComponent;

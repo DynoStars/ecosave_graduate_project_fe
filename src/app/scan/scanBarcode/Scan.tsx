@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Quagga from "quagga";
@@ -14,7 +13,6 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import ToastNotification from "@/components/toast/ToastNotification";
-
 const BarcodeScanner = () => {
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.user);
@@ -30,29 +28,23 @@ const BarcodeScanner = () => {
     message: string;
     keyword: "SUCCESS" | "ERROR" | "WARNING" | "INFO";
   } | null>(null);
-
   useEffect(() => {
     const checkIfSaved = async () => {
       if (!user || !barcode) return; // Kiểm tra nếu user hoặc barcode không tồn tại
-
       try {
         setLoading(true);
         const exists = await checkProductExists(user.id, barcode); // Gọi API kiểm tra
         if(exists) setIsSaved(true); // Cập nhật trạng thái đã lưu hay chưa
-
       } catch (error) {
         console.error("Lỗi khi kiểm tra sản phẩm:", error);
       } finally {
         setLoading(false);
       }
     };
-
     checkIfSaved(); // Gọi hàm kiểm tra khi barcode thay đổi
   }, [user, barcode]); // Chạy lại khi user hoặc barcode thay đổi
-
   useEffect(() => {
     if (!isScanning || !videoRef.current) return;
-
     Quagga.init(
       {
         inputStream: {
@@ -79,43 +71,33 @@ const BarcodeScanner = () => {
         Quagga.start();
       }
     );
-
     const handleDetected = (data: any) => {
       const scannedCode = data.codeResult.code;
       if (!scannedCode || seenCodes.current.has(scannedCode)) return;
-
       seenCodes.current.add(scannedCode);
       setTimeout(() => seenCodes.current.delete(scannedCode), 1000);
-
       setBarcode(scannedCode);
       setIsScanning(false);
       Quagga.stop();
-
       // Hiển thị sản phẩm sau 1 giây
       setTimeout(() => {
         setShowProduct(true);
       }, 1000);
     };
-
     Quagga.onDetected(handleDetected);
-
     return () => {
       Quagga.offDetected(handleDetected);
       Quagga.stop();
     };
   }, [isScanning]);
-
   const restartScanning = () => {
     setBarcode(null);
     setShowProduct(false);
     setIsScanning(true);
   };
-
   const storeProductToRemainder = async () => {
     if (isSaved) return; // Tránh lưu lại nếu sản phẩm đã được lưu trước đó
-
     setLoading(true);
-
     if (!user || !product) {
       setToast({
         message: "Người dùng hoặc sản phẩm không hợp lệ!",
@@ -123,14 +105,12 @@ const BarcodeScanner = () => {
       });
       return null;
     }
-
     try {
       const isStore = await storeSaveProductToReceiptNotification(
         user.id,
         product._id,
         product.expiryDate
       );
-
       if (!isStore) {
         setToast({
           message: "Sản phẩm đã tồn tại",
@@ -139,33 +119,27 @@ const BarcodeScanner = () => {
         setIsSaved(true); // Đánh dấu sản phẩm đã được lưu
         return null;
       }
-
       setToast({
         message: "Lưu sản phẩm thành công",
         keyword: "SUCCESS",
       });
-
       setIsSaved(true); // Cập nhật trạng thái đã lưu
       return isStore;
     } catch (error: any) {
       console.error("Lỗi khi lưu sản phẩm:", error);
-
       let errorMessage = "Đã xảy ra lỗi!";
       if (error.response?.data) {
         errorMessage = error.response.data.error || error.response.data.message;
       }
-
       setToast({
         message: errorMessage,
         keyword: "ERROR",
       });
-
       return null;
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div
       className={`relative grid ${
@@ -212,7 +186,6 @@ const BarcodeScanner = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Hiển thị trạng thái quét thành công */}
       <AnimatePresence>
         {barcode && !showProduct && (
@@ -230,7 +203,6 @@ const BarcodeScanner = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Hiển thị thông tin sản phẩm */}
       <AnimatePresence>
         {showProduct && barcode && (
@@ -270,7 +242,6 @@ const BarcodeScanner = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Gợi ý sản phẩm */}
       <AnimatePresence>
         {showProduct && barcode && product && (
@@ -284,12 +255,10 @@ const BarcodeScanner = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
       {toast && (
         <ToastNotification message={toast.message} keyword={toast.keyword} />
       )}
     </div>
   );
 };
-
 export default BarcodeScanner;

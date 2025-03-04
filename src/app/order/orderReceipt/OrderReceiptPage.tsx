@@ -35,44 +35,34 @@ const OrderReceipt = () => {
   } | null>(null);
   const { user } = useSelector((state: RootState) => state.user);
   const [store, setStore] = useState<Store>();
-
   // Xử lý tạo đơn hàng
   useEffect(() => {
     if (orderId) return; // Đã có orderId thì không gọi API nữa
-
     const fetchOrder = async () => {
       try {
         const params = new URLSearchParams(window.location.search);
         const responseCode = params.get("vnp_ResponseCode");
-
         if (responseCode !== "00") {
           setPaymentStatus("failure");
           setLoading(false);
           return;
         }
-
         const storedOrderData = getCookie("orderData");
         if (!storedOrderData) return;
-
         const orderDataObject = JSON.parse(storedOrderData);
         orderDataObject.status = "completed";
-
         const orderStore = await getStoreById(Number(orderDataObject.store_id));
         setStore(orderStore);
-
         document.cookie = `storeLocation=${encodeURIComponent(
           JSON.stringify([orderStore.latitude, orderStore.longitude])
         )}; path=/; secure`;
-
         const orderItems = getCookie("orderItems");
         if (orderItems) {
           setSelectedItems(JSON.parse(orderItems));
         }
-
         // Tạo đơn hàng mới
         const newOrderId = await createNewOrder(orderDataObject);
         console.log("Order Created:", newOrderId);
-
         if (newOrderId) {
           setOrderId(newOrderId);
         }
@@ -87,13 +77,10 @@ const OrderReceipt = () => {
         router.replace(window.location.pathname);
       }
     };
-
     fetchOrder();
   }, [orderId]);
-
   useEffect(() => {
     if (!orderId || selectedItems.length === 0 || !store?.id) return;
-
     (async () => {
       try {
         const orderItems = selectedItems.map((item) => ({
@@ -103,28 +90,20 @@ const OrderReceipt = () => {
             ? parseFloat(item.price.replace(/\./g, "").replace(",", "."))
             : item.price,
         }));
-
         // Gửi order items lên server
         await createOrderItems(Number(orderId), orderItems);
-
         // Xóa các sản phẩm đã đặt khỏi giỏ hàng (chạy song song để nhanh hơn)
         await Promise.all(selectedItems.map(item => removeCartItem(store.id, item.id)));
-
         // Fetch lại giỏ hàng từ backend
         const cartData = await getCartDetail(store.id);
         const items = cartData.data?.store?.items ?? [];
-
         // Cập nhật Redux Store nếu có dữ liệu
         dispatch(setTotalItems(items.length));
-
       } catch (error) {
         console.error("Lỗi khi xử lý order items:", error);
       }
     })();
-
   }, [orderId, selectedItems, store?.id, dispatch]);
-
-
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -228,7 +207,6 @@ const OrderReceipt = () => {
               </h1>
               <h2 className="text-xl font-semibold mt-2">HÓA ĐƠN LẤY HÀNG</h2>
             </header>
-
             {/* Nội dung có thể cuộn */}
             <div className="p-4 overflow-y-auto flex-grow">
               <section className="mb-4 text-sm space-y-2">
@@ -253,7 +231,6 @@ const OrderReceipt = () => {
                   {getCurrentDateTime()}
                 </p>
               </section>
-
               {/* Bảng sản phẩm */}
               <table className="w-full text-sm border-t border-b border-gray-300">
                 <thead>
@@ -293,7 +270,6 @@ const OrderReceipt = () => {
                   })}
                 </tbody>
               </table>
-
               {/* Tổng thanh toán */}
               <div className="text-right mt-4 text-sm space-y-2">
                 <p>
@@ -309,12 +285,10 @@ const OrderReceipt = () => {
                 </p>
               </div>
             </div>
-
             {/* Footer cố định */}
             <footer className="p-4 border-t border-gray-200 text-center text-xs text-gray-500 sticky bottom-0 bg-white">
               www.ecosave.space
             </footer>
-
             {/* Nút đóng */}
             <button
               onClick={toggleModal}

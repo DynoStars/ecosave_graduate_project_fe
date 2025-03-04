@@ -50,6 +50,16 @@ const config: Config = {
           "rgba(17, 12, 46, 0.15) 0px 48px 100px 0px",
 
       },
+      animation: {
+        "spin-ease": "spin-ease 1.5s cubic-bezier(0.65, 0, 0.35, 1) infinite",
+      },
+      keyframes: {
+        "spin-ease": {
+          "0%": { transform: "rotate(0deg)" },
+          "50%": { transform: "rotate(180deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

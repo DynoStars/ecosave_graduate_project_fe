@@ -224,7 +224,7 @@ export const getCart = async () => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để xem giỏ hàng!");
+
     window.location.href = "http://localhost:3000/login";
     return null;
   }
@@ -257,7 +257,6 @@ export const addToCart = async (productId: number, quantity: number) => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập trước khi thêm sản phẩm vào giỏ hàng!");
     window.location.href = "http://localhost:3000/login";
     return null;
   }
@@ -296,7 +295,6 @@ export const getCartDetail = async (storeId: number) => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để xem giỏ hàng!");
     window.location.href = "http://localhost:3000/login";
     return null;
   }
@@ -332,7 +330,6 @@ export const updateCartItemQuantity = async (storeId: number, productId: number,
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để cập nhật giỏ hàng!");
     return null;
   }
 
@@ -367,7 +364,6 @@ export const removeCartItem = async (storeId: number, productId: number) => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để xóa sản phẩm khỏi giỏ hàng!");
     return null;
   }
 
@@ -413,7 +409,6 @@ export const createNewOrder = async (orderData: OrderData): Promise<number | nul
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để tạo đơn hàng!");
     return null; // Return null if no token is found
   }
 

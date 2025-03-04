@@ -15,12 +15,13 @@ import Image from "next/image";
 import defaultAvatar from "../../../assets/images/users/userAvata1.png";
 import LOGO from "../../../assets/images/logo/LOGO.png";
 import NotificationsComponent from "@/app/notification/Notifications";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import useNotifications from "@/hooks/useNotifications";
 import useCart from "@/hooks/useCart";
 import RemainderComponent from "@/components/remainder/RemainderComponent";
 import { getCurrentDate } from "@/utils/helpers/getCurrentDate";
+import { reset } from "@/redux/notificationSlice";
 
 export interface NavbarProps {
   user: UserProfile | null;
@@ -29,6 +30,7 @@ export interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ user }) => {
   useNotifications(); // Kích hoạt lấy thông báo ngay khi Navbar render
   useCart();
+  const dispatch = useDispatch();
   const notificationCount = useSelector(
     (state: RootState) => state.notifications.count
   );
@@ -51,6 +53,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+    dispatch(reset());
   };
 
   const icons: { [key: string]: JSX.Element } = {

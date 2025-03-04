@@ -4,15 +4,12 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-
 export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanProductInfoProps) {
   const [product, setProduct] = useState<ProductScan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     if (!barcode) return;
-
     const fetchProduct = async () => {
       setLoading(true);
       setError(null);
@@ -30,10 +27,8 @@ export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanPr
         setLoading(false);
       }
     };
-
     fetchProduct();
   }, [barcode]);
-
   if (loading) {
     return (
       <div className="p-6 rounded-lg w-full bg-white animate-fadeIn">
@@ -50,13 +45,10 @@ export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanPr
       </div>
     );
   }
-
   if (error) {
     return <p className="text-red-500 text-center text-lg">{error}</p>;
   }
-
   if (!product) return null;
-
   return (
     <div className="bg-white p-4 w-full animate-fadeIn">
       {/* Hình ảnh sản phẩm */}
@@ -72,7 +64,6 @@ export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanPr
           Giảm {product.discountPercentage}%
         </span>
       </div>
-
       {/* Thông tin sản phẩm */}
       <h1 className="text-2xl font-bold text-gray-900 mt-4">{product.title}</h1>
       <p className="text-gray-700">{product.description}</p>
@@ -82,7 +73,6 @@ export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanPr
           {product.availabilityStatus}
         </span>
       </div>
-
       {/* Chi tiết sản phẩm */}
       <h4 className="mt-6 text-lg font-semibold text-gray-800">
         Chi tiết sản phẩm
@@ -101,7 +91,6 @@ export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanPr
     </div>
   );
 }
-
 // Component hiển thị chi tiết sản phẩm
 const DetailItem = ({ label, value }: { label: string; value: string }) => (
   <div className="bg-gray-100 p-2 rounded-md shadow-sm">

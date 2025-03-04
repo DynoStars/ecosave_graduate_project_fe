@@ -16,6 +16,7 @@ export default async function HomePage() {
 
   try {
     products = await getProducts({page});
+    console.log(products)
     categories = await getCategories();
     console.log(categories)
     loading = false;

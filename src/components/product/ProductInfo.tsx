@@ -8,7 +8,7 @@ import ToastNotification from "../toast/ToastNotification";
 import { createPortal } from "react-dom";
 import { addToCart } from "@/api";
 import { useDispatch, useSelector } from "react-redux";
-import { addPaymentItem } from "@/redux/paymentSlice";
+import { addPaymentItem, clearPaymentItems } from "@/redux/paymentSlice";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/redux/store";
 import { increment } from "@/redux/cartSlice";
@@ -73,6 +73,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         message: "Vui lòng đăng nhập trước khi mua sản phẩm!",
         keyword: "WARNING",
       });
+      return;
       }
     const paymentItem: PaymentItem = {
       id: product.id,
@@ -83,6 +84,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       storeId: product.store_id,
     };
 
+    dispatch(clearPaymentItems());
     dispatch(addPaymentItem(paymentItem));
     setToast({
       message: "Sản phẩm đã được thêm vào thanh toán!",

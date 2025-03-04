@@ -1,9 +1,6 @@
-
-
 import { getAccessToken } from "@/utils/helpers/getAccessToken";
 import BarcodeScanner from "./Scan";
 import { redirect } from "next/navigation";
-
 const ScanPage = () => {
   const token = getAccessToken();
     if (!token) {
@@ -16,5 +13,4 @@ const ScanPage = () => {
     </div>
   );
 };
-
 export default ScanPage;
