@@ -17,8 +17,11 @@ export const paymentSlice = createSlice({
     addPaymentItem: (state, action: PayloadAction<PaymentItem>) => {
       state.items.push(action.payload);
     },
+    clearPaymentItems: (state) => {
+      state.items = [];
+    },
   },
 });
 
-export const { addPaymentItem } = paymentSlice.actions;
+export const { addPaymentItem, clearPaymentItems } = paymentSlice.actions;
 export default paymentSlice.reducer;

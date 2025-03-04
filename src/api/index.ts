@@ -1,5 +1,5 @@
 import { FormData } from '@/app/(auth)/register/Register';
-import { ApiResponse, Category, OrderData, Product, ProductFilters, Store } from '@/types';
+import { ApiResponse, Category, OrderData, Product, ProductFilters, ProductScan, Store } from '@/types';
 import getCookie from '@/utils/helpers/getCookie';
 import axios from 'axios';
 import { useState } from "react";
@@ -204,7 +204,7 @@ export async function makeNewPayment(total: number): Promise<string> {
       {
         headers: {
           "Cache-Control": "no-store",
-           'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
       }
     );
@@ -224,7 +224,7 @@ export const getCart = async () => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để xem giỏ hàng!");
+
     window.location.href = "http://localhost:3000/login";
     return null;
   }
@@ -257,7 +257,6 @@ export const addToCart = async (productId: number, quantity: number) => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập trước khi thêm sản phẩm vào giỏ hàng!");
     window.location.href = "http://localhost:3000/login";
     return null;
   }
@@ -296,7 +295,6 @@ export const getCartDetail = async (storeId: number) => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để xem giỏ hàng!");
     window.location.href = "http://localhost:3000/login";
     return null;
   }
@@ -332,7 +330,6 @@ export const updateCartItemQuantity = async (storeId: number, productId: number,
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để cập nhật giỏ hàng!");
     return null;
   }
 
@@ -367,7 +364,6 @@ export const removeCartItem = async (storeId: number, productId: number) => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để xóa sản phẩm khỏi giỏ hàng!");
     return null;
   }
 
@@ -409,11 +405,10 @@ export interface OrderData {
   order_code: string;
 }
 
-export const createNewOrder = async (orderData: OrderData): Promise<OrderData | null> => {
+export const createNewOrder = async (orderData: OrderData): Promise<number | null> => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    alert("Vui lòng đăng nhập để tạo đơn hàng!");
     return null; // Return null if no token is found
   }
 
@@ -430,11 +425,109 @@ export const createNewOrder = async (orderData: OrderData): Promise<OrderData | 
     );
 
     console.log("Order created successfully:", res.data);
-    return res.data.data; // Return response data
+    return res.data.data.id; // Return response data
   } catch (error) {
     console.error("Error creating order:", error);
     throw error; // Rethrow for handling in the calling function
   }
 };
+export const storeSaveProductToReceiptNotification = async (userId: number, code: string, expiryDate?: string) => {
+  const token = localStorage.getItem("access_token");
 
-export { getProductByStoreId,getStoreById,getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };
+  // Chuyển đổi định dạng ngày
+  const formattedExpiryDate = expiryDate ? new Date(expiryDate).toISOString().split("T")[0] : null;
+
+  try {
+    const res = await axios.post(
+      `${serverUrl}/save-products`,
+      {
+        user_id: userId,
+        code: code,
+        expiry_date: formattedExpiryDate, // Định dạng YYYY-MM-DD
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Sản phẩm đã lưu thành công:", res.data);
+    return res.data;
+
+  } catch (err) {
+    console.error("Lỗi khi lưu sản phẩm:", err);
+    return null;
+  }
+};
+
+
+export const fetchSaveProducts = async (userId: number, expiryDate: string) => {
+  try {
+    const token = localStorage.getItem("access_token"); // Nếu API yêu cầu token
+    const res = await axios.get(`${serverUrl}/save-products`, {
+      params: { user_id: userId, expiry_date: expiryDate },
+      headers: {
+        Authorization: `Bearer ${token}`, // Thêm nếu cần authentication
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Trích xuất danh sách code từ API response
+    const productCodes = res.data.map((product: { code: string }) => product.code);
+    return productCodes;
+
+  } catch (error) {
+    console.error("Lỗi khi lấy sản phẩm đã lưu:", error);
+    return [];
+  }
+};
+export async function getSaveProductOfUser(userId: number, expiryDate: string): Promise<string[] | null> {
+  const url = `${serverUrl}/save-products`; // API URL
+  const token = localStorage.getItem("access_token");
+
+  try {
+    const response = await axios.get<{ success: boolean; productIds: string[] }>(url, {
+      params: { user_id: userId, expiry_date: expiryDate },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (response.data.success) {
+      console.log('Product IDs:', response.data.productIds);
+      return response.data.productIds; // Trả về mảng productIds
+    } else {
+      console.warn('API returned false success status');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching product IDs:', error);
+    return null;
+  }
+}
+export const checkProductExists = async (userId: number, code: string) => {
+  const token = localStorage.getItem("access_token"); // Lấy token từ localStorage
+
+  try {
+    const res = await axios.post(
+      `${serverUrl}/check-product-exists`,
+      {
+        user_id: userId,
+        code: code,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Thêm token vào headers
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return res.data.exists; // Trả về true nếu sản phẩm đã tồn tại, ngược lại false
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra sản phẩm:", error);
+    return false; // Mặc định trả về false nếu có lỗi
+  }
+};
+
+export { getProductByStoreId, getStoreById, getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };

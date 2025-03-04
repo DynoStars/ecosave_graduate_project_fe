@@ -1,7 +1,14 @@
 "use client";
-import { getStoreById, createNewOrder } from "@/api";
+import {
+  getStoreById,
+  createNewOrder,
+  removeCartItem,
+  getCartDetail,
+} from "@/api";
+import { createOrderItems } from "@/api/orders";
 import Loading from "@/app/loading";
 import ToastNotification from "@/components/toast/ToastNotification";
+import { setTotalItems } from "@/redux/cartSlice";
 import { RootState } from "@/redux/store";
 import { PaymentItem, Store } from "@/types";
 import { formatCurrency, getCurrentDateTime } from "@/utils";
@@ -10,14 +17,16 @@ import { FileText } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 const OrderReceipt = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<"success" | "failure">(
     "success"
   );
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(true);
-  const [urlParams, setUrlParams] = useState<any>({});
+  const [urlParams] = useState<any>({});
+  const [orderId, setOrderId] = useState<number | null>(null);
   const [selectedItems, setSelectedItems] = useState<PaymentItem[]>([]);
   const router = useRouter();
   const [toast, setToast] = useState<{
@@ -26,57 +35,41 @@ const OrderReceipt = () => {
   } | null>(null);
   const { user } = useSelector((state: RootState) => state.user);
   const [store, setStore] = useState<Store>();
+  // Xử lý tạo đơn hàng
   useEffect(() => {
-    let isMounted = true; // To track component mount state
-
+    if (orderId) return; // Đã có orderId thì không gọi API nữa
     const fetchOrder = async () => {
       try {
-        // Parse URL parameters
         const params = new URLSearchParams(window.location.search);
-        const paramsObject: { [key: string]: string | null } = {};
-        params.forEach((value, key) => (paramsObject[key] = value));
-
-        if (!isMounted) return;
-        setUrlParams(paramsObject);
-
-        const responseCode = paramsObject["vnp_ResponseCode"];
+        const responseCode = params.get("vnp_ResponseCode");
         if (responseCode !== "00") {
-          if (isMounted) setPaymentStatus("failure");
+          setPaymentStatus("failure");
+          setLoading(false);
           return;
         }
-
-        // Retrieve order data from cookies
         const storedOrderData = getCookie("orderData");
         if (!storedOrderData) return;
-
         const orderDataObject = JSON.parse(storedOrderData);
-        orderDataObject.status = "completed"; // Mark as completed
-
-        // Fetch store data
+        orderDataObject.status = "completed";
         const orderStore = await getStoreById(Number(orderDataObject.store_id));
-        if (isMounted) {
-          setStore(orderStore);
-          document.cookie = `storeLocation=${encodeURIComponent(
-            JSON.stringify([orderStore.latitude, orderStore.longitude])
-          )}; path=/; secure`;
-        }
-
-        // Retrieve and set order items
+        setStore(orderStore);
+        document.cookie = `storeLocation=${encodeURIComponent(
+          JSON.stringify([orderStore.latitude, orderStore.longitude])
+        )}; path=/; secure`;
         const orderItems = getCookie("orderItems");
         if (orderItems) {
-          const allOrderItems = JSON.parse(orderItems);
-          if (isMounted) setSelectedItems(allOrderItems);
+          setSelectedItems(JSON.parse(orderItems));
         }
-
-        // Create a new order
-        await createNewOrder(orderDataObject);
-        if (!isMounted) return;
+        // Tạo đơn hàng mới
+        const newOrderId = await createNewOrder(orderDataObject);
+        console.log("Order Created:", newOrderId);
+        if (newOrderId) {
+          setOrderId(newOrderId);
+        }
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching order:", error);
       } finally {
-        if (isMounted) setLoading(false);
-
-        // Cleanup: Delete cookies
+        setLoading(false);
         document.cookie =
           "orderData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie =
@@ -84,13 +77,33 @@ const OrderReceipt = () => {
         router.replace(window.location.pathname);
       }
     };
-
     fetchOrder();
-
-    return () => {
-      isMounted = false; // Cleanup function to avoid state updates after unmount
-    };
-  }, [router]);
+  }, [orderId]);
+  useEffect(() => {
+    if (!orderId || selectedItems.length === 0 || !store?.id) return;
+    (async () => {
+      try {
+        const orderItems = selectedItems.map((item) => ({
+          product_id: item.id,
+          quantity: Number(item.quantity),
+          price: typeof item.price === "string"
+            ? parseFloat(item.price.replace(/\./g, "").replace(",", "."))
+            : item.price,
+        }));
+        // Gửi order items lên server
+        await createOrderItems(Number(orderId), orderItems);
+        // Xóa các sản phẩm đã đặt khỏi giỏ hàng (chạy song song để nhanh hơn)
+        await Promise.all(selectedItems.map(item => removeCartItem(store.id, item.id)));
+        // Fetch lại giỏ hàng từ backend
+        const cartData = await getCartDetail(store.id);
+        const items = cartData.data?.store?.items ?? [];
+        // Cập nhật Redux Store nếu có dữ liệu
+        dispatch(setTotalItems(items.length));
+      } catch (error) {
+        console.error("Lỗi khi xử lý order items:", error);
+      }
+    })();
+  }, [orderId, selectedItems, store?.id, dispatch]);
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -115,6 +128,7 @@ const OrderReceipt = () => {
           onClick={toggleModal}
           className="absolute right-2 top-2 flex items-center justify-center space-x-2 p-2 bg-gray-50 text-gray-400 rounded-lg hover:bg-gray-100 transition duration-300"
         >
+          <p>Hóa đơn</p>
           <FileText className="w-5 h-5" />
         </button>
         <div className="flex justify-center mb-4">
@@ -193,7 +207,6 @@ const OrderReceipt = () => {
               </h1>
               <h2 className="text-xl font-semibold mt-2">HÓA ĐƠN LẤY HÀNG</h2>
             </header>
-
             {/* Nội dung có thể cuộn */}
             <div className="p-4 overflow-y-auto flex-grow">
               <section className="mb-4 text-sm space-y-2">
@@ -218,7 +231,6 @@ const OrderReceipt = () => {
                   {getCurrentDateTime()}
                 </p>
               </section>
-
               {/* Bảng sản phẩm */}
               <table className="w-full text-sm border-t border-b border-gray-300">
                 <thead>
@@ -258,7 +270,6 @@ const OrderReceipt = () => {
                   })}
                 </tbody>
               </table>
-
               {/* Tổng thanh toán */}
               <div className="text-right mt-4 text-sm space-y-2">
                 <p>
@@ -274,12 +285,10 @@ const OrderReceipt = () => {
                 </p>
               </div>
             </div>
-
             {/* Footer cố định */}
             <footer className="p-4 border-t border-gray-200 text-center text-xs text-gray-500 sticky bottom-0 bg-white">
               www.ecosave.space
             </footer>
-
             {/* Nút đóng */}
             <button
               onClick={toggleModal}
