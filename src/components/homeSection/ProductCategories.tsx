@@ -18,9 +18,12 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
   const handleCategoryClick = async (category: Category) => {
     setLoading(true); // Bắt đầu tải dữ liệu
     setSelectedCategory(category.id);
+    console.log(category.id)
     try {
       const filterProductsByCategory = await getProductsByCategoryId(category.id);
-      setProducts(filterProductsByCategory);
+      console.log(filterProductsByCategory)
+      setProducts([...filterProductsByCategory]);
+
     } catch (error) {
       console.error("Error fetching products by category:", error);
     }

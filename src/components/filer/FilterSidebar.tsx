@@ -25,7 +25,9 @@ export default function FilterSidebar({
 
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
-  const [priceRange, setPriceRange] = useState<[number, number]>([10000, 1000000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    10000, 1000000,
+  ]);
   const [expiryDate, setExpiryDate] = useState<string>("");
   const [distance, setDistance] = useState<number>(10);
 
@@ -35,10 +37,11 @@ export default function FilterSidebar({
   }, [selectedCategories, selectedRating, priceRange, expiryDate, distance]);
 
   async function handleFilterProduct() {
-    console.log('hello')
+    console.log("hello");
     setLoading(true);
     const filters: ProductFilters = {
-      category_id: selectedCategories.length > 0 ? selectedCategories : undefined,
+      category_id:
+        selectedCategories.length > 0 ? selectedCategories : undefined,
       rating: selectedRating ?? undefined,
       min_price: priceRange[0],
       max_price: priceRange[1],
@@ -47,9 +50,9 @@ export default function FilterSidebar({
     };
 
     const filteredProducts = await getProducts(filters);
-    console.log(filteredProducts)
+    console.log(filteredProducts);
     setProducts(filteredProducts);
-    console.log(allProducts)
+    console.log(allProducts);
     setLoading(false);
   }
 
@@ -70,7 +73,10 @@ export default function FilterSidebar({
         <div className="space-y-2 max-h-96 overflow-auto">
           {categories && categories.length > 0 ? (
             categories.map((type) => (
-              <div key={type.id} className="flex items-center space-x-2 cursor-pointer hover:bg-primary">
+              <div
+                key={type.id}
+                className="flex items-center space-x-2 cursor-pointer hover:bg-primary"
+              >
                 <Checkbox
                   id={type.name.toLowerCase()}
                   checked={selectedCategories.includes(type.id)}
@@ -82,7 +88,10 @@ export default function FilterSidebar({
                     );
                   }}
                 />
-                <label htmlFor={type.name.toLowerCase()} className="text-sm cursor-pointer">
+                <label
+                  htmlFor={type.name.toLowerCase()}
+                  className="text-sm cursor-pointer"
+                >
                   {type.name}
                 </label>
               </div>
@@ -100,16 +109,25 @@ export default function FilterSidebar({
           {[5, 4, 3, 2, 1].map((rating) => (
             <div key={rating} className="flex items-center space-x-2">
               <input
+                className="w-5 h-5 border border-gray-400 rounded-full checked:bg-primary checked:border-primary focus:ring-primary"
                 type="radio"
                 id={`rating-${rating}`}
                 name="rating"
                 checked={selectedRating === rating}
-                onChange={() => {
-                  setSelectedRating(rating);
-                }}
+                onChange={() => setSelectedRating(rating)}
               />
-              <label htmlFor={`rating-${rating}`} className="text-sm flex items-center cursor-pointer">
-                {rating} <Star className="w-4 h-4 ml-1 fill-yellow-400" />
+              <label
+                htmlFor={`rating-${rating}`}
+                className="text-sm flex items-center cursor-pointer"
+              >
+                {/* Hiển thị đúng số lượng sao */}
+                {Array.from({ length: rating }).map((_, index) => (
+                  <Star
+                    key={index}
+                    className="w-5 h-5 m-1 fill-yellow-400"
+                    stroke="none"
+                  />
+                ))}
               </label>
             </div>
           ))}

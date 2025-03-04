@@ -52,6 +52,11 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
       console.error("Trình duyệt không hỗ trợ Geolocation");
     }
   }, []);
+  useEffect(() => {
+
+    console.log("Products have changed in Home:", products);
+  }, [products]);
+
   return (
     <div className="lg:px-20 px-10 h-full w-full overflow-hidden">
       <section className="relative px-4 flex flex-col md:flex-row items-center justify-between h-[600px]">
@@ -186,7 +191,7 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
       <section className="relative flex flex-col md:flex-row items-center justify-between h-auto">
         <ProductCategories categories={categories} setProducts={setProducts} setLoading={setLoading}/>
       </section>
-      <section className="relative min-h-96 flex flex-col md:flex-row items-start justify-between h-auto">
+      <section className="relative min-h-96 flex flex-col md:flex-row items-start justify-between h-auto px-3">
         <Products products={products} setProducts={setProducts} loading={loading} setLoading={setLoading} />
       </section>
       <section className="relative flex flex-col md:flex-row items-center justify-between h-auto">

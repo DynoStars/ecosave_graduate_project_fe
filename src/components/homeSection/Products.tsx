@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AiFillStar } from "react-icons/ai";
@@ -45,7 +45,10 @@ export default function Products({ products, loading }: ProductsProps) {
   );
   const [quantity, setQuantity] = useState(1);
   const [isWishlist, setIsWishlist] = useState(false);
-  const [toast, setToast] = useState<{ message: string; keyword: "SUCCESS" | "ERROR" | "WARNING" | "INFO" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    keyword: "SUCCESS" | "ERROR" | "WARNING" | "INFO";
+  } | null>(null);
   const params = useParams();
   const storeId = params.storeId ? parseInt(params.storeId) : undefined;
 
@@ -56,6 +59,10 @@ export default function Products({ products, loading }: ProductsProps) {
     startIndex,
     startIndex + itemsPerPage
   );
+
+  useEffect(() => {
+    setListProducts(products);
+  }, [products]);
 
   const handleSearchProduct = async (query: string) => {
     setLoadingProducts(true);
@@ -96,26 +103,38 @@ export default function Products({ products, loading }: ProductsProps) {
     );
   };
 
+
+
   const handleAddToCart = async (product: Product) => {
     try {
-        await addToCart(product.id, quantity);
-        setToast({ message: "Sản phẩm đã được thêm vào giỏ hàng!", keyword: "SUCCESS" });
-        dispatch(increment());
-        setTimeout(() => setToast(null), 3000);
+      await addToCart(product.id, quantity);
+      setToast({
+        message: "Sản phẩm đã được thêm vào giỏ hàng!",
+        keyword: "SUCCESS",
+      });
+      dispatch(increment());
+      setTimeout(() => setToast(null), 3000);
     } catch (error: unknown) {
-        let errorMessage = "Đã xảy ra lỗi khi thêm vào giỏ hàng.";
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-        setToast({ message: errorMessage, keyword: "ERROR" });
-        setTimeout(() => setToast(null), 3000);
+      let errorMessage = "Đã xảy ra lỗi khi thêm vào giỏ hàng.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setToast({ message: errorMessage, keyword: "ERROR" });
+      setTimeout(() => setToast(null), 3000);
     }
   };
 
   return (
-    <section className="container mx-auto px-4">
+    <section className=" mx-auto w-full">
       <div className="absolute">
-        {toast && createPortal(<ToastNotification message={toast.message} keyword={toast.keyword} />, document.body)}
+        {toast &&
+          createPortal(
+            <ToastNotification
+              message={toast.message}
+              keyword={toast.keyword}
+            />,
+            document.body
+          )}
       </div>
       <div className="flex justify-between items-center py-4">
         <h4 className="text-2xl font-bold">Sản Phẩm Bán Chạy</h4>
@@ -142,19 +161,14 @@ export default function Products({ products, loading }: ProductsProps) {
           <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[...Array(10)].map((_, index) => (
               <div key={index} className="bg-white rounded-lg p-4">
-                <div className="bg-gray-300 w-full h-40 rounded-md"></div>{" "}
-                {/* Ảnh sản phẩm */}
+                <div className="bg-gray-300 w-full h-40 rounded-md"></div>
                 <div className="mt-3 space-y-2">
-                  <div className="bg-gray-300 h-4 w-3/4 rounded"></div>{" "}
-                  {/* Tiêu đề */}
-                  <div className="bg-gray-300 h-4 w-1/2 rounded"></div>{" "}
-                  {/* Thông tin phụ */}
+                  <div className="bg-gray-300 h-4 w-3/4 rounded"></div>
+                  <div className="bg-gray-300 h-4 w-1/2 rounded"></div>
                 </div>
                 <div className="flex justify-between gap-7">
-                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>{" "}
-                  {/* Nút hoặc giá */}
-                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>{" "}
-                  {/* Nút hoặc giá */}
+                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>
+                  <div className="mt-4 bg-gray-300 h-10 w-full rounded"></div>
                 </div>
               </div>
             ))}
@@ -169,28 +183,30 @@ export default function Products({ products, loading }: ProductsProps) {
               {currentProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="rounded-lg shadow-soft bg-white pb-3 z-10 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-strong"
+                  className="relative rounded-lg shadow-soft bg-white pb-5 z-10 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-strong"
                 >
                   {product.discount_percent > 0 && (
-                    <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded absolute">
+                    <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
                       Giảm {product.discount_percent}%
                     </span>
                   )}
                   <Link href={`/products/${product.id}`} className="block">
-                    <Image
-                      src={product.images[0]?.image_url || fallbackImage.src}
-                      alt={product.name}
-                      width={300}
-                      height={300}
-                      className="mx-auto w-full object-cover"
-                    />
+                    <div className="w-full h-[300px] overflow-hidden bg-gray-200">
+                      <Image
+                        src={product.images[0]?.image_url || fallbackImage.src}
+                        alt={product.name}
+                        width={600}
+                        height={600}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </Link>
                   <div className="mt-3 px-4">
                     <div className="flex justify-between">
                       <p className="flex-1 text-sm max-w-[100px] text-gray-500 truncate-description-1-line">
                         {product.category.name}
                       </p>
-                      <div className="flex-1 text-gray-500 flex justify-between items-center">
+                      <div className="flex-1 text-gray-500 flex justify-end gap-3 items-center">
                         <p className="text-sm truncate-description-1-line">
                           {userLocation
                             ? `${calculateDistance(
@@ -209,16 +225,17 @@ export default function Products({ products, loading }: ProductsProps) {
                       </div>
                     </div>
                     <Link href={`/products/${product.id}`} className="block">
-                      <h3 className="text-xl font-semibold truncate-description-1-line hover:text-primary">
+                      <h3 className="text-[17px] font-semibold truncate-description-1-line hover:text-primary">
                         {product.name}
                       </h3>
                     </Link>
                     <div className="flex justify-between items-center">
                       <p className="text-primary-light font-bold">
-                        {formatMoney (Number(product.original_price), 'VND')}
+                        {formatMoney(Number(product.original_price), "VND")}
                       </p>
                       <div className="flex justify-center items-center gap-1 ">
-                        {product.rating} <AiFillStar className="text-yellow-400" size={16} />
+                        {product.rating}{" "}
+                        <AiFillStar className="text-yellow-400" size={16} />
                       </div>
                     </div>
                   </div>
@@ -238,7 +255,10 @@ export default function Products({ products, loading }: ProductsProps) {
                       )}
                     </button>
 
-                    <button onClick={() => handleAddToCart(product)} className="p-2 w-[75%] flex justify-center bg-primary rounded-full text-white hover:bg-primary-light">
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      className="p-2 w-[75%] flex justify-center bg-primary rounded-full text-white hover:bg-primary-light"
+                    >
                       <AiOutlineShoppingCart size={20} />
                     </button>
                   </div>

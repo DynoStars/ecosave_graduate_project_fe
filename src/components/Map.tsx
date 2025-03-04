@@ -1,53 +1,53 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import Script from "next/script";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
-
-const HomeMapSecsion = () => {
-  const [map, setMap] = useState<any>(null);
-  const accessToken = "yn7zQK2me9A32r6ZVGl5BuBYBwjifSF3dqBbo9Wp";
-  const defaultLocation: [number, number] = [108.2432527, 16.0600528]; // Centered at Ho Chi Minh City
-
+const accessToken =
+  process.env.MAP_TITLE_KEY || "yn7zQK2me9A32r6ZVGl5BuBYBwjifSF3dqBbo9Wp";
+const mapLinkCss =
+  process.env.MAP_CSS_LINK ||
+  "https://tiles.goong.io/assets/goong_map_web.json";
+const HomeMapSection = () => {
+  const mapRef = useRef<InstanceType<typeof window.goongjs.Map> | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const defaultLocation: [number, number] = [108.2432527, 16.0600528];
   useEffect(() => {
-    if (typeof window !== "undefined" && window.goongjs) {
+    if (!accessToken) {
+      console.error("GoongJS Access Token is missing!");
+      return;
+    }
+    if (typeof window !== "undefined" && window.goongjs && !mapRef.current) {
       window.goongjs.accessToken = accessToken;
-
-      const newMap = new window.goongjs.Map({
-        container: "map",
-        style: "https://tiles.goong.io/assets/goong_map_web.json",
+      mapRef.current = new window.goongjs.Map({
+        container: mapContainerRef.current!,
+        style: mapLinkCss,
         center: defaultLocation,
         zoom: 12,
       });
-
-      setMap(newMap);
-
-      newMap.on("load", () => {
-        // Add marker for default location
-        new window.goongjs.Marker()
-          .setLngLat(defaultLocation)
-          .setPopup(new window.goongjs.Popup().setText("Default Location"))
-          .addTo(newMap);
+      const marker = new window.goongjs.Marker()
+        .setLngLat(defaultLocation)
+        .setPopup(new window.goongjs.Popup().setText("Địa chỉ của bạn"))
+        .addTo(mapRef.current);
+      mapRef.current.on("load", () => {
+        console.log("Map loaded successfully");
       });
+      return () => {
+        marker.remove();
+        if (mapRef.current) {
+          mapRef.current.remove();
+          mapRef.current = null;
+        }
+      };
     }
   }, []);
-
   return (
-    <div className="w-full">
-      <Script
-        src="https://cdn.jsdelivr.net/npm/@goongmaps/goong-js@1.0.9/dist/goong-js.js"
-        onLoad={() => console.log("GoongJS Loaded")}
-        strategy="beforeInteractive"
-      />
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@goongmaps/goong-js@1.0.9/dist/goong-js.css"
-      />
+    <div className="w-full relative">
+      <div ref={mapContainerRef} className="w-full h-[300px]"></div>
       <Link href="/map">
-        <div id="map" style={{ width: "100%", height: "300px" }}></div>
+        <p className="absolute top-2 right-2 bg-white text-primary px-3 py-1 rounded shadow">
+          View Full Map
+        </p>
       </Link>
     </div>
   );
 };
-
-export default HomeMapSecsion;
+export default HomeMapSection;
