@@ -217,3 +217,8 @@ export interface ScanProductInfoProps {
   barcode: string;
   setProductForAiGenerate: (product: ProductScan) => void;
 }
+
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+}

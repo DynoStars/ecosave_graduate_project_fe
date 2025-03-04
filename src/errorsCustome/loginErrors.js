@@ -41,4 +41,4 @@ export const loginErrors = {
       customMessage: "Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau."
     }
   }
-}; // Thêm "as const" để cố định kiểu
+}; 

@@ -1,17 +1,13 @@
-// src/types/global.d.ts
 export {};
-
 declare module "@goongmaps/goong-js" {
   const content: GoongJS;
   export default content;
 }
-
 declare global {
   interface Window {
     goongjs: GoongJS;
   }
 }
-
 interface GoongJS {
   accessToken: string;
   Map: new (options: GoongMapOptions) => GoongMapInstance;
