@@ -63,7 +63,7 @@ const BarcodeScanner = () => {
         locate: true,
         patchSize: "small",
       },
-      (err) => {
+      (err : any) => {
         if (err) {
           console.error("Error initializing Quagga:", err);
           return;

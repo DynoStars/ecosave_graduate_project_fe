@@ -62,11 +62,16 @@ export default function FilterSidebar({
   categories,
   setLoading,
 }: FilterSidebarProps) {
-  const { storeId } = useParams();
+  const params = useParams();
+  const storeId = Array.isArray(params?.storeId)
+    ? params.storeId[0]
+    : params?.storeId;
   const store_id = storeId ? parseInt(storeId as string) : undefined;
   const [state, dispatch] = useReducer(filterReducer, initialState);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(
+    null
+  );
   // Lấy userLocation khi component mount
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -101,7 +106,7 @@ export default function FilterSidebar({
         signal: abortControllerRef.current.signal,
       });
       setProducts(filteredProducts);
-    } catch (error) {
+    } catch (error: any) {
       if (error.name !== "AbortError") {
         console.error("Filter error:", error);
         setProducts(allProducts);
@@ -190,13 +195,16 @@ export default function FilterSidebar({
         <h3 className="font-semibold mb-4">Khoảng giá</h3>
         <Slider
           value={state.priceRange}
-          onValueChange={(value) =>
-            dispatch({ type: "SET_PRICE", payload: value })
-          }
+          onValueChange={(value) => {
+            if (value.length === 2) {
+              dispatch({ type: "SET_PRICE", payload: [value[0], value[1]] });
+            }
+          }}
           max={1000000}
           step={10000}
           className="w-full"
         />
+
         <div className="flex justify-between mt-2 text-sm">
           <span>{state.priceRange[0].toLocaleString()}đ</span>
           <span>{state.priceRange[1].toLocaleString()}đ</span>

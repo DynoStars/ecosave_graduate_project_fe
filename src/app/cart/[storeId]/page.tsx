@@ -1,17 +1,16 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getCartDetail, updateCartItemQuantity, removeCartItem, makeNewPayment } from "@/api";
+import { getCartDetail, updateCartItemQuantity, removeCartItem } from "@/api";
 import React, { useEffect, useState, useCallback } from "react";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 import type { CartProduct, PaymentItem } from "@/types";
 import { DeliveryAddress } from "@/components/cart/DeliveryAddress";
 import { CartItem } from "@/components/cart/CartItem";
 import { CartSummary } from "@/components/cart/CartSummary";
-import { ShoppingCart, AlertCircle, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { ShoppingCart, AlertCircle, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { addPaymentItem } from "@/redux/paymentSlice";
 
@@ -21,67 +20,85 @@ const CartPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const params = useParams();
-  const { user } = useSelector((state: RootState) => state.user);
   const router = useRouter();
   const dispatch = useDispatch();
 
+  const storeId =
+    params?.storeId && !isNaN(parseInt(params.storeId as string))
+      ? parseInt(params.storeId as string)
+      : null;
 
-  const storeId = params.storeId && !isNaN(parseInt(params.storeId))
-    ? parseInt(params.storeId)
-    : null;
+  const debouncedUpdateQuantity = debounce(
+    async (storeId: number, productId: number, newQuantity: number) => {
+      try {
+        await updateCartItemQuantity(storeId, productId, newQuantity);
+      } catch (error) {
+        console.error("Failed to update quantity:", error);
+        setCartItems((prevItems) =>
+          prevItems.map((item) =>
+            item.product_id === productId
+              ? { ...item, quantity: item.quantity }
+              : item
+          )
+        );
+        setError("Không thể cập nhật số lượng. Vui lòng thử lại.");
+      }
+    },
+    500
+  );
 
-  const debouncedUpdateQuantity = debounce(async (storeId: number, productId: number, newQuantity: number) => {
-    try {
-      await updateCartItemQuantity(storeId, productId, newQuantity);
-    } catch (error) {
-      console.error("Failed to update quantity:", error);
+  const handleQuantityChange = useCallback(
+    (productId: number, newQuantity: number) => {
+      if (!storeId) return;
+
       setCartItems((prevItems) =>
         prevItems.map((item) =>
-          item.product_id === productId ? { ...item, quantity: item.quantity } : item
+          item.product_id === productId
+            ? {
+                ...item,
+                quantity: newQuantity,
+                subtotal: newQuantity * Number(item.discounted_price),
+              }
+            : item
         )
       );
-      setError("Không thể cập nhật số lượng. Vui lòng thử lại.");
-    }
-  }, 500);
 
-  const handleQuantityChange = useCallback((productId: number, newQuantity: number) => {
-    if (!storeId) return;
+      debouncedUpdateQuantity(storeId, productId, newQuantity);
+    },
+    [storeId, debouncedUpdateQuantity]
+  );
 
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product_id === productId
-          ? { ...item, quantity: newQuantity, subtotal: newQuantity * Number(item.discounted_price) }
-          : item
-      )
-    );
+  const handleRemoveItem = useCallback(
+    async (productId: number) => {
+      if (!storeId) return;
 
-    debouncedUpdateQuantity(storeId, productId, newQuantity);
-  }, [storeId, debouncedUpdateQuantity]);
-
-  const handleRemoveItem = useCallback(async (productId: number) => {
-    if (!storeId) return;
-
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product_id === productId ? { ...item, isRemoving: true } : item
-      )
-    );
-
-    try {
-      await removeCartItem(storeId, productId);
-      setCartItems((prevItems) => prevItems.filter((item) => item.product_id !== productId));
-    } catch (error) {
-      console.error("Failed to remove item:", error);
       setCartItems((prevItems) =>
         prevItems.map((item) =>
-          item.product_id === productId ? { ...item, isRemoving: false } : item
+          item.product_id === productId ? { ...item, isRemoving: true } : item
         )
       );
-      setError("Không thể xóa sản phẩm. Vui lòng thử lại.");
-    }
-  }, [storeId]);
 
-  const fetchCart = async () => {
+      try {
+        await removeCartItem(storeId, productId);
+        setCartItems((prevItems) =>
+          prevItems.filter((item) => item.product_id !== productId)
+        );
+      } catch (error) {
+        console.error("Failed to remove item:", error);
+        setCartItems((prevItems) =>
+          prevItems.map((item) =>
+            item.product_id === productId
+              ? { ...item, isRemoving: false }
+              : item
+          )
+        );
+        setError("Không thể xóa sản phẩm. Vui lòng thử lại.");
+      }
+    },
+    [storeId]
+  );
+
+  const fetchCart = useCallback(async () => {
     if (!storeId) {
       setError("Store ID không hợp lệ.");
       setLoading(false);
@@ -91,13 +108,14 @@ const CartPage: React.FC = () => {
     try {
       setLoading(true);
       const cartData = await getCartDetail(storeId);
+
       setCartData(cartData.data);
-      const items = cartData.data?.store?.items;
-      console.log(items)
-      if (Array.isArray(items) && items.length > 0) {
-        setCartItems(items);
-      } else {
-        setCartItems([]);
+
+      const items = cartData.data?.store?.items ?? [];
+
+      setCartItems(items);
+
+      if (items.length === 0) {
         setError("Giỏ hàng trống.");
       }
     } catch (err: any) {
@@ -106,20 +124,23 @@ const CartPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [storeId]); // ✅ `useCallback` ensures `fetchCart` is stable
 
   useEffect(() => {
     fetchCart();
-  }, [storeId]);
+  }, [fetchCart]); // ✅ No ESLint warnings now
 
-  const calculateTotal = () => cartItems.reduce((sum, item) => sum + Number(item.subtotal), 0);
-  const calculateSavings = () => cartItems.reduce(
-    (sum, item) => sum + (Number(item.original_price) * item.quantity - Number(item.subtotal)),
-    0
-  );
+  const calculateTotal = () =>
+    cartItems.reduce((sum, item) => sum + Number(item.subtotal), 0);
+  const calculateSavings = () =>
+    cartItems.reduce(
+      (sum, item) =>
+        sum +
+        (Number(item.original_price) * item.quantity - Number(item.subtotal)),
+      0
+    );
 
   const handlePayment = async () => {
-
     // if (!user) {
     //   setToast({
     //     message: "Vui lòng đăng nhập trước khi mua sản phẩm!",
@@ -132,14 +153,12 @@ const CartPage: React.FC = () => {
         id: product.product_id,
         name: product.name,
         price: product.discounted_price,
-        quantity : product.quantity,
+        quantity: product.quantity,
         picture: product.images[0].image_url,
         storeId: storeId ?? 1,
       };
       dispatch(addPaymentItem(paymentProductItem));
-    })
-
-
+    });
 
     // setToast({
     //   message: "Sản phẩm đã được thêm vào thanh toán!",
@@ -147,9 +166,8 @@ const CartPage: React.FC = () => {
     // });
     // setTimeout(() => setToast(null), 3000);
     router.push("/checkout");
-    console.log(cartItems)
-
-  }
+    console.log(cartItems);
+  };
 
   if (loading) {
     return (
@@ -185,8 +203,8 @@ const CartPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <DeliveryAddress
-                storeLatitude = {cartData?.store?.store_latitude || ""}
-                storeLongitude = {cartData?.store?.store_longitude || ""}
+                storeLatitude={cartData?.store?.store_latitude || ""}
+                storeLongitude={cartData?.store?.store_longitude || ""}
                 storeAddress={cartData?.store?.store_address || ""}
                 userAddress={cartData?.user?.address || ""}
                 onChangeAddress={() => console.log("Change address")}
@@ -215,7 +233,9 @@ const CartPage: React.FC = () => {
         ) : (
           <div className="text-center py-16 bg-white rounded-lg shadow-lg">
             <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-            <p className="text-2xl text-gray-600 mb-8">Giỏ hàng của bạn đang trống.</p>
+            <p className="text-2xl text-gray-600 mb-8">
+              Giỏ hàng của bạn đang trống.
+            </p>
             <Link
               href="/products"
               className="inline-flex items-center justify-center bg-teal-500 hover:bg-teal-600 text-white py-3 px-8 rounded-full transition-colors duration-300 text-lg font-medium"

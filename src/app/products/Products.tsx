@@ -28,7 +28,7 @@ export default function ProductListing({
     }, 5000);
     return () => clearInterval(interval);
   }, [banners.length]);
-  
+
   return (
     <div className="container mx-auto py-8 mw-[100%]">
       <div className="w-full h-[350px] relative">
@@ -59,9 +59,7 @@ export default function ProductListing({
         <main className="flex-1 flex-wrap w-full">
           <Products
             products={products}
-            setProducts={setProducts}
             loading={loading}
-            setLoading={setLoading}
           />
         </main>
       </div>

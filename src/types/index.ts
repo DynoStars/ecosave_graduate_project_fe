@@ -277,3 +277,21 @@ export type Review = {
 export interface StoreInfoProps {
   store: Store;
 }
+
+export interface FormData {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  role_id: number;
+}
+export interface Errors {
+  name?: string;
+  email?: string;
+  address?: string;
+  password?: string;
+  password_confirmation?: string;
+}

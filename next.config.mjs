@@ -12,6 +12,10 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    optimizeCss: true,
+  },
+  trailingSlash: true, // Có thể giúp tránh lỗi khi export
 };
 
 export default nextConfig;

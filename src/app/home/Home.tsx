@@ -32,14 +32,15 @@ export default function Home({
   const [categories] = useState<Category[]>(listCategories);
   const [loading, setLoading] = useState<boolean>(loadingProps);
   const [products, setProducts] = useState<Product[]>(listProducts);
-  const images = useMemo(() => [Image1.src, Image2.src], []); // Danh sách ảnh
+  const images = useMemo(() => [Image1.src, Image2.src], []);
   const [index, setIndex] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 2) % images.length);
     }, 3000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [images.length]);
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(

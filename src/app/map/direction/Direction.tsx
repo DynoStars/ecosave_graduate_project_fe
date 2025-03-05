@@ -1,8 +1,6 @@
 "use client";
-
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
 const GOONG_MAPTILES_API_KEY = "YEhRSFL1iJ9L36gE9JBntr9CZbJeCdQuMYEKoEhR";
 const GOONG_DIRECTIONS_API_KEY = "ciKymNkaZCbLIS6e6ZdXhTADft9jAJQerhyfI6cq";
 
@@ -10,19 +8,15 @@ interface DirectionProps {
   origin: string;
   destination: string;
 }
-
 const Direction = ({ origin, destination }: DirectionProps) => {
   const [route, setRoute] = useState<any>(null);
   const accessToken = "yn7zQK2me9A32r6ZVGl5BuBYBwjifSF3dqBbo9Wp";
-
   useEffect(() => {
     const fetchRoute = async () => {
       const url = `https://rsapi.goong.io/Direction?origin=${origin}&destination=${destination}&api_key=${GOONG_DIRECTIONS_API_KEY}`;
-
       try {
         const response = await fetch(url);
         const data = await response.json();
-
         if (data && data.routes) {
           setRoute(data.routes[0]);
         }
@@ -30,27 +24,27 @@ const Direction = ({ origin, destination }: DirectionProps) => {
         console.error("Error fetching route:", error);
       }
     };
-
     fetchRoute();
   }, [origin, destination]);
-
   useEffect(() => {
     if (typeof window !== "undefined" && window.goongjs) {
       window.goongjs.accessToken = accessToken;
+      const center = origin.split(",").map(Number).reverse() as [
+        number,
+        number
+      ];
       if (route) {
-        const map = new goongjs.Map({
+        const map = new window.goongjs.Map({
           container: "map",
           style: `https://tiles.goong.io/assets/goong_map_web.json?api_key=${GOONG_MAPTILES_API_KEY}`,
-          center: origin.split(",").map(Number).reverse(),
+          center: center,
           zoom: 14,
         });
-
         const decodePolyline = (encoded: string) => {
           let index = 0,
             lat = 0,
             lng = 0,
             coordinates = [];
-
           while (index < encoded.length) {
             let b,
               shift = 0,
@@ -60,10 +54,8 @@ const Direction = ({ origin, destination }: DirectionProps) => {
               result |= (b & 0x1f) << shift;
               shift += 5;
             } while (b >= 0x20);
-
             const dlat = result & 1 ? ~(result >> 1) : result >> 1;
             lat += dlat;
-
             shift = 0;
             result = 0;
             do {
@@ -71,21 +63,15 @@ const Direction = ({ origin, destination }: DirectionProps) => {
               result |= (b & 0x1f) << shift;
               shift += 5;
             } while (b >= 0x20);
-
             const dlng = result & 1 ? ~(result >> 1) : result >> 1;
             lng += dlng;
-
             coordinates.push([lng / 1e5, lat / 1e5]);
           }
-
           return coordinates;
         };
-
         const decodedPath = decodePolyline(route.overview_polyline.points);
-
         map.on("load", () => {
           let index = 0;
-
           const animateRoute = () => {
             if (index < decodedPath.length) {
               const slice = decodedPath.slice(0, index);
@@ -101,7 +87,6 @@ const Direction = ({ origin, destination }: DirectionProps) => {
               requestAnimationFrame(animateRoute);
             }
           };
-
           map.addSource("route", {
             type: "geojson",
             data: {
@@ -113,7 +98,6 @@ const Direction = ({ origin, destination }: DirectionProps) => {
               },
             },
           });
-
           map.addLayer({
             id: "route",
             type: "line",
@@ -123,23 +107,21 @@ const Direction = ({ origin, destination }: DirectionProps) => {
               "line-width": 5,
             },
           });
-
           animateRoute();
-
-          const [originLng, originLat] = origin.split(",").map(Number).reverse();
+          const [originLng, originLat] = origin
+            .split(",")
+            .map(Number)
+            .reverse();
           const [destLng, destLat] = destination
             .split(",")
             .map(Number)
             .reverse();
-
           const originEl = document.createElement("div");
           originEl.className = "origin-marker";
           originEl.style.animation = "bounce 1s infinite";
-
           const popup = new window.goongjs.Popup({ offset: 25 }).setText(
             "Địa chỉ của bạn"
           );
-
           new window.goongjs.Marker({
             element: originEl,
             anchor: "center",
@@ -147,24 +129,19 @@ const Direction = ({ origin, destination }: DirectionProps) => {
             .setLngLat([originLng, originLat])
             .setPopup(popup)
             .addTo(map);
-
           popup.addTo(map);
-
           const el = document.createElement("div");
           el.innerHTML = "🏪";
           el.style.fontSize = "24px";
           el.style.animation = "fadeIn 1.5s";
-
           new window.goongjs.Marker(el)
             .setLngLat([destLng, destLat])
             .addTo(map);
         });
-
         return () => map.remove();
       }
     }
   }, [route, origin, destination]);
-
   return (
     <div className="relative">
       <Link href="/">
@@ -176,5 +153,4 @@ const Direction = ({ origin, destination }: DirectionProps) => {
     </div>
   );
 };
-
 export default Direction;

@@ -1,11 +1,13 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+import tailwindcssDebugScreens from "tailwindcss-debug-screens";
+
 const config: Config = {
   darkMode: ["class"],
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/pages/**/*.{js,ts,jsx,tsx}",
+    "./src/components/**/*.{js,ts,jsx,tsx}",
+    "./src/app/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
     extend: {
@@ -14,7 +16,7 @@ const config: Config = {
         white: "#FFFFFF",
         primary: {
           DEFAULT: "#009883",
-          dark: "#06887",
+          dark: "#068887", // Fixed invalid hex code
           light: "#058170",
         },
         secondary: {
@@ -37,7 +39,7 @@ const config: Config = {
         foreground: "var(--foreground)",
       },
       boxShadow: {
-        soft: "rgba(0, 0, 0, 0.1) 0px 10px 50px;",
+        soft: "rgba(0, 0, 0, 0.1) 0px 10px 50px",
         strong: "rgba(17, 12, 46, 0.15) 0px 48px 100px 0px",
       },
       animation: {
@@ -52,7 +54,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [tailwindcssAnimate, tailwindcssDebugScreens], // Fixed missing plugin
 };
 
 export default config;

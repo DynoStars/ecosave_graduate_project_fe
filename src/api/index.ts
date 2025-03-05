@@ -1,8 +1,5 @@
-import { FormData } from '@/app/(auth)/register/Register';
-import { ApiResponse, Category, OrderData, Product, ProductFilters, ProductScan, Store } from '@/types';
-import getCookie from '@/utils/helpers/getCookie';
+import {  Category, FormData, Product, ProductFilters, Store } from '@/types';
 import axios from 'axios';
-import { useState } from "react";
 
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 const MAP_KEY = process.env.NEXT_PUBLIC_MAP_KEY;
@@ -99,7 +96,7 @@ const register = async (formData: FormData) => {
     console.error("Lỗi khi đăng ký:", error);
   }
 };
-async function getProducts(filters: ProductFilters): Promise<Product[]> {
+async function getProducts(filters: ProductFilters, options?: RequestInit): Promise<Product[]> {
   try {
     const params: any = { ...filters };
     if (filters.category_id && filters.category_id.length > 0) {
@@ -122,7 +119,10 @@ async function getProducts(filters: ProductFilters): Promise<Product[]> {
     const response = await axios.get(`${serverUrl}/products`, {
       params,
       headers: { "Cache-Control": "no-store" },
+      signal: options?.signal ?? undefined, // Chỉ truyền nếu signal hợp lệ
     });
+
+
 
     const products = response.data.data as Product[];
 
@@ -356,7 +356,7 @@ export const addToCart = async (productId: number, quantity: number) => {
   }
 
   try {
-    const response = await axios.post(
+    await axios.post(
       `${serverUrl}/cart/add`,
       { product_id: productId, quantity },
       {
@@ -643,7 +643,7 @@ export const fetchUser = async () => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    return await response.json(); 
+    return await response.json();
   } catch (error) {
     console.error("Lỗi khi gọi API:", error);
     return null;

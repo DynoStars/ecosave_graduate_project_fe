@@ -7,7 +7,6 @@ import {
   ShoppingCart,
   Close,
 } from "@mui/icons-material";
-import "./NavBar.css";
 import Link from "next/link";
 import menuItemsData from "../../../assets/json/menuItems.json";
 import { UserProfile } from "@/types";

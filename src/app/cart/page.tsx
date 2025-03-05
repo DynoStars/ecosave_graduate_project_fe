@@ -72,7 +72,7 @@ const ShoppingCart: React.FC = () => {
     }
 
     fetchCart()
-  }, [])
+  }, [dispatch])
 
   const getFirstImage = (items: CartItem[]): string => {
     if (items[0]?.images?.length > 0) {

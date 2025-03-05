@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,17 +21,14 @@ import ToastNotification from "../toast/ToastNotification";
 import calculateDistance from "@/utils/calculateDistance";
 import { formatMoney } from "@/utils";
 import SubLoading from "../loading/subLoading";
-
 // Constants
 const ITEMS_PER_PAGE = 8;
 const DEBOUNCE_DELAY = 500;
 const TOAST_DURATION = 3000;
-
 interface ProductsProps {
   products: Product[];
   loading?: boolean;
 }
-
 export default function Products({
   products: initialProducts,
   loading: initialLoading,
@@ -40,11 +36,7 @@ export default function Products({
   const dispatch = useDispatch();
   const userLocation = useUserLocation();
   const params = useParams();
-  const storeId = params.storeId
-    ? parseInt(params.storeId as string, 10)
-    : undefined;
-
-  // State declarations
+  const storeId = params && params.storeId ? parseInt(params.storeId as string, 10) : undefined;
   const [currentPage, setCurrentPage] = useState(1);
   const [listProducts, setListProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,7 +52,6 @@ export default function Products({
     message: string;
     keyword: "SUCCESS" | "ERROR" | "WARNING" | "INFO";
   } | null>(null);
-
   // Memoized calculations
   const totalPages = useMemo(
     () => Math.ceil(listProducts.length / ITEMS_PER_PAGE),
@@ -70,21 +61,17 @@ export default function Products({
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return listProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [listProducts, currentPage]);
-
   // Sync initial products when they change
   useEffect(() => {
     setListProducts(initialProducts);
   }, [initialProducts]);
-
   // Debounced search handler
   const handleSearchProduct = useCallback(
     (query: string) => {
       setSearchQuery(query);
       setCurrentPage(1);
       setLoadingProducts(true);
-
       if (debounceTimeout) clearTimeout(debounceTimeout);
-
       const timeout = setTimeout(async () => {
         try {
           const searchResults = await getProducts({
@@ -98,12 +85,10 @@ export default function Products({
           setLoadingProducts(false);
         }
       }, DEBOUNCE_DELAY);
-
       setDebounceTimeout(timeout);
     },
     [debounceTimeout, storeId]
   );
-
   // Toggle favorite product
   const toggleFavorite = useCallback((productId: number) => {
     setFavoriteProducts((prev) =>
@@ -112,7 +97,6 @@ export default function Products({
         : [...prev, productId]
     );
   }, []);
-
   // Add to cart handler
   const handleAddToCart = useCallback(
     async (product: Product) => {
@@ -128,7 +112,6 @@ export default function Products({
     },
     [dispatch]
   );
-
   // Render loading skeleton
   const renderLoadingSkeleton = () => (
     <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -147,7 +130,6 @@ export default function Products({
       ))}
     </div>
   );
-
   // Render product card
   const renderProductCard = (product: Product) => (
     <div
@@ -236,7 +218,6 @@ export default function Products({
       </div>
     </div>
   );
-
   // Render pagination
   const renderPagination = () => (
     <div className="flex justify-center mt-4">
@@ -267,7 +248,6 @@ export default function Products({
       </button>
     </div>
   );
-
   return (
     <section className="mx-auto w-full">
       {toast &&
