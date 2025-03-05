@@ -185,6 +185,8 @@ const CartPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <DeliveryAddress
+                storeLatitude = {cartData?.store?.store_latitude || ""}
+                storeLongitude = {cartData?.store?.store_longitude || ""}
                 storeAddress={cartData?.store?.store_address || ""}
                 userAddress={cartData?.user?.address || ""}
                 onChangeAddress={() => console.log("Change address")}

@@ -131,7 +131,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
           ))}
 
         {user ? (
-          <Link href="/account">
+          <Link href="/profile">
             <div className="flex items-center space-x-2 cursor-pointer hover:text-primary-light transition-colors duration-300">
               <div className="w-10 h-10 rounded-full overflow-hidden">
                 <Image
