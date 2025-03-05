@@ -628,4 +628,27 @@ export const checkProductExists = async (userId: number, code: string) => {
   }
 };
 
+export const fetchUser = async () => {
+  const token = localStorage.getItem("access_token");
+  try {
+    const response = await fetch( `${serverUrl}/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    return await response.json(); 
+  } catch (error) {
+    console.error("Lỗi khi gọi API:", error);
+    return null;
+  }
+};
+
+
 export { getProductByStoreId, getStoreById, getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };

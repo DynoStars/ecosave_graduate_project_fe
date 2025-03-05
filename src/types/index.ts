@@ -74,6 +74,9 @@ export interface Product {
   category: Category;
   images: ProductImage[];
   reviews: Review[];
+  origin: string,
+  usage_instructions: string,
+  storage_instructions: string
 }
 export interface ProductFilters {
   page?: number;
@@ -107,6 +110,8 @@ export interface CartItemProps {
   onQuantityChange: (productId: number, newQuantity: number) => void;
 }
 export interface DeliveryAddressProps {
+  storeLatitude: string;
+  storeLongitude: string;
   storeAddress: string;
   userAddress: string;
   onChangeAddress: () => void;

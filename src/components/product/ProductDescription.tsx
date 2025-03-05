@@ -25,22 +25,18 @@ export function ProductDescription({
                 <span className="text-gray-600 w-[180px]">Ngày hết hạn</span>
                 <span>{formatDateTime(details.expiration_date)}</span>
               </div>
-              {/* <div className="flex items-start gap-8 py-2 border-b">
+              <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Xuất xứ</span>
-                <span>{formatDateTime(details.created_at)}</span>
-              </div> */}
-              {/* <div className="flex items-start gap-8 py-2 border-b">
-                <span className="text-gray-600 w-[180px]">Thành phần</span>
-                <span className="flex-1">{details.ingredients}</span>
-              </div> */}
-              {/* <div className="flex items-start gap-8 py-2 border-b">
+                <span>{details.origin}</span>
+              </div>
+              <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Hướng dẫn sử dụng</span>
-                <span>{details.usage}</span>
-              </div> */}
-              {/* <div className="flex items-start gap-8 py-2 border-b">
+                <span>{details.usage_instructions}</span>
+              </div>
+              <div className="flex items-start gap-8 py-2 border-b">
                 <span className="text-gray-600 w-[180px]">Bảo quản</span>
-                <span className="flex-1">{details.storage}</span>
-              </div> */}
+                <span className="flex-1">{details.storage_instructions}</span>
+              </div>
             </div>
           </div>
         </div>
