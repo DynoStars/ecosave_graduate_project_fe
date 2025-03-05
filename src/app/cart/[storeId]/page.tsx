@@ -1,5 +1,4 @@
 "use client";
-
 import { useParams } from "next/navigation";
 import { getCartDetail, updateCartItemQuantity, removeCartItem } from "@/api";
 import React, { useEffect, useState, useCallback } from "react";
@@ -13,7 +12,7 @@ import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { addPaymentItem } from "@/redux/paymentSlice";
-
+import Loading from "@/app/loading";
 const CartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartProduct[]>([]);
   const [cartData, setCartData] = useState<any>(null);
@@ -22,12 +21,10 @@ const CartPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
-
   const storeId =
     params?.storeId && !isNaN(parseInt(params.storeId as string))
       ? parseInt(params.storeId as string)
       : null;
-
   const debouncedUpdateQuantity = debounce(
     async (storeId: number, productId: number, newQuantity: number) => {
       try {
@@ -46,11 +43,9 @@ const CartPage: React.FC = () => {
     },
     500
   );
-
   const handleQuantityChange = useCallback(
     (productId: number, newQuantity: number) => {
       if (!storeId) return;
-
       setCartItems((prevItems) =>
         prevItems.map((item) =>
           item.product_id === productId
@@ -62,22 +57,18 @@ const CartPage: React.FC = () => {
             : item
         )
       );
-
       debouncedUpdateQuantity(storeId, productId, newQuantity);
     },
     [storeId, debouncedUpdateQuantity]
   );
-
   const handleRemoveItem = useCallback(
     async (productId: number) => {
       if (!storeId) return;
-
       setCartItems((prevItems) =>
         prevItems.map((item) =>
           item.product_id === productId ? { ...item, isRemoving: true } : item
         )
       );
-
       try {
         await removeCartItem(storeId, productId);
         setCartItems((prevItems) =>
@@ -97,24 +88,18 @@ const CartPage: React.FC = () => {
     },
     [storeId]
   );
-
   const fetchCart = useCallback(async () => {
     if (!storeId) {
       setError("Store ID không hợp lệ.");
       setLoading(false);
       return;
     }
-
     try {
       setLoading(true);
       const cartData = await getCartDetail(storeId);
-
       setCartData(cartData.data);
-
       const items = cartData.data?.store?.items ?? [];
-
       setCartItems(items);
-
       if (items.length === 0) {
         setError("Giỏ hàng trống.");
       }
@@ -125,11 +110,9 @@ const CartPage: React.FC = () => {
       setLoading(false);
     }
   }, [storeId]); // ✅ `useCallback` ensures `fetchCart` is stable
-
   useEffect(() => {
     fetchCart();
   }, [fetchCart]); // ✅ No ESLint warnings now
-
   const calculateTotal = () =>
     cartItems.reduce((sum, item) => sum + Number(item.subtotal), 0);
   const calculateSavings = () =>
@@ -139,7 +122,6 @@ const CartPage: React.FC = () => {
         (Number(item.original_price) * item.quantity - Number(item.subtotal)),
       0
     );
-
   const handlePayment = async () => {
     // if (!user) {
     //   setToast({
@@ -147,7 +129,6 @@ const CartPage: React.FC = () => {
     //     keyword: "WARNING",
     //   });
     //   }
-
     cartItems.forEach((product) => {
       const paymentProductItem: PaymentItem = {
         id: product.product_id,
@@ -159,7 +140,6 @@ const CartPage: React.FC = () => {
       };
       dispatch(addPaymentItem(paymentProductItem));
     });
-
     // setToast({
     //   message: "Sản phẩm đã được thêm vào thanh toán!",
     //   keyword: "SUCCESS",
@@ -168,15 +148,11 @@ const CartPage: React.FC = () => {
     router.push("/checkout");
     console.log(cartItems);
   };
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-teal-500"></div>
-      </div>
+      <Loading />
     );
   }
-
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -191,14 +167,12 @@ const CartPage: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-100 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-xl font-bold mb-8 text-gray-800 flex items-center">
           <ShoppingCart className="mr-3" /> Chi tiết giỏ hàng
         </h1>
-
         {cartItems.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
@@ -209,7 +183,6 @@ const CartPage: React.FC = () => {
                 userAddress={cartData?.user?.address || ""}
                 onChangeAddress={() => console.log("Change address")}
               />
-
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                 {cartItems.map((item) => (
                   <CartItem
@@ -221,7 +194,6 @@ const CartPage: React.FC = () => {
                 ))}
               </div>
             </div>
-
             <div className="lg:col-span-1">
               <CartSummary
                 total={calculateTotal()}
@@ -248,5 +220,4 @@ const CartPage: React.FC = () => {
     </div>
   );
 };
-
 export default CartPage;
