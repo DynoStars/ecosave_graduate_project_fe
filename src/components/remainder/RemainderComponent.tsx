@@ -42,7 +42,7 @@ export default function RemainderComponent({ currentDate, user }: Remaindertype)
         <div className="flex flex-col gap-4">
           {products.map((product) => (
             <div
-              key={product.id}
+              key={product._id}
               className="flex items-center w-full border rounded-lg shadow-lg bg-white p-1 transition-transform transform hover:scale-105 hover:shadow-xl"
             >
               <Image

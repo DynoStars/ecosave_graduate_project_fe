@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Image2 from "../../assets/images/auth/registerImage.png";
@@ -18,22 +18,26 @@ import ValuesSection from "@/components/homeSection/ValuesSection";
 import FoundersSection from "@/components/homeSection/FoundersSection";
 import BenefitsSection from "@/components/homeSection/BenefitsSection";
 import { Category, Product } from "@/types";
-import HomeMapSecsion from "@/components/Map";
+import HomeMapSecsion from "@/components/map/Map";
 type HomeType = {
   listCategories: Category[];
   listProducts: Product[];
-  loadingProps : boolean;
+  loadingProps: boolean;
 };
-export default function Home({ listCategories, listProducts, loadingProps }: HomeType) {
+export default function Home({
+  listCategories,
+  listProducts,
+  loadingProps,
+}: HomeType) {
   const [categories] = useState<Category[]>(listCategories);
   const [loading, setLoading] = useState<boolean>(loadingProps);
   const [products, setProducts] = useState<Product[]>(listProducts);
-  const images = [Image1.src, Image1.src, Image2.src, Image2.src]; // Danh sách ảnh
+  const images = useMemo(() => [Image1.src, Image2.src], []); // Danh sách ảnh
   const [index, setIndex] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 2) % images.length);
-    }, 3000); // Chuyển đổi ảnh mỗi 3 giây
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
   useEffect(() => {
@@ -41,7 +45,7 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          const location = [latitude, longitude ];
+          const location = [latitude, longitude];
           localStorage.setItem("user_location", JSON.stringify(location));
         },
         (error) => {
@@ -52,10 +56,6 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
       console.error("Trình duyệt không hỗ trợ Geolocation");
     }
   }, []);
-  useEffect(() => {
-
-    console.log("Products have changed in Home:", products);
-  }, [products]);
 
   return (
     <div className="lg:px-20 px-10 h-full w-full overflow-hidden">
@@ -67,6 +67,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
           height={300}
           alt="background login image"
           className="bg-image hidden absolute -left-40 lg:block"
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          quality={50}
         />
         <Image
           src={bgIcon.src}
@@ -74,6 +77,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
           height={300}
           alt="background login image"
           className="bg-image hidden absolute -right-40 bottom-4 lg:block"
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          quality={50}
         />
         {/* Nội dung bên trái */}
         <div className="max-w-xl">
@@ -100,6 +106,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
                 width={30}
                 height={30}
                 alt="icon safe"
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                quality={70}
               />
               <p>An Toàn</p>
             </div>
@@ -109,6 +118,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
                 width={30}
                 height={30}
                 alt="icon save money"
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                quality={70}
               />
               <p>An Toàn</p>
             </div>
@@ -118,6 +130,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
                 width={30}
                 height={30}
                 alt="icon idea"
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                quality={50}
               />
               <p>An Toàn</p>
             </div>
@@ -139,6 +154,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
               width={500}
               height={1000}
               className="w-72 h-[80%] object-cover rounded-lg shadow-md"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              quality={70}
             />
             <Image
               src={images[(index + 1) % images.length]}
@@ -146,6 +164,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
               width={500}
               height={1000}
               className="w-72 h-[80%] object-cover rounded-lg shadow-md"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              quality={70}
             />
           </motion.div>
           {/* Box số liệu */}
@@ -155,6 +176,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
               alt="icon computer for top banner"
               width={50}
               height={50}
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              quality={50}
             />
             <div>
               <p className="text-lg font-bold">2K+</p>
@@ -167,6 +191,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
               alt="icon computer for top banner"
               width={50}
               height={50}
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              quality={50}
             />
             <p className="text-lg font-bold">5K+</p>
             <span className="text-gray-500 text-sm">Sản phẩm</span>
@@ -177,6 +204,9 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
               alt="icon computer for top banner"
               width={50}
               height={50}
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              quality={50}
             />
             <div>
               <span className="text-gray-500 text-sm">Cửa hàng</span>
@@ -189,18 +219,29 @@ export default function Home({ listCategories, listProducts, loadingProps }: Hom
         <PromoBanner />
       </section>
       <section className="relative flex flex-col md:flex-row items-center justify-between h-auto">
-        <ProductCategories categories={categories} setProducts={setProducts} setLoading={setLoading}/>
+        <ProductCategories
+          categories={categories}
+          setProducts={setProducts}
+          setLoading={setLoading}
+        />
       </section>
       <section className="relative min-h-96 flex flex-col md:flex-row items-start justify-between h-auto px-3">
-        <Products products={products} setProducts={setProducts} loading={loading} setLoading={setLoading} />
+        {products.length === 0 ? (
+          <div className="text-center text-primary">
+            Không có sản phẩm nào để hiển thị.
+          </div>
+        ) : (
+          <Products products={products} loading={loading} />
+        )}
       </section>
+
       <section className="relative flex flex-col md:flex-row items-center justify-between h-auto">
         <ValuesSection />
       </section>
       <section className="relative flex flex-col md:flex-row items-center justify-between h-auto bg-red-300">
         <HomeMapSecsion />
       </section>
-      <section >
+      <section>
         <FoundersSection />
       </section>
       <section className="relative flex flex-col md:flex-row items-center gap-5 h-auto justify-center">

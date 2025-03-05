@@ -22,11 +22,9 @@ import useCart from "@/hooks/useCart";
 import RemainderComponent from "@/components/remainder/RemainderComponent";
 import { getCurrentDate } from "@/utils/helpers/getCurrentDate";
 import { reset } from "@/redux/notificationSlice";
-
 export interface NavbarProps {
   user: UserProfile | null;
 }
-
 const Navbar: React.FC<NavbarProps> = ({ user }) => {
   useNotifications(); // Kích hoạt lấy thông báo ngay khi Navbar render
   useCart();
@@ -34,28 +32,24 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
   const notificationCount = useSelector(
     (state: RootState) => state.notifications.count
   );
-
   const currentDate = getCurrentDate();
-
   const [menuItems] = useState<{ [key: string]: string }>(
     menuItemsData.menuItems1
   );
   const [menuIcons] = useState<{ [key: string]: string }>(
     menuItemsData.menuItems2
   );
-
   const [active, setActive] = useState<number>(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const menuRefs = useRef<(HTMLLIElement | null)[]>([]);
   const totalItems = useSelector((state: RootState) => state.cart.totalItems);
   const [typeOfNotification, setTypeOfNotification] = useState<
-    "new" | "reminder">("new");
-
+    "new" | "reminder"
+  >("new");
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
     dispatch(reset());
   };
-
   const icons: { [key: string]: JSX.Element } = {
     Notification: (
       <Badge
@@ -80,7 +74,6 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
       </Link>
     ),
   };
-
   return (
     <nav
       className={`hidden lg:flex items-center justify-between w-full px-6 py-2 shadow-md`}
@@ -97,7 +90,6 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
           className="object-contain"
         />
       </div>
-
       <div className="flex-grow flex justify-center relative">
         <ul className="flex space-x-8 text-gray-600 relative">
           {Object.entries(menuItems).map(([key, label], index) => (
@@ -118,7 +110,6 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
           ))}
         </ul>
       </div>
-
       <div className="flex items-center space-x-6">
         {user &&
           Object.keys(menuIcons).map((key) => (
@@ -129,7 +120,6 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
               {icons[key]}
             </div>
           ))}
-
         {user ? (
           <Link href="/account">
             <div className="flex items-center space-x-2 cursor-pointer hover:text-primary-light transition-colors duration-300">
@@ -165,7 +155,6 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
           </div>
         )}
       </div>
-
       {/* Sidebar Notification Drawer */}
       <Drawer anchor="right" open={isSidebarOpen} onClose={toggleSidebar}>
         <div className="w-[300px] lg:w-[500px] min-h-full h-auto bg-white p-6">
@@ -186,7 +175,6 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
               <Close fontSize="large" />
             </button>
           </div>
-
           {/* Tabs */}
           <div className="w-full flex">
             <div
@@ -204,20 +192,20 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
               className={`w-1/2 py-2 text-center cursor-pointer transition-colors ${
                 typeOfNotification === "reminder"
                   ? " text-black font-semibold border border-b-4 border-primary"
-                   : "bg-white hover:bg-primary-light border text-gray-800"
+                  : "bg-white hover:bg-primary-light border text-gray-800"
               }`}
             >
               Sản phẩm nhắc nhở
             </div>
           </div>
-
           {/* Nội dung */}
-          {typeOfNotification === 'new' && <NotificationsComponent />}
-          {typeOfNotification === 'reminder' && <RemainderComponent currentDate={currentDate} user={user}/>}
+          {typeOfNotification === "new" && <NotificationsComponent />}
+          {typeOfNotification === "reminder" && (
+            <RemainderComponent currentDate={currentDate} user={user} />
+          )}
         </div>
       </Drawer>
     </nav>
   );
 };
-
 export default Navbar;

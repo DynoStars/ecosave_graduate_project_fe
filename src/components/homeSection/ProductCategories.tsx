@@ -1,6 +1,7 @@
 import { getProducts, getProductsByCategoryId } from "@/api";
 import { Category, Product } from "@/types";
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
+import ClassNames from "classnames";
 
 interface ProductCategoriesProps {
   categories: Category[];
@@ -15,33 +16,28 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
-  const handleCategoryClick = async (category: Category) => {
-    setLoading(true); // Bắt đầu tải dữ liệu
-    setSelectedCategory(category.id);
-    console.log(category.id)
-    try {
-      const filterProductsByCategory = await getProductsByCategoryId(category.id);
-      console.log(filterProductsByCategory)
-      setProducts([...filterProductsByCategory]);
+  const fetchProducts = useCallback(
+    async (categoryId: number | null) => {
+      setLoading(true);
+      setSelectedCategory(categoryId);
+      try {
+        const products = categoryId
+          ? await getProductsByCategoryId(categoryId)
+          : await getProducts({ page: 1 });
+        setProducts(products);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [setProducts, setLoading]
+  );
 
-    } catch (error) {
-      console.error("Error fetching products by category:", error);
-    }
-    setLoading(false); // Dữ liệu đã tải xong
-  };
-
-  const handleGetAllCategories = async () => {
-    const page = 1;
-    setLoading(true); // Bắt đầu tải dữ liệu
-    setSelectedCategory(null);
-    try {
-      const products = await getProducts({page});
-      setProducts(products);
-    } catch (error) {
-      console.error("Error fetching all products:", error);
-    }
-    setLoading(false); // Dữ liệu đã tải xong
-  };
+  // Gọi API ban đầu khi component mount
+  useEffect(() => {
+    fetchProducts(null);
+  }, [fetchProducts]);
 
   return (
     <div className="w-full px-4 py-3">
@@ -51,26 +47,21 @@ const ProductCategories: React.FC<ProductCategoriesProps> = ({
           Danh mục hàng đầu của tuần
         </span>
       </div>
-
       <div className="mt-1 overflow-x-auto max-h-80">
         <div className="flex gap-4 overflow-x-auto scrollbar-container py-4">
-          {/* Nút "All" để lấy tất cả sản phẩm */}
-          <div
-            className={`flex-shrink-0 flex w-[200px] flex-col items-center p-4 rounded-lg cursor-pointer transition
-            ${selectedCategory === null ? "bg-green-200 shadow-lg" : "bg-gray-100 hover:shadow-lg"}`}
-            onClick={handleGetAllCategories}
-          >
-            <p className="text-gray-700 font-medium text-center">Tất cả</p>
-          </div>
-
-          {categories.map((category) => (
+          {[{ id: null, name: "Tất cả" }, ...categories].map(({ id, name }) => (
             <div
-              key={category.id}
-              className={`flex-shrink-0 flex w-[200px] flex-col items-center p-4 rounded-lg cursor-pointer transition
-              ${selectedCategory === category.id ? "bg-green-200 shadow-lg" : "bg-gray-100 hover:shadow-lg"}`}
-              onClick={() => handleCategoryClick(category)}
+              key={id ?? "all"}
+              className={ClassNames(
+                "flex-shrink-0 flex w-[200px] flex-col items-center p-4 rounded-lg cursor-pointer transition",
+                {
+                  "bg-green-200 shadow-lg": selectedCategory === id,
+                  "bg-gray-100 hover:shadow-lg": selectedCategory !== id,
+                }
+              )}
+              onClick={() => fetchProducts(id)}
             >
-              <p className="text-gray-700 font-medium text-center">{category.name}</p>
+              <p className="text-gray-700 font-medium text-center">{name}</p>
             </div>
           ))}
         </div>

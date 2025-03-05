@@ -1,12 +1,10 @@
-import { Product } from "@/types"
-import { formatDateTime } from "@/utils"
+import { ProductDescriptionProps } from "@/types";
+import { formatDateTime } from "@/utils";
 
-interface ProductDescriptionProps {
-  description: string
-  details: Product
-}
-
-export function ProductDescription({ description, details }: ProductDescriptionProps) {
+export function ProductDescription({
+  description,
+  details,
+}: ProductDescriptionProps) {
   return (
     <div className="mt-12">
       <div className="grid md:grid-cols-2 gap-8">
@@ -48,6 +46,5 @@ export function ProductDescription({ description, details }: ProductDescriptionP
         </div>
       </div>
     </div>
-  )
+  );
 }
-

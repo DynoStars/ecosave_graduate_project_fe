@@ -1,6 +1,5 @@
 "use client";
-
-import type { PaymentItem, Product } from "@/types";
+import type { PaymentItem, ProductInfoProps } from "@/types";
 import { formatMoney } from "@/utils";
 import { Heart, Star, ShoppingCart } from "lucide-react";
 import { useState } from "react";
@@ -12,11 +11,6 @@ import { addPaymentItem, clearPaymentItems } from "@/redux/paymentSlice";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/redux/store";
 import { increment } from "@/redux/cartSlice";
-
-interface ProductInfoProps {
-  product: Product;
-}
-
 export function ProductInfo({ product }: ProductInfoProps) {
   const { user } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();

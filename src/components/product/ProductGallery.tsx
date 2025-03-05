@@ -1,27 +1,10 @@
 "use client";
-
 import Image from "next/image";
 import { useState } from "react";
 import backupImage from "../../assets/images/products/product3.png";
-
-interface ProductGalleryProps {
-  images: ImageType[];
-}
-
-type ImageType = {
-  id: number | string;
-  product_id: number | string;
-  image_url: string;
-  image_order: number;
-  created_at: string;
-  updated_at: string;
-};
-
+import { ProductGalleryProps } from "@/types";
 export function ProductGallery({ images }: ProductGalleryProps) {
-  // Đảm bảo luôn có hình ảnh đầu tiên khi images không rỗng
   const [selectedImage, setSelectedImage] = useState(0);
-
-  // Nếu không có ảnh, hiển thị khung trống với ảnh placeholder
   if (!images || images.length === 0) {
     return (
       <div className="flex">
@@ -41,8 +24,6 @@ export function ProductGallery({ images }: ProductGalleryProps) {
             </button>
           ))}
         </div>
-
-        {/* Ảnh lớn (rỗng) */}
         <div className="flex-1 w-[500px] aspect-[3/2] relative border rounded-lg overflow-hidden">
           <Image
             src={backupImage.src}
@@ -54,10 +35,8 @@ export function ProductGallery({ images }: ProductGalleryProps) {
       </div>
     );
   }
-
   return (
     <div className="flex">
-      {/* Danh sách ảnh nhỏ */}
       <div className="flex flex-col space-y-4 mr-4">
         {images.map((img, idx) => (
           <button
@@ -76,8 +55,6 @@ export function ProductGallery({ images }: ProductGalleryProps) {
           </button>
         ))}
       </div>
-
-      {/* Ảnh lớn hiển thị */}
       <div className="flex-1 w-[500px] aspect-[3/2] relative border rounded-lg overflow-hidden">
         <Image
           src={images[selectedImage]?.image_url || "/placeholder.svg"}

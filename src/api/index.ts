@@ -108,16 +108,37 @@ async function getProducts(filters: ProductFilters): Promise<Product[]> {
     if (filters.store_id) {
       params.store_id = filters.store_id;
     }
+
+    // Kiểm tra nếu đang chạy trên client-side
+    if (typeof window !== "undefined") {
+      const cacheKey = `products_${JSON.stringify(params)}`;
+      const cachedData = sessionStorage.getItem(cacheKey);
+
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+    }
+
     const response = await axios.get(`${serverUrl}/products`, {
       params,
       headers: { "Cache-Control": "no-store" },
     });
-    return response.data.data as Product[];
+
+    const products = response.data.data as Product[];
+
+    // Lưu cache chỉ khi chạy trên client
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(`products_${JSON.stringify(params)}`, JSON.stringify(products));
+    }
+
+    return products;
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
   }
 }
+
+
 async function getProductByStoreId(storeId: string | number) {
   try {
     const response = await axios.get(`${serverUrl}/products?store_id=${storeId}`, {
@@ -142,35 +163,109 @@ async function getCategories(): Promise<Category[]> {
   }
 }
 async function getProductsByCategoryId(categoryId: number | string): Promise<Product[]> {
+  if (typeof window === "undefined") {
+    // Nếu đang chạy trên server (SSR), không thể sử dụng sessionStorage
+    console.warn("⚠️ Không thể sử dụng sessionStorage trên server.");
+    return [];
+  }
+
+  const cacheKey = `products_category_${categoryId}`;
+  const cachedData = sessionStorage.getItem(cacheKey);
+
+  if (cachedData) {
+    console.log(`✅ Lấy dữ liệu từ cache: ${cacheKey}`);
+    return JSON.parse(cachedData) as Product[];
+  }
+
   try {
     const response = await axios.get(`${serverUrl}/products?category_id=${categoryId}`, {
       headers: { "Cache-Control": "no-store" },
     });
-    return response.data.data as Product[];
+
+    const products = response.data.data as Product[];
+
+    // Cập nhật cache nếu có dữ liệu mới
+    if (products.length > 0) {
+      sessionStorage.setItem(cacheKey, JSON.stringify(products));
+      console.log(`🔄 Cập nhật cache: ${cacheKey}`);
+    } else {
+      console.warn(`⚠️ API trả về dữ liệu rỗng, không cập nhật cache.`);
+    }
+
+    return products;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("❌ Lỗi khi lấy dữ liệu:", error);
     return [];
   }
 }
+
 export const getProductDetail = async (id: string) => {
+  if (typeof window === "undefined") {
+    console.warn("⚠️ Không thể sử dụng sessionStorage trên server.");
+    return null;
+  }
+
+  const cacheKey = `product_detail_${id}`;
+  const cachedData = sessionStorage.getItem(cacheKey);
+
+  if (cachedData) {
+    console.log(`✅ Lấy dữ liệu từ cache: ${cacheKey}`);
+    return JSON.parse(cachedData);
+  }
+
   try {
     const response = await axios.get(`${serverUrl}/products/${id}`);
-    return response.data.data;
+    const product = response.data.data;
+
+    if (product) {
+      sessionStorage.setItem(cacheKey, JSON.stringify(product));
+      console.log(`🔄 Cập nhật cache: ${cacheKey}`);
+    } else {
+      console.warn(`⚠️ API trả về dữ liệu rỗng, không cập nhật cache.`);
+    }
+
+    return product;
   } catch (error) {
-    throw error;
+    console.error("❌ Lỗi khi lấy chi tiết sản phẩm:", error);
+    return null;
   }
 };
+
 async function getNearingStores(latitude: number, longitude: number): Promise<Store[]> {
+  if (typeof window === "undefined") {
+    console.warn("⚠️ Không thể sử dụng sessionStorage trên server.");
+    return [];
+  }
+
+  const cacheKey = `nearing_stores_${latitude}_${longitude}`;
+  const cachedData = sessionStorage.getItem(cacheKey);
+
+  if (cachedData) {
+    console.log(`✅ Lấy dữ liệu từ cache: ${cacheKey}`);
+    return JSON.parse(cachedData) as Store[];
+  }
+
   try {
     const response = await axios.get(`${serverUrl}/stores?latitude=${latitude}&longitude=${longitude}`, {
       headers: { "Cache-Control": "no-store" },
     });
-    return response.data.data as Store[];
+
+    const stores = response.data.data as Store[];
+
+    if (stores.length > 0) {
+      sessionStorage.setItem(cacheKey, JSON.stringify(stores));
+      console.log(`🔄 Cập nhật cache: ${cacheKey}`);
+    } else {
+      console.warn(`⚠️ API trả về danh sách cửa hàng rỗng, không cập nhật cache.`);
+    }
+
+    return stores;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("❌ Lỗi khi lấy danh sách cửa hàng gần nhất:", error);
     return [];
   }
 }
+
 async function getStoreById(id: number | string): Promise<Store> {
   try {
     const response = await axios.get(`${serverUrl}/stores/${id}`, {
@@ -257,39 +352,42 @@ export const addToCart = async (productId: number, quantity: number) => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
-    window.location.href = "http://localhost:3000/login";
-    return null;
+    return { success: false, message: "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục." };
   }
 
   try {
-    const response = await axios.post(`${serverUrl}/cart/add`, {
-      product_id: productId,
-      quantity: quantity
-    }, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
+    const response = await axios.post(
+      `${serverUrl}/cart/add`,
+      { product_id: productId, quantity },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       }
-    });
+    );
 
-    return response.data;
-
+    return { success: true, message: "Sản phẩm đã được thêm vào giỏ hàng! 🛒" };
   } catch (error: any) {
+    let errorMessage = "Không thể thêm sản phẩm vào giỏ hàng.";
+
     if (error.response) {
-      if (error.response.data?.error === "This product is out of stock.") {
-        throw new Error("Hiện tại sản phẩm đang hết hàng, vui lòng xem lại sau.");
+      const apiError = error.response.data?.error;
+      if (apiError === "This product is out of stock.") {
+        errorMessage = "Sản phẩm đã hết hàng, vui lòng thử lại sau.";
+      } else {
+        errorMessage = apiError || errorMessage;
       }
-      console.error("Lỗi API khi thêm vào giỏ hàng:", error.response.data);
-      throw new Error(error.response.data?.error || "Không thể thêm sản phẩm vào giỏ hàng.");
     } else if (error.request) {
-      console.error("Không thể kết nối đến server:", error.request);
-      throw new Error("Không thể kết nối đến máy chủ, vui lòng thử lại.");
+      errorMessage = "Không thể kết nối đến máy chủ, vui lòng thử lại.";
     } else {
-      console.error("Lỗi không xác định:", error.message);
-      throw new Error("Đã xảy ra lỗi không xác định.");
+      errorMessage = "Đã xảy ra lỗi không xác định.";
     }
+
+    return { success: false, message: errorMessage };
   }
 };
+
 
 export const getCartDetail = async (storeId: number) => {
   const token = localStorage.getItem("access_token");

@@ -1,27 +1,11 @@
-"use client"
+"use client";
 
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { formatDateTime } from "@/utils";
 import { useState } from "react";
-
-interface User {
-  id: number;
-  username: string;
-  avatar?: string;
-}
-
-interface Review {
-  rating: number;
-  created_at: string;
-  review_content: string;
-  user?: User;
-}
-
-interface ReviewsProps {
-  reviews: Review[];
-}
+import { Button } from "../ui/button";
+import { ReviewsProps } from "@/types";
 
 export function Reviews({ reviews }: ReviewsProps) {
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -58,9 +42,7 @@ export function Reviews({ reviews }: ReviewsProps) {
                   />
                 ) : (
                   <span className="text-gray-600 font-medium">
-                    {review.user?.username
-                      ? review.user.username[0]
-                      : "?"}
+                    {review.user?.username ? review.user.username[0] : "?"}
                   </span>
                 )}
               </div>
@@ -105,7 +87,6 @@ export function Reviews({ reviews }: ReviewsProps) {
         </div>
       )}
 
-      {/* Nút mở form nhập đánh giá */}
       <div className="text-center mt-6">
         <Button
           variant="outline"
@@ -116,7 +97,6 @@ export function Reviews({ reviews }: ReviewsProps) {
         </Button>
       </div>
 
-      {/* Form nhập đánh giá */}
       {showReviewForm && (
         <div className="mt-6 border p-4 rounded-lg">
           <h3 className="text-lg font-medium mb-4">Nhập đánh giá của bạn</h3>
@@ -132,9 +112,7 @@ export function Reviews({ reviews }: ReviewsProps) {
                       ? "fill-yellow-400 text-yellow-400"
                       : "fill-gray-200 text-gray-200"
                   }`}
-                  onClick={() =>
-                    setNewReview({ ...newReview, rating: i + 1 })
-                  }
+                  onClick={() => setNewReview({ ...newReview, rating: i + 1 })}
                 />
               ))}
           </div>

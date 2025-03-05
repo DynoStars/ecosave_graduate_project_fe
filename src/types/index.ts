@@ -97,17 +97,7 @@ export type MapListingType = {
 export type GoongMapProps = MapListingType & {
   setLoading?: (loading: boolean) => void;
 };
-export type Review = {
-  id: number;
-  user_id: number;
-  product_id: number;
-  rating: number;
-  review_content: string;
-  image_url: string | null;
-  created_at: string;
-  updated_at: string;
-  user: UserProfile;
-};
+
 export interface CartItemProps {
   product: CartProduct;
   onRemove: (id: number) => void;
@@ -221,4 +211,61 @@ export interface ScanProductInfoProps {
 export interface UserLocation {
   latitude: number;
   longitude: number;
+}
+
+ export interface BreadcrumbItem {
+  label: string
+  href: string
+}
+
+export interface BreadcrumbProps {
+  items: BreadcrumbItem[]
+}
+
+export interface ProductDescriptionProps {
+  description: string
+  details: Product
+}
+
+export interface ProductGalleryProps {
+  images: ImageType[];
+}
+
+export type ImageType = {
+  id: number | string;
+  product_id: number | string;
+  image_url: string;
+  image_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export interface ProductInfoProps {
+  product: Product;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  avatar?: string;
+}
+
+export interface ReviewsProps {
+  reviews: Review[];
+}
+
+export type Review = {
+  id: number;
+  user_id: number;
+  product_id: number;
+  rating: number;
+  review_content: string;
+  image_url: string | null;
+  created_at: string;
+  updated_at: string;
+  user?: UserProfile;
+};
+
+export interface StoreInfoProps {
+  store: Store;
 }
