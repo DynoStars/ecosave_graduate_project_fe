@@ -1,4 +1,4 @@
-export type UserLogin  = {
+export type UserLogin = {
   id: number;
   name: string;
   email: string;
@@ -33,8 +33,8 @@ export type Store = {
   contact_phone: string | null;
   latitude: number;
   longitude: number;
-  soft_description: string ;
-  address : string ;
+  soft_description: string;
+  address: string;
   description: string | null;
   user_id: number;
   deleted_at: string | null;
@@ -73,7 +73,7 @@ export interface Product {
   rating: number;
   category: Category;
   images: ProductImage[];
-  reviews : Review[];
+  reviews: Review[];
 }
 export interface ProductFilters {
   page?: number;
@@ -85,7 +85,10 @@ export interface ProductFilters {
   min_price?: number;
   max_price?: number;
   rating?: number;
-  store_id ?: string | number;
+  store_id?: string | number;
+  distance?: string | number;
+  user_lat?: string | number;
+  user_lng?: string | number;
 }
 export type MapListingType = {
   listStores: Store[];
@@ -111,7 +114,7 @@ export interface DeliveryAddressProps {
 export interface CartSummaryProps {
   total: number;
   savings: number;
-  handlePayment : () => void;
+  handlePayment: () => void;
 }
 export interface CartProduct {
   product_id: number;
@@ -126,8 +129,8 @@ export interface CartProduct {
   store_id?: string;
   price?: string | number;
   picture?: string;
-  storeId ?: number | string;
-  orderId ?: number | string;
+  storeId?: number | string;
+  orderId?: number | string;
 }
 export interface ProductImage {
   id: number;
@@ -143,8 +146,8 @@ export interface PaymentItem {
   price: string | number;
   quantity: number;
   picture: string;
-  storeId : number | string;
-  orderId ?: number | string;
+  storeId: number | string;
+  orderId?: number | string;
 }
 export interface PaymentState {
   items: PaymentItem[];
@@ -213,7 +216,7 @@ export interface UserLocation {
   longitude: number;
 }
 
- export interface BreadcrumbItem {
+export interface BreadcrumbItem {
   label: string
   href: string
 }
