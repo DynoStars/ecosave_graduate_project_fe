@@ -299,9 +299,9 @@ export default function Products({
         {loadingProducts || initialLoading ? (
           renderLoadingSkeleton()
         ) : listProducts.length === 0 ? (
-          <p className="text-center text-gray-500 mt-6">
-            Không có sản phẩm nào
-          </p>
+          <div className="flex justify-center items-center text-gray-500 mt-6 w-full  h-[300px]">
+            <h3 className="text-xl">Không tìm thấy sản phẩm</h3>
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
