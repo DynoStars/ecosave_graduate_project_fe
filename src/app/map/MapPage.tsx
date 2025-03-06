@@ -67,6 +67,7 @@ const GoongMap = ({
             store.latitude,
             store.longitude
           );
+          console.log(storesInRange)
           const popupContent = `
             <div class="popup-content max-w-[200px] cursor-pointer">
               <a href="/store/${store.id}">

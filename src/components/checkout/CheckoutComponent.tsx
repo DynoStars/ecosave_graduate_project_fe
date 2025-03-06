@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { formatMoney } from "@/utils";
 import { useRouter } from "next/navigation";
 import { makeNewPayment } from "@/api";
@@ -14,22 +14,53 @@ import bgIcon from "../../assets/images/auth/bg-circle.png";
 
 const CheckoutComponent = ({ products }: { products: PaymentItem[] }) => {
   const router = useRouter();
-  const [selectedItems, setSelectedItems] = useState(products);
-  const totalPrice = selectedItems.reduce(
-    (total, item) => total + Number(item.price) * item.quantity,
-    0
-  );
+  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedItems, setSelectedItems] = useState<PaymentItem[]>(products);
   const { user } = useSelector((state: RootState) => state.user);
+
+  // Sử dụng useMemo để tránh tính toán lại không cần thiết
+  const totalPrice = useMemo(
+    () =>
+      selectedItems.reduce(
+        (total, item) => total + Number(item.price) * item.quantity,
+        0
+      ),
+    [selectedItems]
+  );
+
+  const totalItems = useMemo(() => selectedItems.length, [selectedItems]);
+
+  // Khôi phục từ localStorage khi products rỗng
+  useEffect(() => {
+    if (products.length === 0 && typeof window !== "undefined") {
+      const storedItems = localStorage.getItem("checkoutItems");
+      if (storedItems) {
+        setSelectedItems(JSON.parse(storedItems));
+      }
+    } else {
+      setSelectedItems(products); // Đồng bộ với props nếu có dữ liệu
+    }
+  }, [products]);
+
+  // Lưu selectedItems vào localStorage mỗi khi nó thay đổi
+  useEffect(() => {
+    if (typeof window !== "undefined" && totalItems > 0) {
+      localStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
+    }
+  }, [selectedItems, totalItems]);
+
   const handleRemoveItem = (id: string) => {
     setSelectedItems((prevItems) =>
       prevItems.filter((item) => item.id.toString() !== id)
     );
   };
+
   const handleBuyClick = async () => {
+    setLoading(true);
     const orderData = {
-      id : Math.floor(10 + Math.random() * 90),
+      id: Math.floor(10 + Math.random() * 90),
       user_id: user?.id || 1,
-      store_id: products[0].storeId,
+      store_id: products[0]?.storeId || selectedItems[0]?.storeId || 1,
       total_price: totalPrice.toFixed(0),
       status: "pending",
       order_date: new Date().toISOString(),
@@ -43,30 +74,34 @@ const CheckoutComponent = ({ products }: { products: PaymentItem[] }) => {
     document.cookie = `orderItems=${encodeURIComponent(
       JSON.stringify(selectedItems)
     )}; path=/; secure`;
+
     try {
       const URLPayment = await makeNewPayment(Number(totalPrice.toFixed(0)));
+      setLoading(false);
       if (URLPayment) {
         router.push(URLPayment);
       }
     } catch (error) {
       console.error("Error during payment:", error);
+      setLoading(false);
     }
   };
+
   return (
     <div className="bg-white rounded-lg space-y-6 w-full mx-auto relative">
-         <Image
-          src={bgIcon.src}
-          width={300}
-          height={300}
-          alt="background login image"
-          className="bg-image hidden absolute -left-40 lg:block z-0"
-        />
+      <Image
+        src={bgIcon.src}
+        width={300}
+        height={300}
+        alt="background login image"
+        className="bg-image hidden absolute -left-40 lg:block z-0"
+      />
       <div className="flex flex-col md:flex-row gap-8">
         {/* Left column for Order Items */}
         <div className="w-full md:w-5/12 gap-6 flex flex-col">
           <CheckoutFormGetInfo />
-          {products.length > 0 && products[0].storeId ? (
-            <CheckoutStoreInfo storeId={products[0].storeId} />
+          {totalItems > 0 && selectedItems[0]?.storeId ? (
+            <CheckoutStoreInfo storeId={selectedItems[0].storeId} />
           ) : (
             <p className="text-gray-500">Không có thông tin cửa hàng.</p>
           )}
@@ -77,17 +112,23 @@ const CheckoutComponent = ({ products }: { products: PaymentItem[] }) => {
             Các sản phẩm của Bạn
           </h2>
           <div className="scrollbar-container gap-3 flex flex-col h-[350px] overflow-auto">
-            {selectedItems.map((item) => (
-              <OrderCard
-                key={item.id}
-                id={item.id.toString()}
-                picture={item.picture}
-                name={item.name}
-                price={item.price.toString()}
-                quantity={item.quantity}
-                onRemove={handleRemoveItem}
-              />
-            ))}
+            {totalItems > 0 ? (
+              selectedItems.map((item) => (
+                <OrderCard
+                  key={item.id}
+                  id={item.id.toString()}
+                  picture={item.picture}
+                  name={item.name}
+                  price={item.price.toString()}
+                  quantity={item.quantity}
+                  onRemove={handleRemoveItem}
+                />
+              ))
+            ) : (
+              <p className="text-gray-500 text-center">
+                Không có sản phẩm nào trong giỏ hàng.
+              </p>
+            )}
           </div>
           {/* Price Summary */}
           <div className="bg-gray-200 shadow-soft p-4 rounded-lg mt-4">
@@ -96,11 +137,9 @@ const CheckoutComponent = ({ products }: { products: PaymentItem[] }) => {
               <p className="font-semibold">{formatMoney(totalPrice)}</p>
             </div>
             <div className="flex justify-between text-gray-800 font-bold">
-              <p>Tổng Thanh Toán ({products.length} Sản phẩm)</p>
+              <p>Tổng Thanh Toán ({totalItems} Sản phẩm)</p>
               <p className="text-lg text-red-500">
-                {products.length > 0 && totalPrice
-                  ? formatMoney(totalPrice)
-                  : 0}
+                {totalItems > 0 && totalPrice ? formatMoney(totalPrice) : "0"}
               </p>
             </div>
           </div>
@@ -108,13 +147,14 @@ const CheckoutComponent = ({ products }: { products: PaymentItem[] }) => {
           <div className="flex justify-end mt-4">
             <button
               onClick={handleBuyClick}
-              className={`px-6 py-2 text-white rounded-lg ${
-                products.length > 0
-                  ? "bg-primary hover:bg-primary-light active:bg-primary"
-                  : "bg-gray-300"
-              }`}
+              disabled={totalItems === 0 || loading}
+              className={`px-6 py-2 rounded-lg text-white transition-all duration-300 ease-in-out
+    ${totalItems > 0 && !loading
+      ? "bg-primary hover:bg-primary-light active:bg-primary-dark"
+      : "bg-gray-300 cursor-not-allowed opacity-70"}
+    ${loading ? "cursor-wait bg-primary opacity-80" : ""}`}
             >
-              Mua Ngay
+              {!loading ? "Mua Ngay" : "Đang xử lí..."}
             </button>
           </div>
         </div>
@@ -122,4 +162,5 @@ const CheckoutComponent = ({ products }: { products: PaymentItem[] }) => {
     </div>
   );
 };
+
 export default CheckoutComponent;

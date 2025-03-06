@@ -36,7 +36,10 @@ export default function Products({
   const dispatch = useDispatch();
   const userLocation = useUserLocation();
   const params = useParams();
-  const storeId = params && params.storeId ? parseInt(params.storeId as string, 10) : undefined;
+  const storeId =
+    params && params.storeId
+      ? parseInt(params.storeId as string, 10)
+      : undefined;
   const [currentPage, setCurrentPage] = useState(1);
   const [listProducts, setListProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,8 +66,11 @@ export default function Products({
   }, [listProducts, currentPage]);
   // Sync initial products when they change
   useEffect(() => {
-    setListProducts(initialProducts);
-  }, [initialProducts]);
+    if (!searchQuery) {
+      setListProducts(initialProducts);
+    }
+  }, [initialProducts, searchQuery]);
+
   // Debounced search handler
   const handleSearchProduct = useCallback(
     (query: string) => {

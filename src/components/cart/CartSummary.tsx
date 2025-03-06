@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo } from "react";
 import { CartSummaryProps } from "@/types";
 import { formatMoney } from "@/utils";
 
@@ -21,7 +21,15 @@ export const CartSummary: React.FC<CartSummaryProps> = memo(({ total, savings, h
           </div>
         </div>
         <div>
-          <button onClick={handlePayment} className="w-full mx-auto bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 rounded-md transition-colors">
+          <button
+            onClick={handlePayment}
+            disabled={total === 0}
+            className={`w-full mx-auto py-2 px-4 rounded-md transition-colors
+              ${total === 0
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-teal-500 hover:bg-teal-600 text-white"}
+            `}
+          >
             Đặt hàng
           </button>
         </div>
@@ -30,4 +38,4 @@ export const CartSummary: React.FC<CartSummaryProps> = memo(({ total, savings, h
   );
 });
 
-CartSummary.displayName = 'CartSummary';
+CartSummary.displayName = "CartSummary";
