@@ -208,33 +208,18 @@ export const getProductDetail = async (id: string) => {
   }
 };
 async function getNearingStores(latitude: number, longitude: number): Promise<Store[]> {
-  if (typeof window === "undefined") {
-    console.warn("⚠️ Không thể sử dụng sessionStorage trên server.");
-    return [];
-  }
-  const cacheKey = `nearing_stores_${latitude}_${longitude}`;
-  const cachedData = sessionStorage.getItem(cacheKey);
-  if (cachedData) {
-    console.log(`✅ Lấy dữ liệu từ cache: ${cacheKey}`);
-    return JSON.parse(cachedData) as Store[];
-  }
   try {
     const response = await axios.get(`${serverUrl}/stores?latitude=${latitude}&longitude=${longitude}`, {
       headers: { "Cache-Control": "no-store" },
     });
-    const stores = response.data.data as Store[];
-    if (stores.length > 0) {
-      sessionStorage.setItem(cacheKey, JSON.stringify(stores));
-      console.log(`🔄 Cập nhật cache: ${cacheKey}`);
-    } else {
-      console.warn(`⚠️ API trả về danh sách cửa hàng rỗng, không cập nhật cache.`);
-    }
-    return stores;
+
+    return response.data.data as Store[];
   } catch (error) {
     console.error("❌ Lỗi khi lấy danh sách cửa hàng gần nhất:", error);
     return [];
   }
 }
+
 async function getStoreById(id: number | string): Promise<Store> {
   try {
     const response = await axios.get(`${serverUrl}/stores/${id}`, {
@@ -508,25 +493,50 @@ export const fetchSaveProducts = async (userId: number, expiryDate: string) => {
   }
 };
 export async function getSaveProductOfUser(userId: number, expiryDate: string): Promise<string[] | null> {
+  if (typeof window === "undefined") {
+    console.warn("⚠️ Không thể sử dụng sessionStorage trên server.");
+    return null;
+  }
+
+  const cacheKey = `save_products_${userId}`;
+  const storedData = sessionStorage.getItem(cacheKey);
+
+  if (storedData) {
+    const { cachedExpiryDate, productIds } = JSON.parse(storedData) as { cachedExpiryDate: string; productIds: string[] };
+
+    if (cachedExpiryDate === expiryDate) {
+      console.log(`✅ Lấy dữ liệu từ cache: ${cacheKey}`);
+      return productIds;
+    } else {
+      console.log(`🔄 Expiry date thay đổi (${cachedExpiryDate} → ${expiryDate}), xóa cache cũ.`);
+      sessionStorage.removeItem(cacheKey);
+    }
+  }
+
   const url = `${serverUrl}/save-products`; // API URL
   const token = localStorage.getItem("access_token");
+
   try {
     const response = await axios.get<{ success: boolean; productIds: string[] }>(url, {
       params: { user_id: userId, expiry_date: expiryDate },
       headers: { Authorization: `Bearer ${token}` },
     });
+
     if (response.data.success) {
-      console.log('Product IDs:', response.data.productIds);
-      return response.data.productIds; // Trả về mảng productIds
+      console.log("✅ Product IDs:", response.data.productIds);
+      sessionStorage.setItem(cacheKey, JSON.stringify({ cachedExpiryDate: expiryDate, productIds: response.data.productIds })); // Lưu cache mới
+      return response.data.productIds;
     } else {
-      console.warn('API returned false success status');
+      console.warn("⚠️ API returned false success status");
       return null;
     }
   } catch (error) {
-    console.error('Error fetching product IDs:', error);
+    console.error("❌ Error fetching product IDs:", error);
     return null;
   }
 }
+
+
 export const checkProductExists = async (userId: number, code: string) => {
   const token = localStorage.getItem("access_token"); // Lấy token từ localStorage
   try {

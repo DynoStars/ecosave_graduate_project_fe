@@ -23,6 +23,7 @@ const OrderReceipt = () => {
   const [paymentStatus, setPaymentStatus] = useState<"success" | "failure">(
     "success"
   );
+  const [totalAmout, setTotalAmout] = useState<number>(0)
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(true);
   const [urlParams] = useState<any>({});
@@ -42,6 +43,7 @@ const OrderReceipt = () => {
       try {
         const params = new URLSearchParams(window.location.search);
         const responseCode = params.get("vnp_ResponseCode");
+        setTotalAmout(Number(params.get("vnp_Amount")))
         if (responseCode !== "00") {
           setPaymentStatus("failure");
           setLoading(false);
@@ -273,12 +275,12 @@ const OrderReceipt = () => {
               {/* Tổng thanh toán */}
               <div className="text-right mt-4 text-sm space-y-2">
                 <p>
-                  <span className="font-semibold">TỔNG TIỀN T.TOÁN:</span>{" "}
-                  {formatCurrency(urlParams["vnp_Amount"])}
+                  <span className="font-semibold">TỔNG TIỀN T.TOÁN:</span>
+                  {formatCurrency(totalAmout)}
                 </p>
                 <p>
-                  <span className="font-semibold">TIỀN KHÁCH TRẢ:</span>{" "}
-                  {formatCurrency(urlParams["vnp_Amount"])}
+                  <span className="font-semibold">TIỀN KHÁCH TRẢ:</span>
+                  {formatCurrency(totalAmout)}
                 </p>
                 <p className="text-xs text-gray-500">
                   Điểm tích lũy (10.000đ = 1 điểm): 8.9

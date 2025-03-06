@@ -1,63 +1,51 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { getProductDetail } from "@/api";
 import { Product } from "@/types";
 import Loading from "../../loading";
 import ProductDetailPage from "./ProductDetail";
 import { generateMetadata as generateMeta } from "@/utils";
-import Link from "next/link"; // Import để thêm điều hướng
-import Image from "next/image"; // Import để hiển thị hình ảnh minh họa
+import { redirect } from "next/navigation";
+import Link from "next/link";
 
 type Props = {
   params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export async function generateMetadata({ params }: Props) {
   const storeDetail = await getProductDetail(params.id);
   return generateMeta(
-    storeDetail?.name || "Product detail",
+    storeDetail?.name || "Product Detail",
     "To product detail information"
   );
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
-  let product: Product | null = null;
+export default async function Page({ params }: Props) {
   let loading = true;
 
   try {
-    product = await getProductDetail(params.id);
+    const product: Product | null = await getProductDetail(params.id);
     loading = false;
-  } catch (error) {
-    console.error("Failed to fetch data:", error);
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[300px] text-center text-orange-500">
-        <p className="text-lg font-semibold">
-          Lỗi khi lấy dữ liệu. Vui lòng thử lại sau.
-        </p>
-      </div>
-    );
-  }
 
-  if (!product) {
+    if (product) {
+      return <ProductDetailPage product={product} loadingProps={loading} />;
+    }
+
+    // Nếu sản phẩm không tồn tại, hiển thị thông báo "Product Not Found"
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center text-primary">
-        <p className="text-lg font-semibold">
-          Không có sản phẩm nào để hiển thị.
+      <div className="flex flex-col items-center justify-center h-[400px]">
+        <h1 className="text-2xl font-bold">Không tìm thấy sản phẩm</h1>
+        <p className="text-gray-500">
+          Sản phẩm bạn đang tìm kiếm không tồn tại.
         </p>
         <Link href="/products">
-          <button className="mt-4 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
-            Quay lại danh sách sản phẩm
+          <button className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition">
+            Quay lại trang sản phẩm
           </button>
         </Link>
       </div>
     );
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+    return redirect("/error");
   }
-
-  return (
-    <Suspense fallback={<Loading />}>
-      <div>
-        <ProductDetailPage loadingProps={loading} product={product} />
-      </div>
-    </Suspense>
-  );
 }

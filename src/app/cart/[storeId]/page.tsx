@@ -11,7 +11,7 @@ import { ShoppingCart, AlertCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { addPaymentItem } from "@/redux/paymentSlice";
+import { addPaymentItem, clearPaymentItems } from "@/redux/paymentSlice";
 import Loading from "@/app/loading";
 const CartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartProduct[]>([]);
@@ -123,12 +123,6 @@ const CartPage: React.FC = () => {
       0
     );
   const handlePayment = async () => {
-    // if (!user) {
-    //   setToast({
-    //     message: "Vui lòng đăng nhập trước khi mua sản phẩm!",
-    //     keyword: "WARNING",
-    //   });
-    //   }
     cartItems.forEach((product) => {
       const paymentProductItem: PaymentItem = {
         id: product.product_id,
@@ -138,15 +132,10 @@ const CartPage: React.FC = () => {
         picture: product.images[0].image_url,
         storeId: storeId ?? 1,
       };
+      dispatch(clearPaymentItems());
       dispatch(addPaymentItem(paymentProductItem));
     });
-    // setToast({
-    //   message: "Sản phẩm đã được thêm vào thanh toán!",
-    //   keyword: "SUCCESS",
-    // });
-    // setTimeout(() => setToast(null), 3000);
     router.push("/checkout");
-    console.log(cartItems);
   };
   if (loading) {
     return (

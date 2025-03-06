@@ -45,8 +45,8 @@ const MapListing = ({
               <Image
                 src={notFoundImage.src}
                 alt="Không có cửa hàng"
-                width={200}
-                height={200}
+                width={100}
+                height={100}
                 className="mb-6"
               />
               <p className="text-gray-600 text-lg">Không có cửa hàng nào cả</p>
@@ -80,7 +80,7 @@ const MapListing = ({
                     <p className="text-sm text-gray-600 mb-1">
                       {listing.address}
                     </p>
-                    <p className="text-xs mb-1">{listing.description}</p>
+                    <p className="text-xs mb-1 truncate-description-2-line">{listing.description}</p>
                     <p className="text-xs text-gray-500 mb-2">
                       📧 {listing.contact_email} | 📞 {listing.contact_phone} | {listing.opening_hours}
                     </p>

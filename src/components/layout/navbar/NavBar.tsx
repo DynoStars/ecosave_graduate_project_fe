@@ -161,7 +161,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
           <div className="bg-primary flex justify-between items-center p-4 rounded-t-lg sticky top-0 z-30">
             <div>
               <h2 className="text-lg font-semibold text-white">
-                Thông báo sản phẩm gần bạn
+                Thông báo sản phẩm gần bạn và nhắc nhở
               </h2>
               <p className="text-gray-200">
                 Bạn có {notificationCount} thông báo mới
