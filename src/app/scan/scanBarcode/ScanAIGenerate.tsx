@@ -65,7 +65,7 @@ export default function ScanAIGenerate({ product }: ScanAIGenerateProps) {
         setDisplayedText((prev) => prev + fullText[index]);
         index++;
         if (index === fullText.length) clearInterval(interval);
-      }, 50);
+      }, 5);
       return () => clearInterval(interval);
     }
   }, [fullText]);

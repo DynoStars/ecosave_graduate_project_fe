@@ -1,14 +1,5 @@
+import { BreadcrumbProps } from "@/types"
 import Link from "next/link"
-
-interface BreadcrumbItem {
-  label: string
-  href: string
-}
-
-interface BreadcrumbProps {
-  items: BreadcrumbItem[]
-}
-
 export function Breadcrumb({ items }: BreadcrumbProps) {
   return (
     <div className="text-sm mb-6">

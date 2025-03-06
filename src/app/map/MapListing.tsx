@@ -5,7 +5,6 @@ import GoongMap, { getDistance } from "./MapPage";
 import { MapListingType } from "@/types";
 import Link from "next/link";
 import notFoundImage from "../../assets/icons/LOGO-notfound.png";
-
 const MapListing = ({
   listStores,
   userLatitude,
@@ -13,7 +12,6 @@ const MapListing = ({
   loadingProps,
 }: MapListingType) => {
   const [loading, setLoading] = useState<boolean>(loadingProps);
-
   // 🛠 Tính toán danh sách đã sắp xếp (memoized để tối ưu hiệu suất)
   const sortedStores = useMemo(() => {
     return listStores
@@ -29,7 +27,6 @@ const MapListing = ({
       }))
       .sort((a, b) => a.distance - b.distance); // Sắp xếp từ gần đến xa
   }, [listStores, userLatitude, userLongitude]);
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       <div>
@@ -106,5 +103,4 @@ const MapListing = ({
     </div>
   );
 };
-
 export default MapListing;

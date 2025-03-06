@@ -1,61 +1,126 @@
-// Header.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import Navbar from "./navbar/NavBar";
-import { FaHeart, FaBell, FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes } from "react-icons/fa";
 import Link from "next/link";
-import menuItemsData from "../../assets/json/menuItems.json"; // Adjust the path based on your project structure
+import menuItemsData from "../../assets/json/menuItems.json";
 import defaultAvatar from "../../assets/images/users/userAvata1.png";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store"; // Assuming you have a root state type
+import { RootState } from "@/redux/store";
 import Image from "next/image";
-import { MdShoppingCart } from "react-icons/md";
+import { Badge, Drawer } from "@mui/material";
+import { Favorite, Notifications, ShoppingCart, Close } from "@mui/icons-material";
 import { fetchUserInfo } from "@/api";
 import { setUser } from "@/redux/userSlice";
+import NotificationsComponent from "@/app/notification/Notifications";
+import useNotifications from "@/hooks/useNotifications";
+import useCart from "@/hooks/useCart";
+import RemainderComponent from "@/components/remainder/RemainderComponent";
+import { getCurrentDate } from "@/utils/helpers/getCurrentDate";
+import { reset } from "@/redux/notificationSlice";
 const Header: React.FC = () => {
   const dispatch = useDispatch();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  // const [language, setLanguage] = useState("English");
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const { user } = useSelector((state: RootState) => state.user);
-  // Define menuItems as an object
+  useNotifications();
+  useCart();
+  const notificationCount = useSelector(
+    (state: RootState) => state.notifications.count
+  );
+  const currentDate = getCurrentDate();
   const [menuItems] = useState<{ [key: string]: string }>(
     menuItemsData.menuItems1
   );
+  const totalItems = useSelector((state: RootState) => state.cart.totalItems);
+  const [typeOfNotification, setTypeOfNotification] = useState<
+    "new" | "reminder"
+  >("new");
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+  const toggleNotification = () => {
+    dispatch(reset());
+    setIsNotificationOpen(!isNotificationOpen);
+  };
   useEffect(() => {
     const fetchUser = async () => {
-      // Kiểm tra nếu thông tin người dùng chưa có trong Redux
       if (!user) {
-        const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem("access_token");
         if (token) {
           try {
-            const userInfo = await fetchUserInfo(token);  // Gọi API để lấy thông tin người dùng
-            console.log(userInfo)
-            dispatch(setUser(userInfo));  // Cập nhật Redux store với thông tin người dùng
+            const userInfo = await fetchUserInfo(token);
+            console.log(userInfo);
+            dispatch(setUser(userInfo));
           } catch (error) {
             console.error("Error fetching user info:", error);
           }
         }
       }
     };
-    fetchUser();  // Gọi hàm bất đồng bộ bên trong useEffect
+    fetchUser();
   }, [dispatch, user]);
-  // Toggle sidebar
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
   return (
     <header className="sticky top-0 z-50 bg-white">
+      {/* Sidebar Notification Drawer */}
+      <Drawer anchor="right" open={isNotificationOpen} onClose={toggleNotification}>
+        <div className="w-[300px] lg:w-[500px] min-h-full h-auto bg-white p-6">
+          {/* Header */}
+          <div className="bg-primary flex justify-between items-center p-4 rounded-t-lg sticky top-0 z-30">
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                Thông báo sản phẩm gần bạn
+              </h2>
+              <p className="text-gray-200">
+                Bạn có {notificationCount} thông báo mới
+              </p>
+            </div>
+            <button
+              onClick={toggleNotification}
+              className="text-white hover:text-gray-300"
+            >
+              <Close fontSize="large" />
+            </button>
+          </div>
+          {/* Tabs */}
+          <div className="w-full flex">
+            <div
+              onClick={() => setTypeOfNotification("new")}
+              className={`w-1/2 py-2 text-center cursor-pointer transition-colors ${
+                typeOfNotification === "new"
+                  ? " text-black font-semibold border border-b-4 border-primary"
+                  : "bg-white hover:bg-primary-light border text-gray-800"
+              }`}
+            >
+              Sản phẩm mới
+            </div>
+            <div
+              onClick={() => setTypeOfNotification("reminder")}
+              className={`w-1/2 py-2 text-center cursor-pointer transition-colors ${
+                typeOfNotification === "reminder"
+                  ? " text-black font-semibold border border-b-4 border-primary"
+                  : "bg-white hover:bg-primary-light border text-gray-800"
+              }`}
+            >
+              Sản phẩm nhắc nhở
+            </div>
+          </div>
+          {/* Nội dung */}
+          {typeOfNotification === "new" && <NotificationsComponent />}
+          {typeOfNotification === "reminder" && (
+            <RemainderComponent currentDate={currentDate} user={user} />
+          )}
+        </div>
+      </Drawer>
       {/* Top Header */}
       <div className="hidden lg:flex items-center justify-between bg-primary text-white px-6 text-xsm">
-        <p>99 Tô Hiến Thành - DN</p>
-        <div className="flex items-center space-x-4">
-           Tiếng Việt
-        </div>
+        <p>{user?.address ?? "99 Tô Hiến Thành - DN"}</p>
+        <div className="flex items-center space-x-4">Tiếng Việt</div>
       </div>
       {/* Desktop Navbar */}
       <Navbar user={user} />
       {/* Mobile Navbar */}
-      <div className="lg:hidden flex items-center justify-between px-2 py-4 shadow-md">
+      <div className="lg:hidden flex items-center justify-between p-4 shadow-md">
         {/* Menu Icon */}
         <FaBars
           className="text-gray-600 text-xl cursor-pointer"
@@ -65,24 +130,18 @@ const Header: React.FC = () => {
           Eco<span className="text-gray-800">Save</span>
         </h1>
         <div className="flex items-center space-x-4">
-          <Link href="/notifications">
-            <p>
-              <FaBell className="text-gray-600 relative cursor-pointer hover:text-primary">
-                <span className="absolute top-0 right-0 bg-error text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  2
-                </span>
-              </FaBell>
-            </p>
+          <Link href="#" onClick={toggleNotification}>
+            <Badge badgeContent={2} color="error">
+              <Notifications className="text-gray-600 cursor-pointer hover:text-primary" />
+            </Badge>
           </Link>
           <Link href="/favorites">
-            <p>
-              <FaHeart className="text-gray-600 cursor-pointer hover:text-primary" />
-            </p>
+            <Favorite className="text-gray-600 cursor-pointer hover:text-primary" />
           </Link>
           <Link href="/cart">
-            <p>
-              <MdShoppingCart className="text-gray-600 cursor-pointer hover:text-primary" />
-            </p>
+            <Badge badgeContent={totalItems} color="error">
+              <ShoppingCart className="text-gray-600 cursor-pointer hover:text-primary" />
+            </Badge>
           </Link>
         </div>
       </div>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+const realTimeServerURL = process.env.REALTIME_SERVER_KEY ||  "http://localhost:4000";
 export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanProductInfoProps) {
   const [product, setProduct] = useState<ProductScan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,7 @@ export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanPr
       setError(null);
       try {
         const response = await fetch(
-          `http://localhost:4000/api/products/barcode/${barcode}`
+          `${realTimeServerURL}/api/products/barcode/${barcode}`
         );
         if (!response.ok) throw new Error("Không tìm thấy sản phẩm");
         const { data } = await response.json();

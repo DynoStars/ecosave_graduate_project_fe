@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Direction from "./Direction";
-import CarLoading from "@/components/loading/CarLoading";
 import getCookie from "@/utils/helpers/getCookie";
+import Loading from "@/app/loading";
 
 export default function Page() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
@@ -33,7 +33,7 @@ export default function Page() {
   if (!userLocation || !storeLocation) {
     return (
       <div className="flex justify-center items-center h-[600px]">
-        <CarLoading />
+        <Loading />
       </div>
     );
   }

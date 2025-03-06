@@ -7,6 +7,7 @@ import Link from "next/link"
 import { ShoppingCartIcon as CartIcon, MapPin, Package, Loader2 } from "lucide-react"
 import { useDispatch } from "react-redux";
 import { setTotalItems } from "@/redux/cartSlice";
+import Loading from "../loading";
 
 interface CartItem {
   product_id: number
@@ -72,7 +73,7 @@ const ShoppingCart: React.FC = () => {
     }
 
     fetchCart()
-  }, [])
+  }, [dispatch])
 
   const getFirstImage = (items: CartItem[]): string => {
     if (items[0]?.images?.length > 0) {
@@ -84,7 +85,8 @@ const ShoppingCart: React.FC = () => {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto p-4 flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+        {/* <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" /> */}
+        <Loading />
         <span className="ml-2 text-gray-600">Đang tải giỏ hàng...</span>
       </div>
     )

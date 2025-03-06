@@ -1,25 +1,11 @@
-"use client"
+"use client";
 
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { formatDateTime } from "@/utils";
-interface User {
-  id: number;
-  username: string;
-  avatar?: string;
-}
-
-interface Review {
-  rating: number;
-  created_at: string;
-  review_content: string;
-  user?: User;
-}
-
-interface ReviewsProps {
-  reviews: Review[];
-}
+import { useState } from "react";
+import { Button } from "../ui/button";
+import { ReviewsProps } from "@/types";
 
 export function Reviews({ reviews }: ReviewsProps) {
   return (
@@ -44,9 +30,7 @@ export function Reviews({ reviews }: ReviewsProps) {
                   />
                 ) : (
                   <span className="text-gray-600 font-medium">
-                    {review.user?.username
-                      ? review.user.username[0]
-                      : "?"}
+                    {review.user?.username ? review.user.username[0] : "?"}
                   </span>
                 )}
               </div>

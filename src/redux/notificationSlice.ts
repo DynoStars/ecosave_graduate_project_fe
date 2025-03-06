@@ -1,13 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
 interface NotificationState {
   count: number;
 }
-
 const initialState: NotificationState = {
   count: 0,
 };
-
 const notificationSlice = createSlice({
   name: "notifications",
   initialState,
@@ -23,6 +20,5 @@ const notificationSlice = createSlice({
     },
   },
 });
-
 export const { increment, reset, setCount } = notificationSlice.actions;
 export default notificationSlice.reducer;

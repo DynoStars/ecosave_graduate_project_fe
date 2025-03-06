@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState, useRef } from "react";
 import useSocket from "@/hooks/useSocket";
 import Image from "next/image";
@@ -13,30 +12,25 @@ import { formatCurrency } from "@/utils";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-
 const realTimeServerURL = "http://localhost:4000";
-
 interface Notification {
   event: string;
   data: { product: Product };
   time: string;
   isRead?: boolean;
 }
-
 export default function NotificationsComponent() {
   const dispatch = useDispatch();
-  const { notifications: newNotifications } = useSocket(realTimeServerURL);
+  const { notifications: newNotifications } = useSocket(realTimeServerURL) as { notifications: Notification[] };
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const hasFetched = useRef(false);
   const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>(
     {}
   );
   const userLocation = useUserLocation();
-
   // State để kiểm soát số lượng cửa hàng hiển thị
   const [visibleCount, setVisibleCount] = useState(20);
   const ITEMS_PER_PAGE = 20;
-
   useEffect(() => {
     if (!hasFetched.current) {
       const storedNotifications = localStorage.getItem("notifications");
@@ -48,27 +42,22 @@ export default function NotificationsComponent() {
       hasFetched.current = true;
     }
   }, []);
-
   useEffect(() => {
-    console.log('newwwww' + newNotifications)
     if (newNotifications.length > 0) {
       setNotifications((prev) => {
         const uniqueNotifications = newNotifications.filter(
           (n) => !prev.some((p) => p.data.product.id === n.data.product.id)
         );
-
         if (uniqueNotifications.length > 0) {
           const updated = [...uniqueNotifications, ...prev];
           localStorage.setItem("notifications", JSON.stringify(updated));
           dispatch(increment());
           return updated;
         }
-
         return prev;
       });
     }
   }, [newNotifications]);
-
   const groupedByStore = notifications.reduce((acc, notification) => {
     const storeId = notification.data.product.store.id;
     if (!acc[storeId]) {
@@ -77,16 +66,13 @@ export default function NotificationsComponent() {
     acc[storeId].products.push(notification.data.product);
     return acc;
   }, {} as Record<number, { store: Store; products: Product[] }>);
-
   const storeNotifications = Object.values(groupedByStore);
-
   const toggleStore = (storeId: number) => {
     setExpandedStores((prev) => ({
       ...prev,
       [storeId]: !prev[storeId],
     }));
   };
-
   const removeNotification = (productId: number) => {
     const updatedNotifications = notifications.filter(
       (n) => n.data.product.id !== productId
@@ -95,7 +81,6 @@ export default function NotificationsComponent() {
     localStorage.setItem("notifications", JSON.stringify(updatedNotifications));
     dispatch(setCount(updatedNotifications.length));
   };
-
   const removeStoreNotifications = (storeId: number) => {
     const updatedNotifications = notifications.filter(
       (n) => n.data.product.store.id !== storeId
@@ -104,16 +89,6 @@ export default function NotificationsComponent() {
     localStorage.setItem("notifications", JSON.stringify(updatedNotifications));
     dispatch(setCount(updatedNotifications.length));
   };
-  // const filteredStoreNotifications = storeNotifications.filter(({ store }) => {
-  //   if (!userLocation) return true; // Nếu chưa có vị trí, hiển thị tất cả
-  //   const distance = calculateDistance(
-  //     [store.latitude, store.longitude],
-  //     userLocation
-  //   );
-  //   return Number(distance) < 4; // Chỉ lấy cửa hàng trong bán kính < 4km
-  // });
-
-
   return (
     <div className="bg-white rounded-lg w-full max-w-lg">
       {storeNotifications.length === 0 ? (
@@ -146,7 +121,6 @@ export default function NotificationsComponent() {
                         </span>
                       )}
                     </Link>
-
                     <div>
                       <h3 className="text-sm font-bold text-gray-900 truncate-description-1-line">
                         {store.store_name}
@@ -178,7 +152,6 @@ export default function NotificationsComponent() {
                     </button>
                   </div>
                 </div>
-
                 {expandedStores[store.id] && (
                   <ul className="mt-3 space-y-2">
                     {products.map((product) => (

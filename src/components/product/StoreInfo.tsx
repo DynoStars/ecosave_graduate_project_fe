@@ -3,18 +3,13 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Car } from "lucide-react";
-import { Store } from "@/types";
+import { StoreInfoProps } from "@/types";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import calculateDistance from "@/utils/calculateDistance";
 import Link from "next/link";
 
-interface StoreInfoProps {
-  store: Store;
-}
-
 export function StoreInfo({ store }: StoreInfoProps) {
   const userLocation = useUserLocation();
-
   return (
     <div className="border rounded-lg p-4 space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600 gap-6">

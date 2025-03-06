@@ -7,6 +7,7 @@ import { Provider } from "react-redux"; // Import Provider
 import { store } from "@/redux/store"; // Import store
 import "./globals.css";
 import { Providers } from "@/redux/provider";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -28,9 +29,10 @@ export default function RootLayout({
           src="https://cdn.jsdelivr.net/npm/@goongmaps/goong-js@1.0.9/dist/goong-js.js"
           defer
         ></script>
-        <link
-          href="https://cdn.jsdelivr.net/npm/@goongmaps/goong-js@1.0.9/dist/goong-js.css"
-          rel="stylesheet"
+        <Script
+          src="https://cdn.jsdelivr.net/npm/@goongmaps/goong-js@1.0.9/dist/goong-js.js"
+          onLoad={() => console.log("GoongJS Loaded")}
+          strategy="beforeInteractive"
         />
       </head>
       <body className="bg-white text-gray-900">

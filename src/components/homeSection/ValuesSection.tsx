@@ -34,10 +34,13 @@ export default function ValuesSection() {
     <div className="py-10 w-full text-center relative">
       <Image
         src={bgIcon.src}
-        width={300}
-        height={300}
+        width={100}
+        height={100}
         alt="background login image"
         className="bg-image hidden lg:block absolute"
+        loading="lazy"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        quality={50}
       />
       <Image
         src={bgIcon.src}
@@ -45,6 +48,9 @@ export default function ValuesSection() {
         height={300}
         alt="background login image"
         className="bg-image right-1 bottom-0 hidden lg:block absolute"
+        loading="lazy"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        quality={50}
       />
       <h2 className="text-primary">Giá trị của chúng tôi</h2>
       <h2 className="text-3xl font-bold mt-2">
