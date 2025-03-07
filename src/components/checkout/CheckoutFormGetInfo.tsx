@@ -1,63 +1,57 @@
 import { RootState } from "@/redux/store";
-import React, { FormEvent, useState, useEffect } from "react";
+import React, { FormEvent, useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 
 const CheckoutFormGetInfo: React.FC = () => {
-  // State lưu thông tin người dùng
-  const [formData, setFormData] = useState({
-    phone: "00000000000", // Default value for phone
-    name: "Your name", // Default value for name
-  });
+  // Lấy dữ liệu user từ Redux, chỉ lấy trường cần thiết
+  const user = useSelector((state: RootState) => state.user.user);
 
-  // State cho phương thức thanh toán
+  // useMemo để tính toán dữ liệu mặc định cho form tránh re-render
+  const defaultFormData = useMemo(() => ({
+    name: user?.username || "Your name",
+    phone: user?.phone_number || "00000000000",
+  }), [user]);
+
+  // State lưu thông tin người dùng
+  const [formData, setFormData] = useState(defaultFormData);
   const [paymentMethod, setPaymentMethod] = useState<string>("VNpay");
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const { user } = useSelector((state: RootState) => state.user);
 
-  // Cập nhật formData khi thông tin user thay đổi
+  // Cập nhật formData khi user thay đổi
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.username || "Your name", // Set user data or default value
-        phone: user.phone_number || "00000000000", // Set user phone or default value
-      });
-    }
-  }, [user]);
+    setFormData(defaultFormData);
+  }, [defaultFormData]);
 
   // Xử lý khi người dùng nhập liệu
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const handlePaymentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // Xử lý khi thay đổi phương thức thanh toán
+  const handlePaymentChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setPaymentMethod(e.target.value);
-  };
+  }, []);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // Xử lý submit form
+  const handleSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Đã gửi thông tin:", formData);
     console.log("Phương thức thanh toán đã chọn:", paymentMethod);
     setIsEditing(false); // Chuyển sang chế độ xem sau khi lưu
-  };
+  }, [formData, paymentMethod]);
 
   return (
     <div className="flex justify-center items-center w-full z-10">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full bg-white rounded-lg"
-      >
+      <form onSubmit={handleSubmit} className="w-full bg-white rounded-lg">
         <h2 className="text-2xl font-bold mb-6">Thông Tin Đơn Hàng</h2>
 
         {/* Name */}
         <div className="mb-4">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="name"
-          >
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
             Tên
           </label>
           <input
@@ -74,10 +68,7 @@ const CheckoutFormGetInfo: React.FC = () => {
 
         {/* Phone */}
         <div className="mb-4">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="phone"
-          >
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="phone">
             Số Điện Thoại
           </label>
           <input
@@ -94,10 +85,7 @@ const CheckoutFormGetInfo: React.FC = () => {
 
         {/* Payment Method */}
         <div className="mb-4">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="paymentMethod"
-          >
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="paymentMethod">
             Phương Thức Thanh Toán
           </label>
           <select
@@ -115,4 +103,4 @@ const CheckoutFormGetInfo: React.FC = () => {
   );
 };
 
-export default CheckoutFormGetInfo;
+export default React.memo(CheckoutFormGetInfo);

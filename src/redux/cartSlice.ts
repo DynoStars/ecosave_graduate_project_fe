@@ -1,14 +1,10 @@
-// store/cartSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
 interface CartState {
   totalItems: number;
 }
-
 const initialState: CartState = {
   totalItems: 0,
 };
-
 const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -26,6 +22,5 @@ const cartSlice = createSlice({
     },
   },
 });
-
 export const { setTotalItems, increment, decrement } = cartSlice.actions;
 export default cartSlice.reducer;

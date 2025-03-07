@@ -5,7 +5,6 @@ import GoongMap, { getDistance } from "./MapPage";
 import { MapListingType } from "@/types";
 import Link from "next/link";
 import notFoundImage from "../../assets/icons/LOGO-notfound.png";
-
 const MapListing = ({
   listStores,
   userLatitude,
@@ -13,7 +12,6 @@ const MapListing = ({
   loadingProps,
 }: MapListingType) => {
   const [loading, setLoading] = useState<boolean>(loadingProps);
-
   // 🛠 Tính toán danh sách đã sắp xếp (memoized để tối ưu hiệu suất)
   const sortedStores = useMemo(() => {
     return listStores
@@ -29,7 +27,6 @@ const MapListing = ({
       }))
       .sort((a, b) => a.distance - b.distance); // Sắp xếp từ gần đến xa
   }, [listStores, userLatitude, userLongitude]);
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       <div>
@@ -48,8 +45,8 @@ const MapListing = ({
               <Image
                 src={notFoundImage.src}
                 alt="Không có cửa hàng"
-                width={200}
-                height={200}
+                width={100}
+                height={100}
                 className="mb-6"
               />
               <p className="text-gray-600 text-lg">Không có cửa hàng nào cả</p>
@@ -83,7 +80,7 @@ const MapListing = ({
                     <p className="text-sm text-gray-600 mb-1">
                       {listing.address}
                     </p>
-                    <p className="text-xs mb-1">{listing.description}</p>
+                    <p className="text-xs mb-1 truncate-description-2-line">{listing.description}</p>
                     <p className="text-xs text-gray-500 mb-2">
                       📧 {listing.contact_email} | 📞 {listing.contact_phone} | {listing.opening_hours}
                     </p>
@@ -106,5 +103,4 @@ const MapListing = ({
     </div>
   );
 };
-
 export default MapListing;

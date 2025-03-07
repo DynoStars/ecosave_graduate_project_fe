@@ -1,14 +1,11 @@
-// userTypes.ts
-export type UserLogin  = {
+export type UserLogin = {
   id: number;
   name: string;
   email: string;
 };
-
 export type LoginProps = {
-  csrf: string; // Khai báo kiểu dữ liệu của csrf là string
+  csrf: string;
 };
-
 export interface UserProfile {
   id: number; // ID của người dùng
   username: string; // Tên người dùng
@@ -25,7 +22,6 @@ export interface UserProfile {
   updated_at: string; // Thời gian cập nhật tài khoản
   password: string;
 }
-
 export type Store = {
   id: number;
   store_name: string;
@@ -38,8 +34,8 @@ export type Store = {
   contact_phone: string | null;
   latitude: number;
   longitude: number;
-  soft_description: string ;
-  address : string ;
+  soft_description: string;
+  address: string;
   description: string | null;
   user_id: number;
   deleted_at: string | null;
@@ -47,12 +43,10 @@ export type Store = {
   updated_at: string;
   products: Product[];
 }
-
 export interface Category {
   id: number;
   name: string;
 }
-
 export interface ProductImage {
   id: number;
   product_id: number;
@@ -61,7 +55,6 @@ export interface ProductImage {
   created_at: string;
   updated_at: string;
 }
-
 export interface Product {
   id: number;
   name: string;
@@ -81,25 +74,26 @@ export interface Product {
   rating: number;
   category: Category;
   images: ProductImage[];
-  reviews : Review[];
+  reviews: Review[];
   origin: string,
   usage_instructions: string,
   storage_instructions: string
 }
-
 export interface ProductFilters {
   page?: number;
   name?: string;
   store_name?: string;
-  category_id?: number[]; // Mảng số
+  category_id?: number[];
   category_name?: string;
   expiration_date?: string;
   min_price?: number;
   max_price?: number;
   rating?: number;
-  store_id ?: string | number;
+  store_id?: string | number;
+  distance?: string | number;
+  user_lat?: string | number;
+  user_lng?: string | number;
 }
-
 export type MapListingType = {
   listStores: Store[];
   userLatitude: number;
@@ -107,21 +101,8 @@ export type MapListingType = {
   loadingProps: boolean;
   setLoading?: (loading: boolean) => void;
 };
-
 export type GoongMapProps = MapListingType & {
   setLoading?: (loading: boolean) => void;
-};
-
-export type Review = {
-  id: number;
-  user_id: number;
-  product_id: number;
-  rating: number; // Giá trị đánh giá (ví dụ: 1-5 sao)
-  review_content: string; // Nội dung đánh giá
-  image_url: string | null; // URL hình ảnh (nếu có)
-  created_at: string; // Thời gian tạo
-  updated_at: string; // Thời gian cập nhật
-  user: UserProfile; // Thông tin người dùng đánh giá
 };
 
 export interface CartItemProps {
@@ -129,7 +110,6 @@ export interface CartItemProps {
   onRemove: (id: number) => void;
   onQuantityChange: (productId: number, newQuantity: number) => void;
 }
-
 export interface DeliveryAddressProps {
   storeLatitude: string;
   storeLongitude: string;
@@ -137,13 +117,11 @@ export interface DeliveryAddressProps {
   userAddress: string;
   onChangeAddress: () => void;
 }
-
 export interface CartSummaryProps {
   total: number;
   savings: number;
-  handlePayment : () => void;
+  handlePayment: () => void;
 }
-
 export interface CartProduct {
   product_id: number;
   name: string;
@@ -157,10 +135,9 @@ export interface CartProduct {
   store_id?: string;
   price?: string | number;
   picture?: string;
-  storeId ?: number | string;
-  orderId ?: number | string;
+  storeId?: number | string;
+  orderId?: number | string;
 }
-
 export interface ProductImage {
   id: number;
   product_id: number;
@@ -169,25 +146,18 @@ export interface ProductImage {
   created_at: string;
   updated_at: string;
 }
-
-
-
 export interface PaymentItem {
   id: number;
   name: string;
   price: string | number;
   quantity: number;
   picture: string;
-  storeId : number | string;
-  orderId ?: number | string;
+  storeId: number | string;
+  orderId?: number | string;
 }
-
 export interface PaymentState {
   items: PaymentItem[];
 }
-
-
-// Định nghĩa kiểu dữ liệu cho đơn hàng
 export interface OrderData {
   user_id: number;
   store_id: number;
@@ -195,16 +165,12 @@ export interface OrderData {
   status: "completed" | "cancelled";
   order_code: string;
 }
-
-// Định nghĩa kiểu dữ liệu cho phản hồi từ API
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
   data?: T;
   errors?: Record<string, string[]>;
 }
-
-
 export type ProductScan = {
   _id: string;
   title: string;
@@ -226,8 +192,8 @@ export type ProductScan = {
   warrantyInformation: string;
   shippingInformation: string;
   availabilityStatus: string;
-  manufacturingDate: string; // Ngày sản xuất
-  expiryDate: string; // Ngày hết hạn
+  manufacturingDate: string;
+  expiryDate: string;
   reviews: {
     rating: number;
     comment: string;
@@ -246,8 +212,87 @@ export type ProductScan = {
   thumbnail: string;
   images: string[];
 };
-
 export interface ScanProductInfoProps {
   barcode: string;
   setProductForAiGenerate: (product: ProductScan) => void;
+}
+
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+}
+
+export interface BreadcrumbItem {
+  label: string
+  href: string
+}
+
+export interface BreadcrumbProps {
+  items: BreadcrumbItem[]
+}
+
+export interface ProductDescriptionProps {
+  description: string
+  details: Product
+}
+
+export interface ProductGalleryProps {
+  images: ImageType[];
+}
+
+export type ImageType = {
+  id: number | string;
+  product_id: number | string;
+  image_url: string;
+  image_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export interface ProductInfoProps {
+  product: Product;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  avatar?: string;
+}
+
+export interface ReviewsProps {
+  reviews: Review[];
+}
+
+export type Review = {
+  id: number;
+  user_id: number;
+  product_id: number;
+  rating: number;
+  review_content: string;
+  image_url: string | null;
+  created_at: string;
+  updated_at: string;
+  user?: UserProfile;
+};
+
+export interface StoreInfoProps {
+  store: Store;
+}
+
+export interface FormData {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  role_id: number;
+}
+export interface Errors {
+  name?: string;
+  email?: string;
+  address?: string;
+  password?: string;
+  password_confirmation?: string;
 }

@@ -4,21 +4,24 @@ import { ProductScan, UserProfile } from "@/types";
 import { formatDateTime } from "@/utils";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-
+import { Trash } from "lucide-react"; // Import icon thùng rác
 type Remaindertype = {
   currentDate: string;
   user: UserProfile | null;
 };
-
-export default function RemainderComponent({ currentDate, user }: Remaindertype) {
+export default function RemainderComponent({
+  currentDate,
+  user,
+}: Remaindertype) {
   const [products, setProducts] = useState<ProductScan[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
   useEffect(() => {
     if (user?.id) {
       setLoading(true);
       getSaveProductOfUser(user.id, currentDate)
-        .then((productIds) => (productIds ? getProductsByIds(productIds) : null))
+        .then((productIds) =>
+          productIds ? getProductsByIds(productIds) : null
+        )
         .then((products) => {
           if (products) setProducts(products);
         })
@@ -26,12 +29,37 @@ export default function RemainderComponent({ currentDate, user }: Remaindertype)
         .finally(() => setLoading(false));
     }
   }, [user, currentDate]);
-
+  // Xóa sản phẩm khỏi UI & sessionStorage
+  const handleDelete = (productId: string) => {
+    if (!user?.id) return;
+    const cacheKey = `save_products_${user.id}`;
+    const storedData = sessionStorage.getItem(cacheKey);
+    if (storedData) {
+      const { cachedExpiryDate, productIds } = JSON.parse(storedData) as {
+        cachedExpiryDate: string;
+        productIds: string[];
+      };
+      // Lọc sản phẩm ra khỏi danh sách
+      const updatedProductIds = productIds.filter((id) => id !== productId);
+      // Cập nhật sessionStorage nếu còn sản phẩm, nếu không thì xóa key luôn
+      if (updatedProductIds.length > 0) {
+        sessionStorage.setItem(
+          cacheKey,
+          JSON.stringify({ cachedExpiryDate, productIds: updatedProductIds })
+        );
+      } else {
+        sessionStorage.removeItem(cacheKey);
+      }
+    }
+    // Cập nhật lại state để re-render UI
+    setProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId));
+  };
   return (
-    <div className="max-w-3xl mx-auto p-4">
+    <div className="max-w-3xl mx-auto">
       <h2 className="text-2xl font-semibold text-center">Danh sách sản phẩm</h2>
-      <p className="text-center text-gray-600 mb-4">Hôm nay là ngày: {currentDate}</p>
-
+      <p className="text-center text-gray-600 mb-4">
+        Hôm nay là ngày: {currentDate}
+      </p>
       {loading ? (
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-500"></div>
@@ -42,20 +70,33 @@ export default function RemainderComponent({ currentDate, user }: Remaindertype)
         <div className="flex flex-col gap-4">
           {products.map((product) => (
             <div
-              key={product.id}
-              className="flex items-center w-full border rounded-lg shadow-lg bg-white p-1 transition-transform transform hover:scale-105 hover:shadow-xl"
+              key={product._id}
+              className="flex items-center justify-between w-full border rounded-lg bg-white p-3"
             >
-              <Image
-                width={100}
-                height={100}
-                src={product.images[0]}
-                alt={product.title}
-                className="w-24 h-24 object-cover rounded-lg"
-              />
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold truncate">{product.title}</h3>
-                <p className="text-gray-600 text-sm">Ngày hết hạn: {formatDateTime(product.expiryDate)}</p>
+              <div className="flex items-center">
+                <Image
+                  width={80}
+                  height={80}
+                  src={product.images[0]}
+                  alt={product.title}
+                  className="w-15 h-15 object-cover rounded-lg"
+                />
+                <div className="ml-4">
+                  <h3 className="text-lg font-semibold truncate">
+                    {product.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Ngày hết hạn: {formatDateTime(product.expiryDate)}
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={() => handleDelete(product._id)}
+                className="p-2 text-red-500 hover:text-red-700 transition"
+                aria-label="Xóa sản phẩm"
+              >
+                <Trash size={20} />
+              </button>
             </div>
           ))}
         </div>

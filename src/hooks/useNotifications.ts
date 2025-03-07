@@ -2,32 +2,38 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { increment, setCount } from "@/redux/notificationSlice";
 import useSocket from "@/hooks/useSocket";
-
 const realTimeServerURL = process.env.REALTIME_SERVER_KEY;
+interface Notification {
+  data: {
+    product: {
+      id: number;
+      name: string;
+    };
+  };
+}
 
 export default function useNotifications() {
   const dispatch = useDispatch();
-  const { notifications: newNotifications } = useSocket(realTimeServerURL);
-  const [notifications, setNotifications] = useState([]);
-
+  const { notifications: newNotifications } = useSocket(realTimeServerURL) as { notifications: Notification[] };
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   useEffect(() => {
-    // Lấy thông báo từ localStorage khi trang load
     const storedNotifications = localStorage.getItem("notifications");
     if (storedNotifications) {
       const parsedNotifications = JSON.parse(storedNotifications);
       setNotifications(parsedNotifications);
-      dispatch(setCount(parsedNotifications.length)); // Cập nhật số lượng vào Redux
+      dispatch(setCount(parsedNotifications.length));
     }
-  }, []);
-
+  }, [dispatch]);
   useEffect(() => {
-    if (newNotifications.length > 0) {
+    if (newNotifications.length) {
       setNotifications((prev) => {
         const uniqueNotifications = newNotifications.filter(
-          (n) => !prev.some((p) => p.data.product.id === n.data.product.id)
+          (n) =>
+            n?.data?.product?.id !== undefined &&
+            !prev.some((p) => p?.data?.product?.id === n?.data?.product?.id)
         );
 
-        if (uniqueNotifications.length > 0) {
+        if (uniqueNotifications.length) {
           const updated = [...uniqueNotifications, ...prev];
           localStorage.setItem("notifications", JSON.stringify(updated));
           dispatch(increment());
@@ -37,7 +43,7 @@ export default function useNotifications() {
         return prev;
       });
     }
-  }, [newNotifications]);
+  }, [newNotifications, dispatch]);
 
   return notifications;
 }

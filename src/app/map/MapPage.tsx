@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import Script from "next/script";
 import { GoongMapProps } from "@/types";
-
 export const getDistance = (
   lat1: number,
   lon1: number,
@@ -20,7 +19,6 @@ export const getDistance = (
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Khoảng cách tính bằng mét
 };
-
 const GoongMap = ({
   listStores,
   userLatitude,
@@ -29,12 +27,11 @@ const GoongMap = ({
 }: GoongMapProps) => {
   const [map, setMap] = useState<any>(null);
   const [markers, setMarkers] = useState<any[]>([]);
-  const [userLocation, setUserLocation] = useState<[number, number]>([
+  const [userLocation] = useState<[number, number]>([
     userLongitude,
     userLatitude,
   ]);
   const accessToken = "yn7zQK2me9A32r6ZVGl5BuBYBwjifSF3dqBbo9Wp";
-
   useEffect(() => {
     if (typeof window !== "undefined" && window.goongjs) {
       window.goongjs.accessToken = accessToken;
@@ -45,19 +42,15 @@ const GoongMap = ({
         zoom: 16,
       });
       setMap(newMap);
-
       const radiusInMeters = 4000; // Bán kính quét 4km (4000m)
-
       newMap.on("load", () => {
         markers.forEach((marker) => marker.remove());
         setMarkers([]);
-
         const userMarker = new window.goongjs.Marker()
           .setLngLat(userLocation)
           .setPopup(new window.goongjs.Popup().setText("Vị trí của bạn"))
           .addTo(newMap);
         setMarkers((prev) => [...prev, userMarker]);
-
         const storesInRange = listStores.filter((store) => {
           const distance = getDistance(
             userLocation[1],
@@ -67,7 +60,6 @@ const GoongMap = ({
           );
           return distance <= radiusInMeters;
         });
-
         storesInRange.forEach((store) => {
           const distance = getDistance(
             userLocation[1],
@@ -75,7 +67,7 @@ const GoongMap = ({
             store.latitude,
             store.longitude
           );
-
+          console.log(storesInRange)
           const popupContent = `
             <div class="popup-content max-w-[200px] cursor-pointer">
               <a href="/store/${store.id}">
@@ -91,24 +83,19 @@ const GoongMap = ({
                     </p>
             </div>
           `;
-
           const marker = new window.goongjs.Marker({ color: "#FF5733" })
             .setLngLat([store.longitude, store.latitude])
             .addTo(newMap);
-
           setMarkers((prev) => [...prev, marker]);
-
           const popup = new window.goongjs.Popup({
             offset: 25,
             closeButton: false,
           })
             .setHTML(popupContent)
             .setMaxWidth("200px");
-
           marker.getElement().addEventListener("mouseenter", () => {
             marker.setPopup(popup).togglePopup();
           });
-
           marker.getElement().addEventListener("mouseleave", () => {
             setTimeout(() => {
               if (document.querySelector(".popup-content:hover")) return;
@@ -153,14 +140,12 @@ const GoongMap = ({
           newMap.setPaintProperty("radar-scan", "circle-opacity", radarOpacity);
         }, 100);
       });
-
       return () => {
         newMap.remove();
         markers.forEach((marker) => marker.remove());
       };
     }
   }, [userLocation, listStores]);
-
   return (
     <div className="w-full">
       {loadingProps && (
@@ -179,5 +164,4 @@ const GoongMap = ({
     </div>
   );
 };
-
 export default GoongMap;

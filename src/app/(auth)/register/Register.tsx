@@ -11,24 +11,7 @@ import { getLatLng, register } from "@/api";
 import ToastNotification from "@/components/toast/ToastNotification";
 import AddressInput from "@/components/input/AddressInput";
 import { FiEye, FiEyeOff } from "react-icons/fi"; // Import the eye icons
-
-export interface FormData {
-  name: string;
-  email: string;
-  password: string;
-  password_confirmation: string;
-  address: string;
-  latitude: string;
-  longitude: string;
-  role_id: number;
-}
-interface Errors {
-  name?: string;
-  email?: string;
-  address?: string;
-  password?: string;
-  password_confirmation?: string;
-}
+import { Errors } from "@/types";
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
     name: "",

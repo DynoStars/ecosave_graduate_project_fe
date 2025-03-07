@@ -1,9 +1,8 @@
 "use client";
-
-import type { PaymentItem, Product } from "@/types";
+import type { PaymentItem, ProductInfoProps } from "@/types";
 import { formatMoney } from "@/utils";
 import { Heart, Star, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ToastNotification from "../toast/ToastNotification";
 import { createPortal } from "react-dom";
 import { addToCart } from "@/api";
@@ -12,11 +11,6 @@ import { addPaymentItem, clearPaymentItems } from "@/redux/paymentSlice";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/redux/store";
 import { increment } from "@/redux/cartSlice";
-
-interface ProductInfoProps {
-  product: Product;
-}
-
 export function ProductInfo({ product }: ProductInfoProps) {
   const { user } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
@@ -49,14 +43,22 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const handleAddToCart = async () => {
     try {
-      await addToCart(product.id, quantity);
-      setToast({
-        message: "Sản phẩm đã được thêm vào giỏ hàng!",
-        keyword: "SUCCESS",
-      });
+      const result = await addToCart(product.id, quantity);
+      
+      if (result.success) {
+        setToast({
+          message: result.message,
+          keyword: "SUCCESS",
+        });
+        dispatch(increment());
+      } else {
+        setToast({
+          message: result.message, 
+          keyword: "ERROR",
+        });
+      }
+      
       setTimeout(() => setToast(null), 3000);
-      dispatch(increment());
-
     } catch (error: unknown) {
       let errorMessage = "Đã xảy ra lỗi khi thêm vào giỏ hàng.";
       if (error instanceof Error) {

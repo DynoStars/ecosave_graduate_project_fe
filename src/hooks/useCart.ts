@@ -1,16 +1,12 @@
-// hooks/useCart.ts
 "use client";
-
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getCart } from "@/api";
 import { setTotalItems } from "@/redux/cartSlice";
-
 const useCart = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -26,11 +22,8 @@ const useCart = () => {
         setLoading(false);
       }
     };
-
     fetchCart();
   }, [dispatch]);
-
   return { loading, error };
 };
-
 export default useCart;

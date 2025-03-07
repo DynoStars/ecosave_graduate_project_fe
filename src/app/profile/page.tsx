@@ -7,7 +7,7 @@ import { fetchUser } from "@/api";
 import { UserProfile } from "@/types";
 import Loading from "../loading";
 import Link from "next/link";
-import { ClipboardList, Package} from "lucide-react";
+import { ClipboardList, Package, Heart, LogOut} from "lucide-react";
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState<UserProfile | null>(null);
@@ -89,7 +89,7 @@ export default function ProfilePage() {
               </div>
             </Link>
             <Link
-              href="/order-history"
+              href="/expiry-items-reminder"
               className="flex items-center gap-3 p-4 mt-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
             >
               <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -100,6 +100,29 @@ export default function ProfilePage() {
                 <p className="text-sm text-gray-500">Xem lại kho sản phẩm nhắc nhở ngày hết hạn</p>
               </div>
             </Link>
+            <Link
+              href="/favorite-products"
+              className="flex items-center gap-3 p-4 mt-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <Heart className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Xem sản phẩm yêu thích</p>
+                <p className="text-sm text-gray-500">Nhanh chóng xem lại những sản phẩm yêu thích để tránh hết hàng</p>
+              </div>
+            </Link>
+            <button
+              // onClick={() => signOut()}
+              className="flex items-center gap-3 p-4 mt-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors w-full text-left"
+            >
+              <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <LogOut className="h-5 w-5 text-red-500" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Đăng xuất tài khoản</p>
+              </div>
+            </button>
           </div>    
         </div>
       </div>

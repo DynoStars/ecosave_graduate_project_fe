@@ -2,7 +2,6 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import axios from 'axios';
 import { API_URL } from '@/utils';
-// Function to fetch CSRF token
 export const fetchCsrfToken = async (): Promise<string> => {
   try {
     const response = await axios.get(`${API_URL}/csrf-token`, {
