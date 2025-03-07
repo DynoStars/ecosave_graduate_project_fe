@@ -14,6 +14,8 @@ import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/userSlice";
 import { signIn } from "next-auth/react";
 import { loginErrors } from "../../../errorsCustome/loginErrors";
+import { auth, googleProvider } from "@/lib/firebaseConfig";
+import { signInWithPopup } from "firebase/auth";
 const Login = ({ csrf }: LoginProps) => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
@@ -61,16 +63,17 @@ const Login = ({ csrf }: LoginProps) => {
     }
   };
 
+
+
   const handleSignInWithGoogle = async () => {
-    setLoading(true);
     try {
-      const result = await signIn("google", { redirect: true });
-      console.log("Sign in result:", result); // In ra toàn bộ đối tượng
-      if (result) {
-        setLoading(false);
-      }
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      console.log("User info:", user);
+      // You can store user info in state, context, or a database
+
     } catch (error) {
-      console.error("Error during sign in:", error);
+      console.error("Error signing in:", error);
     }
   };
 
@@ -84,6 +87,7 @@ const Login = ({ csrf }: LoginProps) => {
         alt="background login image"
         className="bg-image hidden lg:block"
       />
+
       <motion.div
         className="w-full lg:w-1/2 p-8 lg:p-16 flex justify-center relative"
         initial={{ opacity: 0, x: -50 }}
