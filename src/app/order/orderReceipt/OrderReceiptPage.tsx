@@ -23,7 +23,7 @@ const OrderReceipt = () => {
   const [paymentStatus, setPaymentStatus] = useState<"success" | "failure">(
     "success"
   );
-  const [totalAmout, setTotalAmout] = useState<number>(0)
+  const [totalAmout, setTotalAmout] = useState<number>(0);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(true);
   const [urlParams] = useState<any>({});
@@ -43,7 +43,7 @@ const OrderReceipt = () => {
       try {
         const params = new URLSearchParams(window.location.search);
         const responseCode = params.get("vnp_ResponseCode");
-        setTotalAmout(Number(params.get("vnp_Amount")))
+        setTotalAmout(Number(params.get("vnp_Amount")));
         if (responseCode !== "00") {
           setPaymentStatus("failure");
           setLoading(false);
@@ -88,14 +88,17 @@ const OrderReceipt = () => {
         const orderItems = selectedItems.map((item) => ({
           product_id: item.id,
           quantity: Number(item.quantity),
-          price: typeof item.price === "string"
-            ? parseFloat(item.price.replace(/\./g, "").replace(",", "."))
-            : item.price,
+          price:
+            typeof item.price === "string"
+              ? parseFloat(item.price.replace(/\./g, "").replace(",", "."))
+              : item.price,
         }));
         // Gửi order items lên server
         await createOrderItems(Number(orderId), orderItems);
         // Xóa các sản phẩm đã đặt khỏi giỏ hàng (chạy song song để nhanh hơn)
-        await Promise.all(selectedItems.map(item => removeCartItem(store.id, item.id)));
+        await Promise.all(
+          selectedItems.map((item) => removeCartItem(store.id, item.id))
+        );
         // Fetch lại giỏ hàng từ backend
         const cartData = await getCartDetail(store.id);
         const items = cartData.data?.store?.items ?? [];
@@ -126,13 +129,15 @@ const OrderReceipt = () => {
           paymentStatus === "failure" ? "bg-red-100" : "bg-green-100"
         }`}
       >
-        <button
-          onClick={toggleModal}
-          className="absolute right-2 top-2 flex items-center justify-center space-x-2 p-2 bg-gray-50 text-gray-400 rounded-lg hover:bg-gray-100 transition duration-300"
-        >
-          <p>Hóa đơn</p>
-          <FileText className="w-5 h-5" />
-        </button>
+        {!(paymentStatus === "failure") && (
+          <button
+            onClick={toggleModal}
+            className="absolute right-2 top-2 flex items-center justify-center space-x-2 p-2 bg-gray-50 text-gray-400 rounded-lg hover:bg-gray-100 transition duration-300"
+          >
+            <p>Hóa đơn</p>
+            <FileText className="w-5 h-5" />
+          </button>
+        )}
         <div className="flex justify-center mb-4">
           <div
             className={`w-16 h-16 flex items-center justify-center rounded-full ${
@@ -193,9 +198,11 @@ const OrderReceipt = () => {
             </button>
           </Link>
           <Link href="/map/direction">
-            <button className="px-6 py-2 bg-primary text-white hover:bg-primary-light rounded-lg">
-              Xem đường đi đến cửa hàng
-            </button>
+            {!(paymentStatus === "failure") && (
+              <button className="px-6 py-2 bg-primary text-white hover:bg-primary-light rounded-lg">
+                Xem đường đi đến cửa hàng
+              </button>
+            )}
           </Link>
         </div>
       </div>
