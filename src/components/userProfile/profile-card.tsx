@@ -1,5 +1,4 @@
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
 
 import { UserProfile} from "@/types"
 
@@ -15,9 +14,6 @@ export default function ProfileCard({ userData }: { userData: UserProfile }) {
           <p className="text-sm text-gray-500">{userData.email}</p>
         </div>
       </div>
-      <Button className="mt-4 sm:mt-0 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-md text-sm">
-        Cập nhật
-      </Button>
     </div>
   )
 }

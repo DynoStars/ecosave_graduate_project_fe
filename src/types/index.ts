@@ -7,19 +7,20 @@ export type LoginProps = {
   csrf: string;
 };
 export interface UserProfile {
-  id: number;
-  username: string;
-  email: string;
-  email_verified_at: string;
-  is_active: number;
-  avatar: string;
-  address: string;
-  role: number;
-  phone_number: string;
-  latitude: string;
-  longitude: string;
-  created_at: string;
-  updated_at: string;
+  id: number; // ID của người dùng
+  username: string; // Tên người dùng
+  email: string; // Email
+  email_verified_at: string; // Thời gian email được xác minh
+  is_active: number; // Trạng thái kích hoạt (1: active, 0: inactive)
+  avatar: string; // URL ảnh đại diện
+  address: string; // Địa chỉ
+  role: number; // Quyền hoặc vai trò của người dùng
+  phone_number: string; // Số điện thoại
+  latitude: string; // Vĩ độ (tọa độ)
+  longitude: string; // Kinh độ (tọa độ)
+  created_at: string; // Thời gian tạo tài khoản
+  updated_at: string; // Thời gian cập nhật tài khoản
+  password: string;
 }
 export type Store = {
   id: number;
