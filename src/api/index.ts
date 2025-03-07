@@ -552,5 +552,26 @@ export const fetchUser = async () => {
   }
 };
 
+export const getUserOrders = async () => {
+  const token = localStorage.getItem("access_token");
+  try {
+    const response = await fetch( `${serverUrl}/order-history`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    return await response.json(); 
+  } catch (error) {
+    console.error("Lỗi khi gọi API:", error);
+    return null;
+  }
+};
 
 export { getProductByStoreId, getStoreById, getNearingStores, getCSRF, logIn, fetchUserInfo, register, getLatLng, getLocationSuggestions, getProducts, getCategories, getProductsByCategoryId };

@@ -6,6 +6,8 @@ import UserInfoSection from "@/components/userProfile/user-info-section";
 import { fetchUser } from "@/api";
 import { UserProfile } from "@/types";
 import Loading from "../loading";
+import Link from "next/link";
+import { ClipboardList, Package} from "lucide-react";
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState<UserProfile | null>(null);
@@ -71,8 +73,36 @@ export default function ProfilePage() {
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <ProfileCard userData={userData} />
           <UserInfoSection userData={userData} />
+
+          {/* Additional Link Section - Inside the white card */}
+          <div className="p-6 border-t border-gray-100">
+            <Link
+              href="/order-history"
+              className="flex items-center gap-3 p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <ClipboardList className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Xem lịch sử đơn hàng</p>
+                <p className="text-sm text-gray-500">Xem lại hóa đơn và chi tiết các đơn hàng của bạn</p>
+              </div>
+            </Link>
+            <Link
+              href="/order-history"
+              className="flex items-center gap-3 p-4 mt-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <Package className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Xem kho sản phẩm</p>
+                <p className="text-sm text-gray-500">Xem lại kho sản phẩm nhắc nhở ngày hết hạn</p>
+              </div>
+            </Link>
+          </div>    
         </div>
       </div>
     </div>
-  );
+  )
 }

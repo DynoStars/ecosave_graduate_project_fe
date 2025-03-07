@@ -23,6 +23,7 @@ export interface UserProfile {
   longitude: string; // Kinh độ (tọa độ)
   created_at: string; // Thời gian tạo tài khoản
   updated_at: string; // Thời gian cập nhật tài khoản
+  password: string;
 }
 
 export type Store = {
