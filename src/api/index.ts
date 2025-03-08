@@ -448,17 +448,44 @@ export const createNewOrder = async (orderData: OrderData): Promise<number | nul
     throw error; // Rethrow for handling in the calling function
   }
 };
-export const storeSaveProductToReceiptNotification = async (userId: number, code: string, expiryDate?: string) => {
-  const token = localStorage.getItem("access_token");
-  // Chuyển đổi định dạng ngày
-  const formattedExpiryDate = expiryDate ? new Date(expiryDate).toISOString().split("T")[0] : null;
+
+export const storeSaveProductToReceiptNotification = async (
+  userId: number,
+  code: string,
+  expiryDate?: string,
+  reminderDays?: number
+) => {
   try {
+    if (!userId || !code) {
+      console.error("Thiếu thông tin người dùng hoặc mã sản phẩm!");
+      return null;
+    }
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      console.error("Không tìm thấy access token!");
+      return null;
+    }
+
+    // Chuyển đổi định dạng ngày thành YYYY-MM-DD (nếu có)
+    let formattedExpiryDate = null;
+    if (expiryDate) {
+      const date = new Date(expiryDate);
+      if (!isNaN(date.getTime())) {
+        formattedExpiryDate = date.toISOString().split("T")[0];
+      } else {
+        console.error("Định dạng ngày không hợp lệ!");
+        return null;
+      }
+    }
+
     const res = await axios.post(
       `${serverUrl}/save-products`,
       {
         user_id: userId,
         code: code,
-        expiry_date: formattedExpiryDate, // Định dạng YYYY-MM-DD
+        expiry_date: formattedExpiryDate,
+        reminder_days: reminderDays,
       },
       {
         headers: {
@@ -467,13 +494,15 @@ export const storeSaveProductToReceiptNotification = async (userId: number, code
         },
       }
     );
-    console.log("Sản phẩm đã lưu thành công:", res.data);
+
+    console.log("✅ Sản phẩm đã lưu thành công:", res.data);
     return res.data;
-  } catch (err) {
-    console.error("Lỗi khi lưu sản phẩm:", err);
-    return null;
+  } catch (error: any) {
+    console.error("❌ Lỗi khi lưu sản phẩm:", error?.response?.data || error.message);
+    return false;
   }
 };
+
 export const fetchSaveProducts = async (userId: number, expiryDate: string) => {
   try {
     const token = localStorage.getItem("access_token"); // Nếu API yêu cầu token

@@ -6,6 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import ScanProduct from "./ScanProductInfo";
 import ScanAIGenerate from "./ScanAIGenerate";
 import { ProductScan } from "@/types";
+import LOGO from "../../../assets/images/logo/LOGO.png";
+import { AiOutlineClose } from "react-icons/ai";
+
 import {
   checkProductExists,
   storeSaveProductToReceiptNotification,
@@ -13,36 +16,24 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import ToastNotification from "@/components/toast/ToastNotification";
+import Image from "next/image";
 const BarcodeScanner = () => {
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.user);
-  const [loading, setLoading] = useState(true);
-  const [isSaved, setIsSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
   const videoRef = useRef<HTMLDivElement>(null);
   const [barcode, setBarcode] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(true);
   const seenCodes = useRef(new Set<string>());
   const [product, setProduct] = useState<ProductScan | undefined>();
   const [showProduct, setShowProduct] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [toast, setToast] = useState<{
     message: string;
     keyword: "SUCCESS" | "ERROR" | "WARNING" | "INFO";
   } | null>(null);
-  useEffect(() => {
-    const checkIfSaved = async () => {
-      if (!user || !barcode) return; // Kiểm tra nếu user hoặc barcode không tồn tại
-      try {
-        setLoading(true);
-        const exists = await checkProductExists(user.id, barcode); // Gọi API kiểm tra
-        if(exists) setIsSaved(true); // Cập nhật trạng thái đã lưu hay chưa
-      } catch (error) {
-        console.error("Lỗi khi kiểm tra sản phẩm:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkIfSaved(); // Gọi hàm kiểm tra khi barcode thay đổi
-  }, [user, barcode]); // Chạy lại khi user hoặc barcode thay đổi
+
   useEffect(() => {
     if (!isScanning || !videoRef.current) return;
     Quagga.init(
@@ -63,7 +54,7 @@ const BarcodeScanner = () => {
         locate: true,
         patchSize: "small",
       },
-      (err : any) => {
+      (err: any) => {
         if (err) {
           console.error("Error initializing Quagga:", err);
           return;
@@ -95,8 +86,7 @@ const BarcodeScanner = () => {
     setShowProduct(false);
     setIsScanning(true);
   };
-  const storeProductToRemainder = async () => {
-    if (isSaved) return; // Tránh lưu lại nếu sản phẩm đã được lưu trước đó
+  const storeProductToRemainder = async (days: number) => {
     setLoading(true);
     if (!user || !product) {
       setToast({
@@ -109,21 +99,15 @@ const BarcodeScanner = () => {
       const isStore = await storeSaveProductToReceiptNotification(
         user.id,
         product._id,
-        product.expiryDate
+        product.expiryDate,
+        days // Truyền số ngày được chọn vào API
       );
+      console.log(isStore);
       if (!isStore) {
-        setToast({
-          message: "Sản phẩm đã tồn tại",
-          keyword: "ERROR",
-        });
-        setIsSaved(true); // Đánh dấu sản phẩm đã được lưu
+        setToast({ message: "Sản phẩm đã tồn tại", keyword: "ERROR" });
         return null;
       }
-      setToast({
-        message: "Lưu sản phẩm thành công",
-        keyword: "SUCCESS",
-      });
-      setIsSaved(true); // Cập nhật trạng thái đã lưu
+      setToast({ message: "Lưu sản phẩm thành công", keyword: "SUCCESS" });
       return isStore;
     } catch (error: any) {
       console.error("Lỗi khi lưu sản phẩm:", error);
@@ -131,21 +115,31 @@ const BarcodeScanner = () => {
       if (error.response?.data) {
         errorMessage = error.response.data.error || error.response.data.message;
       }
-      setToast({
-        message: errorMessage,
-        keyword: "ERROR",
-      });
+      setToast({ message: errorMessage, keyword: "ERROR" });
       return null;
     } finally {
       setLoading(false);
     }
   };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const handleSaveReminder = (days: number) => {
+    setIsModalOpen(false);
+    storeProductToRemainder(days);
+  };
+
   return (
     <div
       className={`relative grid ${
         showProduct ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-3"
       } gap-0 p-4 text-white max-w-full w-auto mx-auto`}
     >
+       {toast  && (
+        <ToastNotification message={toast.message} keyword={toast.keyword} />
+      )}
       {/* Máy quét mã vạch */}
       <AnimatePresence>
         {!showProduct && (
@@ -154,7 +148,7 @@ const BarcodeScanner = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col justify-start bg-red items-center border w-full"
+            className="flex flex-col justify-start items-center border w-full"
           >
             {isScanning && (
               <motion.div
@@ -224,19 +218,15 @@ const BarcodeScanner = () => {
                 🔄 Quét lại
               </button>
               <button
-                onClick={storeProductToRemainder}
-                disabled={loading || isSaved}
+                onClick={handleOpenModal} // Mở modal thay vì gọi lưu ngay
+                disabled={loading}
                 className={`px-4 py-2 rounded shadow-lg transition ${
-                  isSaved
-                    ? "bg-gray-400 cursor-not-allowed" // Nếu đã lưu, đổi màu xám và vô hiệu hóa
+                  loading
+                    ? "bg-gray-400 text-white opacity-50 cursor-not-allowed" // Màu loading
                     : "bg-primary hover:bg-primary-light"
-                } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                }`}
               >
-                {isSaved
-                  ? "✔️ Đã lưu"
-                  : loading
-                  ? "⏳ Đang lưu..."
-                  : "⭐ Lưu để theo dõi sản phẩm"}
+                {loading ? "⏳ Đang lưu..." : "⭐ Lưu để theo dõi sản phẩm"}
               </button>
             </div>
           </motion.div>
@@ -255,8 +245,54 @@ const BarcodeScanner = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      {toast && (
-        <ToastNotification message={toast.message} keyword={toast.keyword} />
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          {/* Modal Animation */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="bg-white p-6 rounded-lg shadow-lg relative w-[90%] max-w-md flex flex-col items-center gap-4"
+          >
+            {/* Nút đóng modal với React Icons */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-red-500 active:text-red-700 transition-colors"
+            >
+              <AiOutlineClose className="text-2xl" />
+            </button>
+
+            {/* Logo */}
+            <Image
+              src={LOGO.src}
+              alt="Logo"
+              width={100}
+              height={100}
+              className="object-contain"
+            />
+
+            {/* Tiêu đề */}
+            <h2 className="text-lg font-semibold text-black text-center px-4">
+              Bạn muốn nhận được thông báo về ngày hết hạn của sản phẩm bao lâu
+              trước ngày hết hạn?
+            </h2>
+
+            {/* Nút chọn số ngày */}
+            <div className="flex space-x-2">
+              {[1, 2, 3, 4, 5].map((day) => (
+                <button
+                  key={day}
+                  onClick={() => handleSaveReminder(day)}
+                  className="px-3 py-2 bg-primary text-white rounded hover:bg-primary-light"
+                >
+                  {day} ngày
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );
