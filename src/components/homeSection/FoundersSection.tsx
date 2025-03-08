@@ -68,6 +68,7 @@ export default function FoundersSection() {
       <div className="grid md:grid-cols-4 gap-6 mt-10 px-4">
         {founders.map(({ id, name, role, description, image }) => (
           <div
+          data-aos="fade-up"
             key={id}
             className="bg-white p-6 rounded-xl border border-primary text-center transition-all duration-300 hover:shadow-lg hover:scale-105"
           >

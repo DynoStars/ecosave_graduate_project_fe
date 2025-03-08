@@ -448,17 +448,44 @@ export const createNewOrder = async (orderData: OrderData): Promise<number | nul
     throw error; // Rethrow for handling in the calling function
   }
 };
-export const storeSaveProductToReceiptNotification = async (userId: number, code: string, expiryDate?: string) => {
-  const token = localStorage.getItem("access_token");
-  // Chuyển đổi định dạng ngày
-  const formattedExpiryDate = expiryDate ? new Date(expiryDate).toISOString().split("T")[0] : null;
+
+export const storeSaveProductToReceiptNotification = async (
+  userId: number,
+  code: string,
+  expiryDate?: string,
+  reminderDays?: number
+) => {
   try {
+    if (!userId || !code) {
+      console.error("Thiếu thông tin người dùng hoặc mã sản phẩm!");
+      return null;
+    }
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      console.error("Không tìm thấy access token!");
+      return null;
+    }
+
+    // Chuyển đổi định dạng ngày thành YYYY-MM-DD (nếu có)
+    let formattedExpiryDate = null;
+    if (expiryDate) {
+      const date = new Date(expiryDate);
+      if (!isNaN(date.getTime())) {
+        formattedExpiryDate = date.toISOString().split("T")[0];
+      } else {
+        console.error("Định dạng ngày không hợp lệ!");
+        return null;
+      }
+    }
+
     const res = await axios.post(
       `${serverUrl}/save-products`,
       {
         user_id: userId,
         code: code,
-        expiry_date: formattedExpiryDate, // Định dạng YYYY-MM-DD
+        expiry_date: formattedExpiryDate,
+        reminder_days: reminderDays,
       },
       {
         headers: {
@@ -467,13 +494,15 @@ export const storeSaveProductToReceiptNotification = async (userId: number, code
         },
       }
     );
-    console.log("Sản phẩm đã lưu thành công:", res.data);
+
+    console.log("✅ Sản phẩm đã lưu thành công:", res.data);
     return res.data;
-  } catch (err) {
-    console.error("Lỗi khi lưu sản phẩm:", err);
-    return null;
+  } catch (error: any) {
+    console.error("❌ Lỗi khi lưu sản phẩm:", error?.response?.data || error.message);
+    return false;
   }
 };
+
 export const fetchSaveProducts = async (userId: number, expiryDate: string) => {
   try {
     const token = localStorage.getItem("access_token"); // Nếu API yêu cầu token
@@ -492,7 +521,7 @@ export const fetchSaveProducts = async (userId: number, expiryDate: string) => {
     return [];
   }
 };
-export async function getSaveProductOfUser(userId: number, expiryDate: string): Promise<string[] | null> {
+export async function getSaveProductOfUser(userId: number): Promise<string[] | null> {
   if (typeof window === "undefined") {
     console.warn("⚠️ Không thể sử dụng sessionStorage trên server.");
     return null;
@@ -502,30 +531,25 @@ export async function getSaveProductOfUser(userId: number, expiryDate: string): 
   const storedData = sessionStorage.getItem(cacheKey);
 
   if (storedData) {
-    const { cachedExpiryDate, productIds } = JSON.parse(storedData) as { cachedExpiryDate: string; productIds: string[] };
-
-    if (cachedExpiryDate === expiryDate) {
-      console.log(`✅ Lấy dữ liệu từ cache: ${cacheKey}`);
-      return productIds;
-    } else {
-      console.log(`🔄 Expiry date thay đổi (${cachedExpiryDate} → ${expiryDate}), xóa cache cũ.`);
-      sessionStorage.removeItem(cacheKey);
-    }
+    console.log(`✅ Lấy dữ liệu từ cache: ${cacheKey}`);
+    return JSON.parse(storedData) as string[];
   }
 
   const url = `${serverUrl}/save-products`; // API URL
   const token = localStorage.getItem("access_token");
 
   try {
-    const response = await axios.get<{ success: boolean; productIds: string[] }>(url, {
-      params: { user_id: userId, expiry_date: expiryDate },
+    const response = await axios.get<{ success: boolean; products: { code: string }[] }>(url, {
+      params: { user_id: userId },
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (response.data.success) {
-      console.log("✅ Product IDs:", response.data.productIds);
-      sessionStorage.setItem(cacheKey, JSON.stringify({ cachedExpiryDate: expiryDate, productIds: response.data.productIds })); // Lưu cache mới
-      return response.data.productIds;
+      const productIds = response.data.products.map((p) => p.code);
+      console.log("✅ Product IDs:", productIds);
+
+      sessionStorage.setItem(cacheKey, JSON.stringify(productIds)); // Lưu cache mới
+      return productIds;
     } else {
       console.warn("⚠️ API returned false success status");
       return null;
@@ -535,6 +559,8 @@ export async function getSaveProductOfUser(userId: number, expiryDate: string): 
     return null;
   }
 }
+
+
 
 
 export const checkProductExists = async (userId: number, code: string) => {
@@ -594,7 +620,7 @@ export const getUserOrders = async () => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    return await response.json(); 
+    return await response.json();
   } catch (error) {
     console.error("Lỗi khi gọi API:", error);
     return null;

@@ -139,6 +139,7 @@ export default function Products({
   // Render product card
   const renderProductCard = (product: Product) => (
     <div
+    data-aos="fade-up"
       key={product.id}
       className="relative rounded-lg shadow-soft bg-white pb-5 transition-transform duration-300 hover:scale-105 hover:shadow-strong"
     >
@@ -232,7 +233,7 @@ export default function Products({
         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
         disabled={currentPage === 1}
       >
-        Prev
+        Trước
       </button>
       {Array.from({ length: totalPages }, (_, index) => (
         <button
@@ -250,7 +251,7 @@ export default function Products({
         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
         disabled={currentPage === totalPages}
       >
-        Next
+        Sau
       </button>
     </div>
   );

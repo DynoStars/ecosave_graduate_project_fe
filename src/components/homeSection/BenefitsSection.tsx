@@ -27,6 +27,7 @@ export default function BenefitsSection() {
     <section className="flex flex-wrap justify-center gap-10 py-10 w-full">
       {benefits.map(({ id, title, description, Icon }) => (
         <motion.div
+        data-aos="fade-up"
           key={id}
           className="flex items-center w-full lg:w-96 gap-4 p-4 rounded-lg bg-gray-50 cursor-pointer transition-all"
           whileHover={{

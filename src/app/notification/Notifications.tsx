@@ -21,7 +21,11 @@ interface Notification {
 }
 export default function NotificationsComponent() {
   const dispatch = useDispatch();
-  const { notifications: newNotifications } = useSocket(realTimeServerURL) as { notifications: Notification[] };
+  const { notifications: newNotifications } = useSocket(realTimeServerURL) as {
+    notifications: Notification[];
+  };
+  const [deletedProducts, setDeletedProducts] = useState<number[]>([]);
+
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const hasFetched = useRef(false);
   const [expandedStores, setExpandedStores] = useState<Record<number, boolean>>(
@@ -43,29 +47,95 @@ export default function NotificationsComponent() {
     }
   }, []);
   useEffect(() => {
-    if (newNotifications.length > 0) {
-      setNotifications((prev) => {
-        const uniqueNotifications = newNotifications.filter(
-          (n) => !prev.some((p) => p.data.product.id === n.data.product.id)
-        );
-        if (uniqueNotifications.length > 0) {
-          const updated = [...uniqueNotifications, ...prev];
-          localStorage.setItem("notifications", JSON.stringify(updated));
-          dispatch(increment());
-          return updated;
-        }
-        return prev;
-      });
-    }
+    newNotifications.forEach((notification) => {
+      switch (notification.event) {
+        case "product.created":
+          handleProductCreated(notification);
+          break;
+        case "product.updated":
+          handleProductUpdated(notification);
+          break;
+        default:
+          break;
+      }
+    });
   }, [newNotifications]);
+
+  // 🟢 Tạo thông báo mới khi có sản phẩm mới
+  const handleProductCreated = (notification: Notification) => {
+    setNotifications((prev) => {
+      // 🔴 Kiểm tra nếu sản phẩm đã bị xóa thì không thêm vào notifications
+      if (deletedProducts.includes(notification.data.product.id)) {
+        return prev;
+      }
+
+      const exists = prev.some(
+        (n) => n.data.product.id === notification.data.product.id
+      );
+      if (!exists) {
+        const updatedNotifications = [notification, ...prev];
+        localStorage.setItem(
+          "notifications",
+          JSON.stringify(updatedNotifications)
+        );
+        dispatch(increment());
+        return updatedNotifications;
+      }
+      return prev;
+    });
+  };
+
+  // 🟡 Cập nhật thông báo khi sản phẩm được chỉnh sửa
+  const handleProductUpdated = (notification: Notification) => {
+    setNotifications((prev) => {
+      const updatedNotifications = prev.map((n) =>
+        n.data.product.id === notification.data.product.id
+          ? {
+              ...notification,
+              data: {
+                ...notification.data,
+                product: {
+                  ...n.data.product, // Giữ nguyên dữ liệu cũ
+                  ...notification.data.product, // Ghi đè dữ liệu mới
+                },
+              },
+            }
+          : n
+      );
+      localStorage.setItem("notifications", JSON.stringify(updatedNotifications));
+      return updatedNotifications;
+    });
+  };
+
+
+  // 🛑 Xóa thông báo khỏi localStorage khi sản phẩm bị xóa
+  const removeNotification = (productId: number) => {
+    setDeletedProducts((prev) => [...prev, productId]); // 🔥 Lưu vào danh sách đã bị xóa
+
+    setNotifications((prev) => {
+      const updatedNotifications = prev.filter(
+        (n) => n.data.product.id !== productId
+      );
+      localStorage.setItem(
+        "notifications",
+        JSON.stringify(updatedNotifications)
+      );
+      dispatch(setCount(updatedNotifications.length));
+      return updatedNotifications;
+    });
+  };
+
   const groupedByStore = notifications.reduce((acc, notification) => {
-    const storeId = notification.data.product.store.id;
+    const storeId = notification.data.product.store?.id;
+    if (!storeId) return acc; // Bỏ qua nếu không có store
+
     if (!acc[storeId]) {
       acc[storeId] = { store: notification.data.product.store, products: [] };
     }
     acc[storeId].products.push(notification.data.product);
     return acc;
   }, {} as Record<number, { store: Store; products: Product[] }>);
+
   const storeNotifications = Object.values(groupedByStore);
   const toggleStore = (storeId: number) => {
     setExpandedStores((prev) => ({
@@ -73,14 +143,7 @@ export default function NotificationsComponent() {
       [storeId]: !prev[storeId],
     }));
   };
-  const removeNotification = (productId: number) => {
-    const updatedNotifications = notifications.filter(
-      (n) => n.data.product.id !== productId
-    );
-    setNotifications(updatedNotifications);
-    localStorage.setItem("notifications", JSON.stringify(updatedNotifications));
-    dispatch(setCount(updatedNotifications.length));
-  };
+
   const removeStoreNotifications = (storeId: number) => {
     const updatedNotifications = notifications.filter(
       (n) => n.data.product.store.id !== storeId
@@ -89,6 +152,31 @@ export default function NotificationsComponent() {
     localStorage.setItem("notifications", JSON.stringify(updatedNotifications));
     dispatch(setCount(updatedNotifications.length));
   };
+
+  const getTimeAgo = (timestamp: string) => {
+    const notificationDate = new Date(timestamp);
+    const currentDate = new Date();
+    const differenceInTime = currentDate.getTime() - notificationDate.getTime();
+
+    const differenceInMinutes = Math.floor(differenceInTime / (1000 * 60));
+    const differenceInHours = Math.floor(differenceInTime / (1000 * 60 * 60));
+    const differenceInDays = Math.floor(
+      differenceInTime / (1000 * 60 * 60 * 24)
+    );
+
+    if (differenceInMinutes < 1) {
+      return "Vừa xong";
+    } else if (differenceInMinutes < 60) {
+      return `${differenceInMinutes} phút trước`;
+    } else if (differenceInHours < 24) {
+      return `${differenceInHours} giờ trước`;
+    } else if (differenceInDays === 1) {
+      return "Hôm qua";
+    } else {
+      return `${differenceInDays} ngày trước`;
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg w-full max-w-lg">
       {storeNotifications.length === 0 ? (
@@ -173,7 +261,7 @@ export default function NotificationsComponent() {
                             />
                           )}
                           <div className="flex-1">
-                            <h4 className="text-sm font-semibold hover:text-primary">
+                            <h4 className="text-sm font-semibold hover:text-primary truncate-description-1-line">
                               {product.name}
                             </h4>
                             <div className="flex gap-2 items-center text-sm">
@@ -188,6 +276,9 @@ export default function NotificationsComponent() {
                             </div>
                           </div>
                         </Link>
+                        <div className="text-xs text-gray-500 w-[100px]">
+                          {getTimeAgo(product.created_at)}
+                        </div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

@@ -60,6 +60,7 @@ export default function ValuesSection() {
       <div className="flex justify-center gap-6 mt-8 flex-wrap lg:flex-nowrap">
         {values.map((value, index) => (
           <div
+          data-aos="fade-up"
             key={value.id}
             className={`p-6 z-20 rounded-xl shadow-strong cursor-pointer w-full lg:w-96 transition-all duration-300 ${
               index === activeIndex ? "bg-primary text-white" : "bg-white"
