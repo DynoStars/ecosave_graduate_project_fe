@@ -175,10 +175,10 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
             </button>
           </div>
           {/* Tabs */}
-          <div className="w-full flex">
+          <div className="w-full flex sticky top-20 z-50">
             <div
               onClick={() => setTypeOfNotification("new")}
-              className={`w-1/2 py-2 text-center cursor-pointer transition-colors ${
+              className={`w-1/2 py-2  bg-white text-center cursor-pointer transition-colors ${
                 typeOfNotification === "new"
                   ? " text-black font-semibold border border-b-4 border-primary"
                   : "bg-white hover:bg-primary-light border text-gray-800"
@@ -188,7 +188,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
             </div>
             <div
               onClick={() => setTypeOfNotification("reminder")}
-              className={`w-1/2 py-2 text-center cursor-pointer transition-colors ${
+              className={`w-1/2 py-2 text-center cursor-pointer bg-white transition-colors ${
                 typeOfNotification === "reminder"
                   ? " text-black font-semibold border border-b-4 border-primary"
                   : "bg-white hover:bg-primary-light border text-gray-800"

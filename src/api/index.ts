@@ -492,7 +492,7 @@ export const fetchSaveProducts = async (userId: number, expiryDate: string) => {
     return [];
   }
 };
-export async function getSaveProductOfUser(userId: number, expiryDate: string): Promise<string[] | null> {
+export async function getSaveProductOfUser(userId: number): Promise<string[] | null> {
   if (typeof window === "undefined") {
     console.warn("⚠️ Không thể sử dụng sessionStorage trên server.");
     return null;
@@ -502,30 +502,25 @@ export async function getSaveProductOfUser(userId: number, expiryDate: string): 
   const storedData = sessionStorage.getItem(cacheKey);
 
   if (storedData) {
-    const { cachedExpiryDate, productIds } = JSON.parse(storedData) as { cachedExpiryDate: string; productIds: string[] };
-
-    if (cachedExpiryDate === expiryDate) {
-      console.log(`✅ Lấy dữ liệu từ cache: ${cacheKey}`);
-      return productIds;
-    } else {
-      console.log(`🔄 Expiry date thay đổi (${cachedExpiryDate} → ${expiryDate}), xóa cache cũ.`);
-      sessionStorage.removeItem(cacheKey);
-    }
+    console.log(`✅ Lấy dữ liệu từ cache: ${cacheKey}`);
+    return JSON.parse(storedData) as string[];
   }
 
   const url = `${serverUrl}/save-products`; // API URL
   const token = localStorage.getItem("access_token");
 
   try {
-    const response = await axios.get<{ success: boolean; productIds: string[] }>(url, {
-      params: { user_id: userId, expiry_date: expiryDate },
+    const response = await axios.get<{ success: boolean; products: { code: string }[] }>(url, {
+      params: { user_id: userId },
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (response.data.success) {
-      console.log("✅ Product IDs:", response.data.productIds);
-      sessionStorage.setItem(cacheKey, JSON.stringify({ cachedExpiryDate: expiryDate, productIds: response.data.productIds })); // Lưu cache mới
-      return response.data.productIds;
+      const productIds = response.data.products.map((p) => p.code);
+      console.log("✅ Product IDs:", productIds);
+
+      sessionStorage.setItem(cacheKey, JSON.stringify(productIds)); // Lưu cache mới
+      return productIds;
     } else {
       console.warn("⚠️ API returned false success status");
       return null;
@@ -535,6 +530,8 @@ export async function getSaveProductOfUser(userId: number, expiryDate: string): 
     return null;
   }
 }
+
+
 
 
 export const checkProductExists = async (userId: number, code: string) => {
@@ -594,7 +591,7 @@ export const getUserOrders = async () => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    return await response.json(); 
+    return await response.json();
   } catch (error) {
     console.error("Lỗi khi gọi API:", error);
     return null;

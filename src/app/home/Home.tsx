@@ -19,6 +19,7 @@ import FoundersSection from "@/components/homeSection/FoundersSection";
 import BenefitsSection from "@/components/homeSection/BenefitsSection";
 import { Category, Product } from "@/types";
 import HomeMapSecsion from "@/components/map/Map";
+import Link from "next/link";
 type HomeType = {
   listCategories: Category[];
   listProducts: Product[];
@@ -93,12 +94,16 @@ export default function Home({
             kiệm hơn mỗi ngày!
           </p>
           <div className="mt-6 flex space-x-4">
-            <button className="px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-light">
-              Đến sản phẩm
-            </button>
-            <button className="px-6 py-3 bg-teal-50 font-semibold rounded-lg hover:bg-teal-100">
-              Khám phá các cửa hàng gần bạn
-            </button>
+            <Link href="/products">
+              <button className="px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-light">
+                Đến sản phẩm
+              </button>
+            </Link>
+            <Link href="/map">
+              <button className="px-6 py-3 bg-teal-50 font-semibold rounded-lg hover:bg-teal-100">
+                Khám phá các cửa hàng gần bạn
+              </button>
+            </Link>
           </div>
           <div className="flex p-3 my-4 space-x-6">
             <div className="flex justify-center items-center gap-2">
@@ -123,7 +128,7 @@ export default function Home({
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 quality={70}
               />
-              <p>An Toàn</p>
+              <p>Tiết kiệm</p>
             </div>
             <div className="flex justify-center items-center gap-2">
               <Image
@@ -135,7 +140,7 @@ export default function Home({
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 quality={50}
               />
-              <p>An Toàn</p>
+              <p>Chất lượng</p>
             </div>
           </div>
         </div>
