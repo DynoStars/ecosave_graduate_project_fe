@@ -4,8 +4,12 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-const realTimeServerURL = process.env.REALTIME_SERVER_KEY ||  "http://localhost:4000";
-export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanProductInfoProps) {
+const realTimeServerURL =
+  process.env.REALTIME_SERVER_KEY || "http://localhost:4000";
+export default function ScanProduct({
+  barcode,
+  setProductForAiGenerate,
+}: ScanProductInfoProps) {
   const [product, setProduct] = useState<ProductScan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +22,10 @@ export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanPr
         const response = await fetch(
           `${realTimeServerURL}/api/products/barcode/${barcode}`
         );
-        if (!response.ok) throw new Error("Không tìm thấy sản phẩm");
+        if (!response.ok) {
+          setProductForAiGenerate(null);
+          throw new Error("Không tìm thấy sản phẩm");
+        }
         const { data } = await response.json();
         setProduct(data);
         setProductForAiGenerate(data);
@@ -69,7 +76,9 @@ export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanPr
       <h1 className="text-2xl font-bold text-gray-900 mt-4">{product.title}</h1>
       <p className="text-gray-700">{product.description}</p>
       <div className="mt-4 flex justify-between items-center">
-        <h4 className="text-xl font-semibold text-red-600">{formatCurrency(product.price)}</h4>
+        <h4 className="text-xl font-semibold text-red-600">
+          {formatCurrency(product.price)}
+        </h4>
         <span className="text-sm text-gray-500">
           {product.availabilityStatus}
         </span>
@@ -86,8 +95,14 @@ export default function ScanProduct({ barcode, setProductForAiGenerate }: ScanPr
           value={`${product.dimensions.width} x ${product.dimensions.height} x ${product.dimensions.depth} cm`}
         />
         <DetailItem label="Bảo hành" value={product.warrantyInformation} />
-        <DetailItem label="Ngày sản xuất" value={formatDateTime(product.manufacturingDate)} />
-        <DetailItem label="Ngày hết hạn" value={formatDateTime(product.expiryDate)} />
+        <DetailItem
+          label="Ngày sản xuất"
+          value={formatDateTime(product.manufacturingDate)}
+        />
+        <DetailItem
+          label="Ngày hết hạn"
+          value={formatDateTime(product.expiryDate)}
+        />
       </div>
     </div>
   );

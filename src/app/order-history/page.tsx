@@ -50,10 +50,13 @@ export default function OrderHistory() {
     fetchOrders()
   }, [])
 
-  // Format currency to VND
-  // const formatCurrency = (amount: number) => {
-  //   return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ"
-  // }
+  const calculateDiscount = (order) => {
+    return order.items.reduce((totalDiscount, item) => {
+      const originalPrice = item.original_price * item.quantity;
+      const discountedPrice = item.unique_price * item.quantity;
+      return totalDiscount + (originalPrice - discountedPrice);
+    }, 0);
+  };
 
   // Map status code to display text
   const getStatusDisplay = (status: "pending | completed" | "cancelled") => {
@@ -160,7 +163,7 @@ export default function OrderHistory() {
                       </div>
                       <div className="text-right">
                         <div className="font-medium">{formatMoney(item.unique_price)}</div>
-                        {/* <div className="font-medium">{formatCurrency(item.sub_price)}</div> */}
+                        {/* <div className="font-medium">{formatMoney(item.sub_price)}</div> */}
                       </div>
                     </div>
                   ))}
@@ -177,11 +180,11 @@ export default function OrderHistory() {
                   </div>
                   <div className="flex justify-between">
                     <span>Số tiền tiết kiệm được:</span>
-                    <span>{formatMoney(0)}</span>
+                    <span>{formatMoney(calculateDiscount(order))}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Thành tiền:</span>
-                    <span>{(order.total_price)}</span>
+                    <span>{formatMoney(order.total_price)}</span>
                   </div>
                 </div>
                 <div className="space-y-3">

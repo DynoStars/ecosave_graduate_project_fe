@@ -173,6 +173,7 @@ export interface OrderData {
   order_id: number;
   order_code: string;
   total_price: number;
+  saved_amount: number;
   status: "pending | completed" | "cancelled";
   order_date: Date;
   items: OrderItem[]; 
@@ -226,7 +227,7 @@ export type ProductScan = {
 };
 export interface ScanProductInfoProps {
   barcode: string;
-  setProductForAiGenerate: (product: ProductScan) => void;
+  setProductForAiGenerate: (product: ProductScan | null) => void;
 }
 
 export interface UserLocation {
@@ -295,11 +296,12 @@ export interface FormData {
   name: string;
   email: string;
   password: string;
-  password_confirmation: string;
   address: string;
   latitude: string;
   longitude: string;
   role_id: number;
+  avatar : string | null;
+  password_confirmation ?: string;
 }
 export interface Errors {
   name?: string;

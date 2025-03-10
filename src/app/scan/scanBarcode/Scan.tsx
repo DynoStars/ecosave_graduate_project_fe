@@ -25,7 +25,7 @@ const BarcodeScanner = () => {
   const [barcode, setBarcode] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(true);
   const seenCodes = useRef(new Set<string>());
-  const [product, setProduct] = useState<ProductScan | undefined>();
+  const [product, setProduct] = useState<ProductScan | undefined | null>(null);
   const [showProduct, setShowProduct] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -65,19 +65,23 @@ const BarcodeScanner = () => {
     const handleDetected = (data: any) => {
       const scannedCode = data.codeResult.code;
       if (!scannedCode || seenCodes.current.has(scannedCode)) return;
-
-      if (scannedCode.length >= 13) {
-        seenCodes.current.add(scannedCode);
-        setBarcode(scannedCode);
-        setIsScanning(false);
-
-        Quagga.stop();
-        console.log("Valid barcode detected:", scannedCode);
-
-        setTimeout(() => {
-          setShowProduct(true);
-        }, 1000);
+      // Kiểm tra mã vạch phải đủ 13 số
+      if (scannedCode.length !== 13) {
+        setToast({
+          message: "Mã vạch không hợp lệ! Phải đủ 13 số.",
+          keyword: "ERROR",
+        });
+        return;
       }
+      seenCodes.current.add(scannedCode);
+      setTimeout(() => seenCodes.current.delete(scannedCode), 1000);
+      setBarcode(scannedCode);
+      setIsScanning(false);
+      Quagga.stop();
+      // Hiển thị sản phẩm sau 1 giây
+      setTimeout(() => {
+        setShowProduct(true);
+      }, 1000);
     };
     Quagga.onDetected(handleDetected);
     return () => {
@@ -138,10 +142,10 @@ const BarcodeScanner = () => {
   return (
     <div
       className={`relative grid ${
-        showProduct ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-3"
+        !product ? "grid-cols-1" : "grid-cols-2"
       } gap-0 p-4 text-white max-w-full w-auto mx-auto`}
     >
-       {toast  && (
+      {toast && (
         <ToastNotification message={toast.message} keyword={toast.keyword} />
       )}
       {/* Máy quét mã vạch */}
@@ -162,7 +166,7 @@ const BarcodeScanner = () => {
                 transition={{ duration: 0.5 }}
                 className="fixed inset-0 flex flex-col gap-3 justify-center items-center bg-black bg-opacity-70 z-50"
               >
-                <h2 className="text-xl font-bold">📸 Barcode Scanner</h2>
+                <h2 className="text-xl font-bold">📸 Quét mã Barcode</h2>
                 <p className="text-green-400 font-semibold">Đang quét...</p>
                 <motion.div
                   initial={{ scale: 0.9 }}
@@ -214,24 +218,39 @@ const BarcodeScanner = () => {
               barcode={barcode}
               setProductForAiGenerate={setProduct}
             />
-            <div className="flex justify-end w-full items-center gap-3 mt-4 px-4 text-white">
+            <div
+              className={`${
+                !product ? "justify-center" : "justify-end"
+              } flex  w-full items-center gap-3 mt-4 px-4 text-white`}
+            >
               <button
                 onClick={restartScanning}
                 className="px-4 py-2 bg-primary hover:bg-primary-light transition shadow-lg rounded"
               >
                 🔄 Quét lại
               </button>
-              <button
-                onClick={handleOpenModal} // Mở modal thay vì gọi lưu ngay
-                disabled={loading}
-                className={`px-4 py-2 rounded shadow-lg transition ${
-                  loading
-                    ? "bg-gray-400 text-white opacity-50 cursor-not-allowed" // Màu loading
-                    : "bg-primary hover:bg-primary-light"
-                }`}
-              >
-                {loading ? "⏳ Đang lưu..." : "⭐ Lưu để theo dõi sản phẩm"}
-              </button>
+              {!product ? (
+                <p className="text-red-500 font-semibold"></p>
+              ) : new Date(product.expiryDate) < new Date() ? (
+                <button
+                  disabled
+                  className="px-4 py-2 rounded shadow-lg bg-gray-400 text-white opacity-50 cursor-not-allowed"
+                >
+                  ❌ Sản phẩm đã hết hạn
+                </button>
+              ) : (
+                <button
+                  onClick={handleOpenModal} // Mở modal
+                  disabled={loading}
+                  className={`px-4 py-2 rounded shadow-lg transition ${
+                    loading
+                      ? "bg-gray-400 text-white opacity-50 cursor-not-allowed"
+                      : "bg-primary hover:bg-primary-light"
+                  }`}
+                >
+                  {loading ? "⏳ Đang lưu..." : "⭐ Lưu để theo dõi sản phẩm"}
+                </button>
+              )}
             </div>
           </motion.div>
         )}
@@ -245,7 +264,7 @@ const BarcodeScanner = () => {
             transition={{ duration: 0.5 }}
             className="text-black p-4 border w-full bg-white"
           >
-            <ScanAIGenerate product={product} />
+            {product && <ScanAIGenerate product={product} />}
           </motion.div>
         )}
       </AnimatePresence>

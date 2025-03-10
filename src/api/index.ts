@@ -1,3 +1,5 @@
+import { AppDispatch } from '@/redux/store';
+import { setUser } from '@/redux/userSlice';
 import {  Category, FormData, Product, ProductFilters, Store } from '@/types';
 import axios from 'axios';
 import { redirect } from 'next/navigation';
@@ -35,6 +37,53 @@ const logIn = async (email: string, password: string, csrfToken: string) => {
     throw error; // Rethrow the error for handling elsewhere
   }
 };
+export const checkEmail = async (email: string): Promise<boolean> => {
+  try {
+    const checkResponse = await axios.post(`${serverUrl}/check-email`, {
+      email, // Gửi email trong phần data, không phải params
+    });
+
+    return checkResponse.data.exists; // Trả về true nếu email tồn tại, ngược lại là false
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra email:", error);
+    return false; // Mặc định trả về false nếu có lỗi
+  }
+};
+
+export const logout = async (dispatch: AppDispatch) => {
+  try {
+    const accessToken = localStorage.getItem("access_token");
+
+    if (!accessToken) {
+      console.error("No access token found.");
+      return;
+    }
+
+    const response = await axios.post(
+      `${serverUrl}/logout`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (response.data.message == "User successfully signed out") {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      dispatch(setUser(null));
+      document.cookie = "authToken=; path=/; secure; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+
+      console.log("Logout successful!");
+    }
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
+
+
+
 const fetchUserInfo = async (token: string) => {
   try {
     const response = await axios.get(`${serverUrl}/me`, {
@@ -78,6 +127,27 @@ const getLocationSuggestions = async (query: string) => {
     return [];
   }
 };
+
+export const getAddressFromCoordinates = async (latitude: string, longitude: string) => {
+  const url = `https://rsapi.goong.io/Geocode?api_key=${MAP_KEY}&latlng=${latitude},${longitude}`;
+
+  try {
+    const response = await axios.get(url);
+    const results = response.data.results;
+
+    if (results.length > 0) {
+      return results[0].formatted_address; // Trả về địa chỉ đầu tiên
+    }
+
+    return "Không tìm thấy địa chỉ phù hợp.";
+  } catch (error) {
+    console.error("Lỗi khi lấy địa chỉ từ tọa độ:", error);
+    return "Lỗi khi lấy địa chỉ.";
+  }
+};
+
+
+
 const register = async (formData: FormData) => {
   try {
     const response = await axios.post(
@@ -587,24 +657,44 @@ export const checkProductExists = async (userId: number, code: string) => {
   }
 };
 export const fetchUser = async () => {
+  const cachedUser = sessionStorage.getItem("user_data");
+
+  if (cachedUser) {
+    return JSON.parse(cachedUser);
+  }
+
   const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    console.error("No access token found.");
+    return null;
+  }
+
   try {
-    const response = await fetch( `${serverUrl}/me`, {
+    const response = await fetch(`${serverUrl}/me`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
+
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    return await response.json();
+
+    const userData = await response.json();
+
+    // Lưu vào sessionStorage để cache dữ liệu
+    sessionStorage.setItem("user_data", JSON.stringify(userData));
+
+    return userData;
   } catch (error) {
     console.error("Lỗi khi gọi API:", error);
     return null;
   }
 };
+
 
 export const getUserOrders = async () => {
   const token = localStorage.getItem("access_token");
