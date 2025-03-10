@@ -1,30 +1,35 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 import Header from "@/components/userProfile/header";
 import ProfileCard from "@/components/userProfile/profile-card";
 import UserInfoSection from "@/components/userProfile/user-info-section";
-import { fetchUser } from "@/api";
+import { fetchUser, logout } from "@/api";
 import { UserProfile } from "@/types";
 import Loading from "../loading";
 import Link from "next/link";
-import { ClipboardList, Package, Heart, LogOut} from "lucide-react";
+import { ClipboardList, Package, Heart, LogOut } from "lucide-react";
 
 export default function ProfilePage() {
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const [userData, setUserData] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [logoutLoading, setLogoutLoading] = useState(false); // 🆕 State để xử lý loading khi logout
 
   useEffect(() => {
     const loadUserData = async () => {
       try {
         setLoading(true);
-        const data = await fetchUser(); 
-        console.log("user profile: ",data)
+        const data = await fetchUser();
+        console.log("user profile: ", data);
         if (!data) {
           throw new Error("Không thể tải thông tin của bạn");
         }
-
-        setUserData(data); 
+        setUserData(data);
         setError(null);
       } catch (err) {
         console.error("Failed to fetch user data:", err);
@@ -37,7 +42,14 @@ export default function ProfilePage() {
     loadUserData();
   }, []);
 
-  if (loading) {
+  const handleLogout = async () => {
+    setLogoutLoading(true); // 🆕 Hiển thị loading khi logout bắt đầu
+    await logout(dispatch);
+    setLogoutLoading(false); // 🆕 Dừng loading sau khi logout xong
+    router.push("/login");
+  };
+
+  if (loading || logoutLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loading />
@@ -62,9 +74,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!userData) {
-    return null;
-  }
+  if (!userData) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -113,19 +123,22 @@ export default function ProfilePage() {
               </div>
             </Link>
             <button
-              // onClick={() => signOut()}
+              onClick={handleLogout}
+              disabled={logoutLoading}
               className="flex items-center gap-3 p-4 mt-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors w-full text-left"
             >
               <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
                 <LogOut className="h-5 w-5 text-red-500" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">Đăng xuất tài khoản</p>
+                <p className="font-medium text-gray-900">
+                  {logoutLoading ? "Đang đăng xuất..." : "Đăng xuất tài khoản"}
+                </p>
               </div>
             </button>
-          </div>    
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

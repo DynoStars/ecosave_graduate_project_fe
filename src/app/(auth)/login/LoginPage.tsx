@@ -7,8 +7,8 @@ import loginImage from "../../../assets/images/auth/loginImage.png";
 import Image from "next/image";
 import bgIcon from "../../../assets/images/auth/bg-circle.png";
 import "./login.css";
-import { LoginProps } from "@/types";
-import { logIn } from "@/api";
+import { FormData, LoginProps } from "@/types";
+import { checkEmail, getAddressFromCoordinates, logIn, register } from "@/api";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/userSlice";
@@ -39,18 +39,7 @@ const Login = ({ csrf }: LoginProps) => {
       setErrorMessage(null); // Reset previous errors
       try {
         const data = await logIn(email, password, csrfToken);
-        const { access_token, refresh_token, user } = data;
-        if (data) {
-          localStorage.setItem("access_token", access_token);
-          localStorage.setItem("refresh_token", refresh_token);
-          dispatch(setUser(user));
-          // Set auth token in cookies
-          document.cookie = `authToken=${access_token}; path=/; secure`;
-          router.push("/"); // Redirect to homepage
-        } else {
-          // Thêm thông báo khi data không hợp lệ
-          setErrorMessage("Dữ liệu không hợp lệ, vui lòng thử lại.");
-        }
+        storeUserData(data)
       } catch (error: any) {
         const errorCode: keyof typeof loginErrors.errors =
           error?.response?.status || 500; // Explicitly type errorCode
@@ -63,20 +52,77 @@ const Login = ({ csrf }: LoginProps) => {
     }
   };
 
+  const storeUserData = (data: any) => {
+    if (data) {
+      const { access_token, refresh_token, user } = data;
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("refresh_token", refresh_token);
+      dispatch(setUser(user));
+      document.cookie = `authToken=${access_token}; path=/; secure`;
+      router.push("/"); // Redirect to homepage
+    } else {
+      setErrorMessage("Dữ liệu không hợp lệ, vui lòng thử lại.");
+    }
+  };
 
 
   const handleSignInWithGoogle = async () => {
     try {
+      setLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      console.log("User info:", user);
-      // You can store user info in state, context, or a database
+
+      if (!user?.email) {
+        setErrorMessage("Email không tồn tại trong tài khoản Google.");
+        return;
+      }
+      const generatedPassword = user.uid.slice(0, 10); // Lấy 10 ký tự đầu từ UID
+      const checkResponse = await checkEmail(user.email);
+
+      if (checkResponse) {
+        const data = await logIn(user.email, generatedPassword, csrfToken);
+        storeUserData(data);
+      } else {
+        console.log("Email chưa tồn tại, tiến hành đăng ký...");
+
+        const locationData = localStorage.getItem("user_location");
+        const [latitude, longitude] = locationData ? JSON.parse(locationData) : [null, null];
+
+        if (!latitude || !longitude) {
+          setErrorMessage("Không thể lấy tọa độ vị trí.");
+          return;
+        }
+
+        const address = await getAddressFromCoordinates(latitude, longitude);
+
+        const formData: FormData = {
+          name: user.displayName || "Người dùng Google",
+          email: user.email,
+          password: generatedPassword,
+          password_confirmation: generatedPassword,
+          address,
+          latitude,
+          longitude,
+          avatar : user?.photoURL,
+          role_id: 2,
+        };
+
+        const res = await register(formData);
+        console.log(res)
+        if (res?.data?.user) {
+          const data = await logIn(user.email, generatedPassword, csrfToken);
+          storeUserData(data);
+        } else {
+          setErrorMessage("Đăng ký thất bại, vui lòng thử lại.");
+        }
+      }
+      setLoading(false);
 
     } catch (error) {
-      console.error("Error signing in:", error);
+      console.error("Lỗi khi đăng nhập với Google:", error);
+      setErrorMessage("Đã xảy ra lỗi, vui lòng thử lại sau.");
     }
   };
-
 
   return (
     <div className="h-screen flex flex-col lg:flex-row items-center justify-center overflow-hidden relative">
