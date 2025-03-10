@@ -214,7 +214,7 @@ export type ProductScan = {
 };
 export interface ScanProductInfoProps {
   barcode: string;
-  setProductForAiGenerate: (product: ProductScan) => void;
+  setProductForAiGenerate: (product: ProductScan | null) => void;
 }
 
 export interface UserLocation {
@@ -283,11 +283,12 @@ export interface FormData {
   name: string;
   email: string;
   password: string;
-  password_confirmation: string;
   address: string;
   latitude: string;
   longitude: string;
   role_id: number;
+  avatar : string | null;
+  password_confirmation ?: string;
 }
 export interface Errors {
   name?: string;
