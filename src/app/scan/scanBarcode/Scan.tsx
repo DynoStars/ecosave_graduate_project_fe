@@ -65,15 +65,19 @@ const BarcodeScanner = () => {
     const handleDetected = (data: any) => {
       const scannedCode = data.codeResult.code;
       if (!scannedCode || seenCodes.current.has(scannedCode)) return;
-      seenCodes.current.add(scannedCode);
-      setTimeout(() => seenCodes.current.delete(scannedCode), 1000);
-      setBarcode(scannedCode);
-      setIsScanning(false);
-      Quagga.stop();
-      // Hiển thị sản phẩm sau 1 giây
-      setTimeout(() => {
-        setShowProduct(true);
-      }, 1000);
+
+      if (scannedCode.length >= 13) {
+        seenCodes.current.add(scannedCode);
+        setBarcode(scannedCode);
+        setIsScanning(false);
+
+        Quagga.stop();
+        console.log("Valid barcode detected:", scannedCode);
+
+        setTimeout(() => {
+          setShowProduct(true);
+        }, 1000);
+      }
     };
     Quagga.onDetected(handleDetected);
     return () => {

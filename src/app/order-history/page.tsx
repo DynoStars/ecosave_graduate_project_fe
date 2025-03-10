@@ -194,9 +194,6 @@ export default function OrderHistory() {
                       Xem đường đi đến cửa hàng
                     </button>
                   )}
-                  <button className="w-full py-2 px-4 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors">
-                    Xem hóa đơn
-                  </button>
                 </div>
               </div>
             </div>
